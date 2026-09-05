@@ -1,0 +1,14 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const temple_controller_1 = require("../controllers/temple.controller");
+const auth_middleware_1 = require("../middleware/auth.middleware");
+const uploadTemple_1 = require("../middleware/uploadTemple");
+const router = (0, express_1.Router)();
+router.use(auth_middleware_1.authenticate);
+router.post("/", temple_controller_1.createTemple);
+router.get("/", (0, auth_middleware_1.requirePermission)('manage_temples', 1), temple_controller_1.getAllTemples);
+router.get("/:id", (0, auth_middleware_1.requirePermission)('manage_temples', 1), temple_controller_1.getTempleById);
+router.put("/:id", (0, auth_middleware_1.requirePermission)('manage_temples', 1), uploadTemple_1.uploadTemple.single("img_name"), temple_controller_1.updateTemple);
+router.delete("/:id", (0, auth_middleware_1.requirePermission)('manage_temples', 1), temple_controller_1.deleteTemple);
+exports.default = router;
