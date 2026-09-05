@@ -10,7 +10,9 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
     "build": "tsc",
-    "start": "node dist/server.js"
+    "start": "node dist/server.js",
+    
+  "lint": "eslint ."
   },
   "dependencies": {
     "@ishubhamx/panchangam-js": "^3.0.0",
