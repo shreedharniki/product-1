@@ -37,7 +37,10 @@ export default defineConfig({
     react(),
     tailwindcss(),
   ],
-
+test: {
+    environment: "jsdom",
+    globals: true,
+  },
   resolve: {
     alias: {
       "@": path.resolve(import.meta.dirname, "./src"),

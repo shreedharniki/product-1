@@ -1,7 +1,7 @@
 
 import { useState } from "react"
 import { List, LayoutGrid } from "lucide-react"
-import {NavLink} from "react-router-dom"
+// import {NavLink} from "react-router-dom"
 import {
   Table,
   TableHeader,
@@ -588,12 +588,12 @@ export default function OrganizationsTable() {
                       {organization.status}
 
                     </span>
-                    <NavLink to="/organizations/details">
+                    {/* <NavLink to="/organizations/details">
                            Details
                         </NavLink>/
                         <NavLink to="/organizations/edit">
                            edit
-                        </NavLink>
+                        </NavLink> */}
                   </TableCell>
 
                 </TableRow>
