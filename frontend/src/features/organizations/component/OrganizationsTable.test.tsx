@@ -20,7 +20,9 @@ describe("OrganizationsTable", () => {
     renderComponent()
 
     expect(
-      screen.getByRole("heading", { name: "Organizations" }),
+      screen.getByRole("heading", {
+        name: "Organizations",
+      }),
     ).toBeInTheDocument()
 
     expect(
@@ -54,7 +56,7 @@ describe("OrganizationsTable", () => {
     ).toBeInTheDocument()
   })
 
-  it("renders the correct number of organizations on the first page", () => {
+  it("renders 11 organizations on the first page", () => {
     renderComponent()
 
     expect(
@@ -66,11 +68,11 @@ describe("OrganizationsTable", () => {
     ).toBeInTheDocument()
 
     expect(
-      screen.getByText("Shree Balaji Temple Trust"),
+      screen.getByText("Shree Lakshmi Narayan Trust"),
     ).toBeInTheDocument()
 
     expect(
-      screen.queryByText("Shree Mahadev Temple Trust"),
+      screen.queryByText("Shree Venkateshwara Trust"),
     ).not.toBeInTheDocument()
   })
 
@@ -81,207 +83,414 @@ describe("OrganizationsTable", () => {
       screen.getByText("Shree Ganesh Temple Trust"),
     ).toBeInTheDocument()
 
-    expect(screen.getByText("SGT001")).toBeInTheDocument()
-    expect(screen.getByText("Pune")).toBeInTheDocument()
+    expect(
+      screen.getByText("SGT001"),
+    ).toBeInTheDocument()
+
+    expect(
+      screen.getByText("Pune"),
+    ).toBeInTheDocument()
+
     expect(
       screen.getByText("admin@ganeshtemple.com"),
     ).toBeInTheDocument()
-    expect(screen.getByText("+91 9876543210")).toBeInTheDocument()
+
+    expect(
+      screen.getByText("+91 9876543210"),
+    ).toBeInTheDocument()
   })
 
   it("displays Active and Inactive status", () => {
     renderComponent()
 
-    expect(screen.getAllByText("Active").length).toBeGreaterThan(0)
+    expect(
+      screen.getAllByText("Active").length,
+    ).toBeGreaterThan(0)
 
     expect(
       screen.getAllByText("Inactive").length,
     ).toBeGreaterThan(0)
   })
 
-//   it("navigates to organization details", () => {
+//   it("changes to the next page", async () => {
+//     const user = userEvent.setup()
+
 //     renderComponent()
 
-//     const detailsLinks = screen.getAllByRole("link", {
-//       name: "Details",
+//     expect(
+//       screen.getByText("Shree Ganesh Temple Trust"),
+//     ).toBeInTheDocument()
+
+//     const nextButton = screen.getByRole("link", {
+//       name: "Next",
 //     })
 
-//     expect(detailsLinks[0]).toHaveAttribute(
-//       "href",
-//       "/organizations/details",
+//     await user.click(nextButton)
+
+//     expect(
+//       screen.getByText("Showing 12 to 22 of 40 organizations"),
+//     ).toBeInTheDocument()
+
+//     expect(
+//       screen.getByText("Shree Venkateshwara Trust"),
+//     ).toBeInTheDocument()
+
+//     expect(
+//       screen.queryByText("Shree Ganesh Temple Trust"),
+//     ).not.toBeInTheDocument()
+//   })
+
+//   it("changes to the previous page", async () => {
+//     const user = userEvent.setup()
+
+//     renderComponent()
+
+//     const nextButton = screen.getByRole("link", {
+//       name: "Next",
+//     })
+
+//     await user.click(nextButton)
+
+//     expect(
+//       screen.getByText("Showing 12 to 22 of 40 organizations"),
+//     ).toBeInTheDocument()
+
+//     const previousButton = screen.getByRole("link", {
+//       name: "Previous",
+//     })
+
+//     await user.click(previousButton)
+
+//     expect(
+//       screen.getByText("Showing 1 to 11 of 40 organizations"),
+//     ).toBeInTheDocument()
+
+//     expect(
+//       screen.getByText("Shree Ganesh Temple Trust"),
+//     ).toBeInTheDocument()
+//   })
+
+//   it("changes directly to page 2", async () => {
+//     const user = userEvent.setup()
+
+//     renderComponent()
+
+//     const pageTwo = screen.getByRole("link", {
+//       name: "2",
+//     })
+
+//     await user.click(pageTwo)
+
+//     expect(
+//       screen.getByText("Showing 12 to 22 of 40 organizations"),
+//     ).toBeInTheDocument()
+
+//     expect(
+//       screen.getByText("Shree Venkateshwara Trust"),
+//     ).toBeInTheDocument()
+
+//     expect(
+//       screen.queryByText("Shree Ganesh Temple Trust"),
+//     ).not.toBeInTheDocument()
+//   })
+
+//   it("disables previous button on the first page", () => {
+//     renderComponent()
+
+//     const previousButton = screen.getByRole("link", {
+//       name: "Previous",
+//     })
+
+//     expect(previousButton).toHaveClass(
+//       "pointer-events-none",
+//       "opacity-50",
 //     )
 //   })
 
-//   it("navigates to organization edit page", () => {
+//   it("switches from list view to grid view", async () => {
+//     const user = userEvent.setup()
+
 //     renderComponent()
 
-//     const editLinks = screen.getAllByRole("link", {
-//       name: "edit",
+//     const gridButton = screen.getByRole("button", {
+//       name: "Grid View",
 //     })
 
-//     expect(editLinks[0]).toHaveAttribute(
-//       "href",
-//       "/organizations/edit",
-//     )
+//     await user.click(gridButton)
+
+//     expect(
+//       screen.getByText("Temples"),
+//     ).toBeInTheDocument()
+
+//     expect(
+//       screen.getByText("Users"),
+//     ).toBeInTheDocument()
+
+//     expect(
+//       screen.getByText("Shree Ganesh Temple Trust"),
+//     ).toBeInTheDocument()
+
+//     expect(
+//       screen.queryByRole("columnheader", {
+//         name: "Organization Name",
+//       }),
+//     ).not.toBeInTheDocument()
 //   })
 
-  it("changes to the next page", async () => {
-    const user = userEvent.setup()
+//   it("switches back from grid view to list view", async () => {
+//     const user = userEvent.setup()
 
-    renderComponent()
+//     renderComponent()
 
-    expect(
-      screen.getByText("Shree Ganesh Temple Trust"),
-    ).toBeInTheDocument()
+//     const gridButton = screen.getByRole("button", {
+//       name: "Grid View",
+//     })
 
-    const nextButton = screen.getByRole("link", {
-      name: "Next",
-    })
+//     await user.click(gridButton)
 
-    await user.click(nextButton)
+//     const listButton = screen.getByRole("button", {
+//       name: "List View",
+//     })
 
-    expect(
-      screen.getByText("Showing 12 to 22 of 40 organizations"),
-    ).toBeInTheDocument()
+//     await user.click(listButton)
 
-    expect(
-      screen.getByText("Shree Lakshmi Narayan Trust"),
-    ).toBeInTheDocument()
+//     expect(
+//       screen.getByRole("columnheader", {
+//         name: "Organization Name",
+//       }),
+//     ).toBeInTheDocument()
+//   })
 
-    expect(
-      screen.queryByText("Shree Ganesh Temple Trust"),
-    ).not.toBeInTheDocument()
+//   it("shows organization counts in grid view", async () => {
+//     const user = userEvent.setup()
+
+//     renderComponent()
+
+//     await user.click(
+//       screen.getByRole("button", {
+//         name: "Grid View",
+//       }),
+//     )
+
+//     expect(
+//       screen.getByText("Temples"),
+//     ).toBeInTheDocument()
+
+//     expect(
+//       screen.getByText("Users"),
+//     ).toBeInTheDocument()
+
+//     expect(
+//       screen.getByText("5"),
+//     ).toBeInTheDocument()
+
+//     expect(
+//       screen.getByText("20"),
+//     ).toBeInTheDocument()
+//   })
+
+
+it("changes to the next page", async () => {
+  const user = userEvent.setup()
+
+  renderComponent()
+
+  expect(
+    screen.getByText("Shree Ganesh Temple Trust"),
+  ).toBeInTheDocument()
+
+  const nextButton = screen.getByRole("button", {
+    name: "Go to next page",
   })
 
-  it("changes to the previous page", async () => {
-    const user = userEvent.setup()
+  await user.click(nextButton)
 
-    renderComponent()
+  expect(
+    screen.getByText("Showing 12 to 22 of 40 organizations"),
+  ).toBeInTheDocument()
 
-    const nextButton = screen.getByRole("link", {
-      name: "Next",
-    })
+  expect(
+    screen.getByText("Shree Venkateshwara Trust"),
+  ).toBeInTheDocument()
 
-    await user.click(nextButton)
+  expect(
+    screen.queryByText("Shree Ganesh Temple Trust"),
+  ).not.toBeInTheDocument()
+})
 
-    const previousButton = screen.getByRole("link", {
-      name: "Previous",
-    })
+it("changes to the previous page", async () => {
+  const user = userEvent.setup()
 
-    await user.click(previousButton)
+  renderComponent()
 
-    expect(
-      screen.getByText("Showing 1 to 11 of 40 organizations"),
-    ).toBeInTheDocument()
-
-    expect(
-      screen.getByText("Shree Ganesh Temple Trust"),
-    ).toBeInTheDocument()
+  const nextButton = screen.getByRole("button", {
+    name: "Go to next page",
   })
 
-  it("changes directly to page 2", async () => {
-    const user = userEvent.setup()
+  await user.click(nextButton)
 
-    renderComponent()
+  expect(
+    screen.getByText("Showing 12 to 22 of 40 organizations"),
+  ).toBeInTheDocument()
 
-    const pageTwo = screen.getByRole("link", {
-      name: "2",
-    })
-
-    await user.click(pageTwo)
-
-    expect(
-      screen.getByText("Showing 12 to 22 of 40 organizations"),
-    ).toBeInTheDocument()
-
-    expect(
-      screen.getByText("Shree Lakshmi Narayan Trust"),
-    ).toBeInTheDocument()
+  const previousButton = screen.getByRole("button", {
+    name: "Go to previous page",
   })
 
-  it("disables previous button on the first page", () => {
-    renderComponent()
+  await user.click(previousButton)
 
-    const previousButton = screen.getByRole("link", {
-      name: "Previous",
-    })
+  expect(
+    screen.getByText("Showing 1 to 11 of 40 organizations"),
+  ).toBeInTheDocument()
 
-    expect(previousButton).toHaveClass(
-      "pointer-events-none",
-      "opacity-50",
-    )
+  expect(
+    screen.getByText("Shree Ganesh Temple Trust"),
+  ).toBeInTheDocument()
+})
+
+it("changes directly to page 2", async () => {
+  const user = userEvent.setup()
+
+  renderComponent()
+
+  const pageTwo = screen.getByRole("button", {
+    name: "2",
   })
 
-  it("switches from list view to grid view", async () => {
-    const user = userEvent.setup()
+  await user.click(pageTwo)
 
-    renderComponent()
+  expect(
+    screen.getByText("Showing 12 to 22 of 40 organizations"),
+  ).toBeInTheDocument()
 
-    const gridButton = screen.getByRole("button", {
+  expect(
+    screen.getByText("Shree Venkateshwara Trust"),
+  ).toBeInTheDocument()
+
+  expect(
+    screen.queryByText("Shree Ganesh Temple Trust"),
+  ).not.toBeInTheDocument()
+})
+
+it("disables previous button on the first page", () => {
+  renderComponent()
+
+  const previousButton = screen.getByRole("button", {
+    name: "Go to previous page",
+  })
+
+  expect(previousButton).toHaveClass(
+    "pointer-events-none",
+    "opacity-50",
+  )
+})
+
+it("switches from list view to grid view", async () => {
+  const user = userEvent.setup()
+
+  renderComponent()
+
+  const gridButton = screen.getByRole("button", {
+    name: "Grid View",
+  })
+
+  await user.click(gridButton)
+
+  expect(
+    screen.getAllByText("Temples").length,
+  ).toBeGreaterThan(0)
+
+  expect(
+    screen.getAllByText("Users").length,
+  ).toBeGreaterThan(0)
+
+  expect(
+    screen.getByText("Shree Ganesh Temple Trust"),
+  ).toBeInTheDocument()
+
+  expect(
+    screen.queryByRole("columnheader", {
+      name: "Organization Name",
+    }),
+  ).not.toBeInTheDocument()
+})
+
+it("switches back from grid view to list view", async () => {
+  const user = userEvent.setup()
+
+  renderComponent()
+
+  await user.click(
+    screen.getByRole("button", {
       name: "Grid View",
-    })
+    }),
+  )
 
-    await user.click(gridButton)
-
-    expect(
-      screen.getByText("Temples"),
-    ).toBeInTheDocument()
-
-    expect(
-      screen.getByText("Users"),
-    ).toBeInTheDocument()
-
-    expect(
-      screen.getByText("Shree Ganesh Temple Trust"),
-    ).toBeInTheDocument()
-
-    expect(
-      screen.queryByRole("columnheader", {
-        name: "Organization Name",
-      }),
-    ).not.toBeInTheDocument()
-  })
-
-  it("switches back from grid view to list view", async () => {
-    const user = userEvent.setup()
-
-    renderComponent()
-
-    const gridButton = screen.getByRole("button", {
-      name: "Grid View",
-    })
-
-    await user.click(gridButton)
-
-    const listButton = screen.getByRole("button", {
+  await user.click(
+    screen.getByRole("button", {
       name: "List View",
-    })
+    }),
+  )
 
-    await user.click(listButton)
+  expect(
+    screen.getByRole("columnheader", {
+      name: "Organization Name",
+    }),
+  ).toBeInTheDocument()
+})
 
-    expect(
-      screen.getByRole("columnheader", {
-        name: "Organization Name",
-      }),
-    ).toBeInTheDocument()
-  })
+it("shows organization counts in grid view", async () => {
+  const user = userEvent.setup()
 
-  it("shows organization counts in grid view", async () => {
-    const user = userEvent.setup()
+  renderComponent()
 
-    renderComponent()
+  await user.click(
+    screen.getByRole("button", {
+      name: "Grid View",
+    }),
+  )
 
-    await user.click(
-      screen.getByRole("button", {
-        name: "Grid View",
-      }),
-    )
+  expect(
+    screen.getAllByText("Temples").length,
+  ).toBe(11)
 
-    expect(screen.getByText("Temples")).toBeInTheDocument()
-    expect(screen.getByText("Users")).toBeInTheDocument()
+  expect(
+    screen.getAllByText("Users").length,
+  ).toBe(11)
 
-    expect(screen.getByText("5")).toBeInTheDocument()
-    expect(screen.getByText("20")).toBeInTheDocument()
-  })
+  expect(
+    screen.getByText("5"),
+  ).toBeInTheDocument()
+
+  expect(
+    screen.getByText("20"),
+  ).toBeInTheDocument()
+})
+
+it("renders the correct organizations on the first page", () => {
+  renderComponent()
+
+  expect(
+    screen.getByText("Showing 1 to 11 of 40 organizations"),
+  ).toBeInTheDocument()
+
+  expect(
+    screen.getByText("Shree Ganesh Temple Trust"),
+  ).toBeInTheDocument()
+
+  expect(
+    screen.getByText("Shree Lakshmi Narayan Trust"),
+  ).toBeInTheDocument()
+
+  expect(
+    screen.queryByText("Shree Venkateshwara Trust"),
+  ).not.toBeInTheDocument()
+
+  expect(
+    screen.queryByText("Shree Balaji Temple Trust"),
+  ).not.toBeInTheDocument()
+})
+
+
 })
 
