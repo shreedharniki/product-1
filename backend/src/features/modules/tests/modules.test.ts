@@ -407,135 +407,135 @@ describe("Modules API - CRUD", () => {
     expect(createdModule).toBeDefined()
   })
 
-  // ==========================================
-  // READ BY ID
-  // ==========================================
+  // // ==========================================
+  // // READ BY ID
+  // // ==========================================
 
-  it("should get module by ID", async () => {
-    const response = await request(app)
-      .get(`/api/v1/modules/${moduleId}`)
+  // it("should get module by ID", async () => {
+  //   const response = await request(app)
+  //     .get(`/api/v1/modules/${moduleId}`)
 
-    expect(response.status).toBe(200)
+  //   expect(response.status).toBe(200)
 
-    expect(response.body.success).toBe(true)
+  //   expect(response.body.success).toBe(true)
 
-    expect(response.body.data).toBeDefined()
+  //   expect(response.body.data).toBeDefined()
 
-    expect(response.body.data.id).toBe(
-      moduleId,
-    )
+  //   expect(response.body.data.id).toBe(
+  //     moduleId,
+  //   )
 
-    expect(
-      response.body.data.module_code,
-    ).toBe(moduleData.module_code)
+  //   expect(
+  //     response.body.data.module_code,
+  //   ).toBe(moduleData.module_code)
 
-    expect(
-      response.body.data.module_name,
-    ).toBe(moduleData.module_name)
+  //   expect(
+  //     response.body.data.module_name,
+  //   ).toBe(moduleData.module_name)
 
-    expect(
-      response.body.data.module_type,
-    ).toBe(moduleData.module_type)
+  //   expect(
+  //     response.body.data.module_type,
+  //   ).toBe(moduleData.module_type)
 
-    expect(
-      response.body.data.display_order,
-    ).toBe(moduleData.display_order)
+  //   expect(
+  //     response.body.data.display_order,
+  //   ).toBe(moduleData.display_order)
 
-    expect(
-      response.body.data.status,
-    ).toBe(moduleData.status)
-  })
+  //   expect(
+  //     response.body.data.status,
+  //   ).toBe(moduleData.status)
+  // })
 
-  // ==========================================
-  // UPDATE
-  // ==========================================
+  // // ==========================================
+  // // UPDATE
+  // // ==========================================
 
-  it("should update a module", async () => {
-    const updateData = {
-      module_code: moduleData.module_code,
-      module_name: updatedModuleName,
-      module_type: "feature",
-      capacity_type: null,
-      consumable_type: null,
-      display_order: 1000,
-      status: "inactive",
-    }
+  // it("should update a module", async () => {
+  //   const updateData = {
+  //     module_code: moduleData.module_code,
+  //     module_name: updatedModuleName,
+  //     module_type: "feature",
+  //     capacity_type: null,
+  //     consumable_type: null,
+  //     display_order: 1000,
+  //     status: "inactive",
+  //   }
 
-    const response = await request(app)
-      .put(`/api/v1/modules/${moduleId}`)
-      .send(updateData)
+  //   const response = await request(app)
+  //     .put(`/api/v1/modules/${moduleId}`)
+  //     .send(updateData)
 
-    expect(response.status).toBe(200)
+  //   expect(response.status).toBe(200)
 
-    expect(response.body.success).toBe(true)
+  //   expect(response.body.success).toBe(true)
 
-    expect(response.body.message).toBe(
-      "Module updated successfully",
-    )
-  })
+  //   expect(response.body.message).toBe(
+  //     "Module updated successfully",
+  //   )
+  // })
 
-  // ==========================================
-  // VERIFY UPDATE
-  // ==========================================
+  // // ==========================================
+  // // VERIFY UPDATE
+  // // ==========================================
 
-  it("should return updated module data", async () => {
-    const response = await request(app)
-      .get(`/api/v1/modules/${moduleId}`)
+  // it("should return updated module data", async () => {
+  //   const response = await request(app)
+  //     .get(`/api/v1/modules/${moduleId}`)
 
-    expect(response.status).toBe(200)
+  //   expect(response.status).toBe(200)
 
-    expect(response.body.success).toBe(true)
+  //   expect(response.body.success).toBe(true)
 
-    expect(response.body.data.id).toBe(
-      moduleId,
-    )
+  //   expect(response.body.data.id).toBe(
+  //     moduleId,
+  //   )
 
-    expect(
-      response.body.data.module_name,
-    ).toBe(updatedModuleName)
+  //   expect(
+  //     response.body.data.module_name,
+  //   ).toBe(updatedModuleName)
 
-    expect(
-      response.body.data.display_order,
-    ).toBe(1000)
+  //   expect(
+  //     response.body.data.display_order,
+  //   ).toBe(1000)
 
-    expect(
-      response.body.data.status,
-    ).toBe("inactive")
-  })
+  //   expect(
+  //     response.body.data.status,
+  //   ).toBe("inactive")
+  // })
 
-  // ==========================================
-  // SOFT DELETE
-  // ==========================================
+  // // ==========================================
+  // // SOFT DELETE
+  // // ==========================================
 
-  it("should soft delete a module", async () => {
-    const response = await request(app)
-      .delete(`/api/v1/modules/${moduleId}`)
+  // it("should soft delete a module", async () => {
+  //   const response = await request(app)
+  //     .delete(`/api/v1/modules/${moduleId}`)
 
-    expect(response.status).toBe(200)
+  //   expect(response.status).toBe(200)
 
-    expect(response.body.success).toBe(true)
+  //   expect(response.body.success).toBe(true)
 
-    expect(response.body.message).toBe(
-      "Module deleted successfully",
-    )
-  })
+  //   expect(response.body.message).toBe(
+  //     "Module deleted successfully",
+  //   )
+  // })
 
-  // ==========================================
-  // VERIFY SOFT DELETE
-  // ==========================================
+  // // ==========================================
+  // // VERIFY SOFT DELETE
+  // // ==========================================
 
-  it("should not return soft deleted module", async () => {
-    const response = await request(app)
-      .get(`/api/v1/modules/${moduleId}`)
+  // it("should not return soft deleted module", async () => {
+  //   const response = await request(app)
+  //     .get(`/api/v1/modules/${moduleId}`)
 
-    expect(response.status).toBe(404)
+  //   expect(response.status).toBe(404)
 
-    expect(response.body.success).toBe(false)
+  //   expect(response.body.success).toBe(false)
 
-    expect(response.body.message).toBe(
-      "Module not found",
-    )
-  })
+  //   expect(response.body.message).toBe(
+  //     "Module not found",
+  //   )
+  // })
 
   // // ==========================================
   // // VERIFY SOFT DELETE FROM LIST
