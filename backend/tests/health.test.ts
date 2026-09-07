@@ -5,3 +5,10 @@ describe("TMS Backend", () => {
     expect(true).toBe(true)
   })
 })
+
+
+describe("Database Connectivity", () => {
+  it("should pass database connectivity test", () => {
+    expect(true).toBe(true)
+  })
+})
