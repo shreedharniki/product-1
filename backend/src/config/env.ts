@@ -7,7 +7,7 @@ export const env = {
   port: Number(process.env.PORT) || 5002,
   nodeEnv: process.env.NODE_ENV || "development",
 
-  dbHost: process.env.DB_HOST || "localhost",
+  dbHost: process.env.DB_HOST || "127.0.0.1",
   dbPort: Number(process.env.DB_PORT) || 3306,
   dbUser: process.env.DB_USERNAME || "",
   dbPassword: process.env.DB_PASSWORD || "",

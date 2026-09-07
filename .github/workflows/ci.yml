@@ -71,6 +71,14 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Check environment
+        run: |
+          echo "DB_HOST configured: ${{ secrets.DB_HOST != '' }}"
+          echo "DB_NAME configured: ${{ secrets.DB_NAME != '' }}"
+          echo "DB_USERNAME configured: ${{ secrets.DB_USERNAME != '' }}"
+          echo "DB_PASSWORD configured: ${{ secrets.DB_PASSWORD != '' }}"
+          echo "JWT_SECRET configured: ${{ secrets.JWT_SECRET != '' }}"
+
       - name: Lint
         run: npm run lint
 
