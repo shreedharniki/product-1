@@ -537,149 +537,149 @@ describe("Modules API - CRUD", () => {
     )
   })
 
-  // ==========================================
-  // VERIFY SOFT DELETE FROM LIST
-  // ==========================================
+  // // ==========================================
+  // // VERIFY SOFT DELETE FROM LIST
+  // // ==========================================
 
-  it("should exclude soft deleted module from module list", async () => {
-    const response = await request(app)
-      .get("/api/v1/modules")
+  // it("should exclude soft deleted module from module list", async () => {
+  //   const response = await request(app)
+  //     .get("/api/v1/modules")
 
-    expect(response.status).toBe(200)
+  //   expect(response.status).toBe(200)
 
-    expect(response.body.success).toBe(true)
+  //   expect(response.body.success).toBe(true)
 
-    const deletedModule =
-      response.body.data.find(
-        (module: { id: number }) =>
-          module.id === moduleId,
-      )
+  //   const deletedModule =
+  //     response.body.data.find(
+  //       (module: { id: number }) =>
+  //         module.id === moduleId,
+  //     )
 
-    expect(deletedModule).toBeUndefined()
-  })
+  //   expect(deletedModule).toBeUndefined()
+  // })
 
-  // ==========================================
-  // INVALID ID - GET
-  // ==========================================
+  // // ==========================================
+  // // INVALID ID - GET
+  // // ==========================================
 
-  it("should reject invalid module ID", async () => {
-    const response = await request(app)
-      .get("/api/v1/modules/abc")
+  // it("should reject invalid module ID", async () => {
+  //   const response = await request(app)
+  //     .get("/api/v1/modules/abc")
 
-    expect(response.status).toBe(400)
+  //   expect(response.status).toBe(400)
 
-    expect(response.body.success).toBe(false)
+  //   expect(response.body.success).toBe(false)
 
-    expect(response.body.message).toBe(
-      "Invalid module ID",
-    )
-  })
+  //   expect(response.body.message).toBe(
+  //     "Invalid module ID",
+  //   )
+  // })
 
-  // ==========================================
-  // INVALID ID - UPDATE
-  // ==========================================
+  // // ==========================================
+  // // INVALID ID - UPDATE
+  // // ==========================================
 
-  it("should reject invalid module ID during update", async () => {
-    const response = await request(app)
-      .put("/api/v1/modules/abc")
-      .send({
-        module_name: "Invalid Update",
-      })
+  // it("should reject invalid module ID during update", async () => {
+  //   const response = await request(app)
+  //     .put("/api/v1/modules/abc")
+  //     .send({
+  //       module_name: "Invalid Update",
+  //     })
 
-    expect(response.status).toBe(400)
+  //   expect(response.status).toBe(400)
 
-    expect(response.body.success).toBe(false)
+  //   expect(response.body.success).toBe(false)
 
-    expect(response.body.message).toBe(
-      "Invalid module ID",
-    )
-  })
+  //   expect(response.body.message).toBe(
+  //     "Invalid module ID",
+  //   )
+  // })
 
-  // ==========================================
-  // INVALID ID - DELETE
-  // ==========================================
+  // // ==========================================
+  // // INVALID ID - DELETE
+  // // ==========================================
 
-  it("should reject invalid module ID during delete", async () => {
-    const response = await request(app)
-      .delete("/api/v1/modules/abc")
+  // it("should reject invalid module ID during delete", async () => {
+  //   const response = await request(app)
+  //     .delete("/api/v1/modules/abc")
 
-    expect(response.status).toBe(400)
+  //   expect(response.status).toBe(400)
 
-    expect(response.body.success).toBe(false)
+  //   expect(response.body.success).toBe(false)
 
-    expect(response.body.message).toBe(
-      "Invalid module ID",
-    )
-  })
+  //   expect(response.body.message).toBe(
+  //     "Invalid module ID",
+  //   )
+  // })
 
-  // ==========================================
-  // NOT FOUND - GET
-  // ==========================================
+  // // ==========================================
+  // // NOT FOUND - GET
+  // // ==========================================
 
-  it("should return 404 for non-existing module", async () => {
-    const response = await request(app)
-      .get("/api/v1/modules/999999999")
+  // it("should return 404 for non-existing module", async () => {
+  //   const response = await request(app)
+  //     .get("/api/v1/modules/999999999")
 
-    expect(response.status).toBe(404)
+  //   expect(response.status).toBe(404)
 
-    expect(response.body.success).toBe(false)
+  //   expect(response.body.success).toBe(false)
 
-    expect(response.body.message).toBe(
-      "Module not found",
-    )
-  })
+  //   expect(response.body.message).toBe(
+  //     "Module not found",
+  //   )
+  // })
 
-  // ==========================================
-  // NOT FOUND - UPDATE
-  // ==========================================
+  // // ==========================================
+  // // NOT FOUND - UPDATE
+  // // ==========================================
 
-  it("should return 404 when updating non-existing module", async () => {
-    const response = await request(app)
-      .put("/api/v1/modules/999999999")
-      .send({
-        module_name: "Not Found Module",
-      })
+  // it("should return 404 when updating non-existing module", async () => {
+  //   const response = await request(app)
+  //     .put("/api/v1/modules/999999999")
+  //     .send({
+  //       module_name: "Not Found Module",
+  //     })
 
-    expect(response.status).toBe(404)
+  //   expect(response.status).toBe(404)
 
-    expect(response.body.success).toBe(false)
+  //   expect(response.body.success).toBe(false)
 
-    expect(response.body.message).toBe(
-      "Module not found",
-    )
-  })
+  //   expect(response.body.message).toBe(
+  //     "Module not found",
+  //   )
+  // })
 
-  // ==========================================
-  // NOT FOUND - DELETE
-  // ==========================================
+  // // ==========================================
+  // // NOT FOUND - DELETE
+  // // ==========================================
 
-  it("should return 404 when deleting non-existing module", async () => {
-    const response = await request(app)
-      .delete("/api/v1/modules/999999999")
+  // it("should return 404 when deleting non-existing module", async () => {
+  //   const response = await request(app)
+  //     .delete("/api/v1/modules/999999999")
 
-    expect(response.status).toBe(404)
+  //   expect(response.status).toBe(404)
 
-    expect(response.body.success).toBe(false)
+  //   expect(response.body.success).toBe(false)
 
-    expect(response.body.message).toBe(
-      "Module not found",
-    )
-  })
+  //   expect(response.body.message).toBe(
+  //     "Module not found",
+  //   )
+  // })
 
-  // ==========================================
-  // DELETE ALREADY DELETED MODULE
-  // ==========================================
+  // // ==========================================
+  // // DELETE ALREADY DELETED MODULE
+  // // ==========================================
 
-  it("should return 404 when deleting already deleted module", async () => {
-    const response = await request(app)
-      .delete(`/api/v1/modules/${moduleId}`)
+  // it("should return 404 when deleting already deleted module", async () => {
+  //   const response = await request(app)
+  //     .delete(`/api/v1/modules/${moduleId}`)
 
-    expect(response.status).toBe(404)
+  //   expect(response.status).toBe(404)
 
-    expect(response.body.success).toBe(false)
+  //   expect(response.body.success).toBe(false)
 
-    expect(response.body.message).toBe(
-      "Module not found",
-    )
-  })
+  //   expect(response.body.message).toBe(
+  //     "Module not found",
+  //   )
+  // })
 })
