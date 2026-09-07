@@ -13,7 +13,7 @@ import type {
 
 // ============================
 // Get Modules
-// ============================
+// ===============================
 
 export const fetchModules = async () => {
   return getModules()
