@@ -5,7 +5,7 @@ import userEvent from "@testing-library/user-event"
 import { MemoryRouter } from "react-router-dom"
 import "@testing-library/jest-dom"
 
-import OrganizationsTable from "./OrganizationsTable"
+import OrganizationsTable from "@/component/OrganizationsTable"
 
 describe("OrganizationsTable", () => {
   const renderComponent = () => {
