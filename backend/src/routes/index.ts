@@ -1,12 +1,9 @@
 import { Router } from "express"
 
+import organizationRoutes from "../features/organizations/routes/organizationRoutes"
+import moduleRoutes from "../features/modules/routes/moduleRoutes"
 const router = Router()
 
-router.get("/", (_req, res) => {
-  res.json({
-    success: true,
-    message: "TMS API v1",
-  })
-})
-
+router.use(organizationRoutes)
+router.use(moduleRoutes)
 export default router
