@@ -13,6 +13,7 @@ import {
   Sparkles,
   Users,
   FileText,
+  Package,
 } from "lucide-react"
 
 import {
@@ -41,7 +42,11 @@ const mainMenu = [
     icon: Building2,
   },
   
- 
+ {
+    title: "Modules",
+    url: "/modules",
+    icon: Package,
+  },
   {
     title: "Temples",
     url: "/temples",

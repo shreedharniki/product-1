@@ -86,6 +86,25 @@ const EditOrganizations = lazy(
 const ViewOrganizations = lazy(
   () => import("@/features/organizations/pages/ViewOrganizations")
 )
+const Modules = lazy(
+  () => import("@/pages/Modules")
+)
+
+const ModulesTable = lazy(
+  () => import("@/features/modules/pages/Modules")
+)
+const AddModules = lazy(
+  () => import("@/features/modules/pages/AddModule")
+)
+
+const EditModule = lazy(
+  () => import("@/features/modules/pages/EditModule")
+)
+
+const ViewModule = lazy(
+  () => import("@/features/modules/pages/ViewModule")
+)
+
 
 function App() {
   return (
@@ -127,8 +146,39 @@ function App() {
               path="edit"
               element={<EditOrganizations />}
             />
+
+            {/* /modules */}
+            
           </Route>
 
+
+          <Route
+            path="/modules"
+            element={<Modules />}
+          >
+            {/* /modules */}
+            <Route
+              index
+              element={<ModulesTable />}
+            />
+
+            {/* /modules/add */}
+            <Route
+              path="add"
+              element={<AddModules />}
+            />
+            {/* /modules/edit */}
+            <Route
+  path="/modules/edit/:id"
+  element={<EditModule />}
+/>
+
+<Route
+  path="/modules/view/:id"
+  element={<ViewModule />}
+/>
+          
+          </Route>
         </Route>
       </Routes>
     </Suspense>
