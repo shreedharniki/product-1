@@ -267,7 +267,7 @@ function calculatePermission(
 /* Component                                                                  */
 /* -------------------------------------------------------------------------- */
 
-export default function SubModuleForm({
+export default function SubmoduleForm({
   initialData,
   loading = false,
   onSubmit,

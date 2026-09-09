@@ -1,8 +1,7 @@
 
 
 
-
-import SubModuleForm from "../components/SubModuleForm";
+import SubModuleForm from "../components/SubmoduleForm"
 
 import type { SubModuleFormData } from "../subModuleValidation"
 
