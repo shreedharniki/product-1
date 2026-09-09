@@ -32,12 +32,16 @@ import {
 
 import { Textarea } from "@/components/ui/textarea"
 
-import {
-  subModuleSchema,
-  type SubModuleFormData,
-  type SubModulePermission,
+import type {
+ 
+   SubModuleFormData,
+   SubModulePermission,
 } from "../subModuleValidation"
 
+import {
+  subModuleSchema,
+  
+} from "../subModuleValidation"
 /* -------------------------------------------------------------------------- */
 /* Props                                                                      */
 /* -------------------------------------------------------------------------- */

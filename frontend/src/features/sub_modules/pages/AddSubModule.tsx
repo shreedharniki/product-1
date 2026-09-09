@@ -2,7 +2,8 @@
 
 
 
-import SubModuleForms from "../components/SubModuleForms"
+import SubModuleForm from "../components/SubModuleForm";
+
 import type { SubModuleFormData } from "../subModuleValidation"
 
 export default function AddSubModule() {
@@ -13,7 +14,7 @@ export default function AddSubModule() {
   }
 
   return (
-    <SubModuleForms
+    <SubModuleForm
       onSubmit={handleSubmit}
     />
   )
