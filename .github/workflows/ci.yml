@@ -3,7 +3,7 @@ name: TMS CI
 on:
   push:
     branches:
-      - main
+      - Modules
 
   pull_request:
     branches:
