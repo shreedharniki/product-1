@@ -1,3 +1,4 @@
+
 import {
   beforeEach,
   describe,
@@ -21,6 +22,8 @@ import {
   editModule,
   removeModule,
 } from "@/features/modules/moduleThunks"
+
+import type { ModulesResponse } from "@/features/modules/moduleTypes"
 
 vi.mock("@/features/modules/services/moduleServices", () => ({
   getModules: vi.fn(),
@@ -57,6 +60,17 @@ const createPayload = {
   status: "active" as const,
 }
 
+const modulesResponse: ModulesResponse = {
+  success: true,
+  data: [moduleData],
+  pagination: {
+    page: 1,
+    limit: 10,
+    total: 1,
+    totalPages: 1,
+  },
+}
+
 describe("moduleThunks CRUD", () => {
   beforeEach(() => {
     vi.clearAllMocks()
@@ -64,21 +78,29 @@ describe("moduleThunks CRUD", () => {
 
   describe("fetchModules", () => {
     it("returns modules on success", async () => {
-      mockedGetModules.mockResolvedValueOnce([
-        moduleData,
-      ])
+      mockedGetModules.mockResolvedValueOnce(
+        modulesResponse
+      )
 
       const dispatch = vi.fn()
       const getState = vi.fn()
 
-      const result = await fetchModules()(
+      const result = await fetchModules({
+        page: 1,
+        limit: 10,
+      })(
         dispatch,
         getState,
         undefined
       )
 
-      expect(result.payload).toEqual([moduleData])
-      expect(mockedGetModules).toHaveBeenCalled()
+      expect(result.payload).toEqual(
+        modulesResponse
+      )
+
+      expect(
+        mockedGetModules
+      ).toHaveBeenCalledWith(1, 10)
     })
 
     it("returns rejected value on failure", async () => {
@@ -86,13 +108,18 @@ describe("moduleThunks CRUD", () => {
         new Error("Network error")
       )
 
-      const result = await fetchModules()(
+      const result = await fetchModules({
+        page: 1,
+        limit: 10,
+      })(
         vi.fn(),
         vi.fn(),
         undefined
       )
 
-      expect(result.payload).toBe("Network error")
+      expect(result.payload).toBe(
+        "Network error"
+      )
     })
   })
 
@@ -108,8 +135,13 @@ describe("moduleThunks CRUD", () => {
         undefined
       )
 
-      expect(result.payload).toEqual(moduleData)
-      expect(mockedGetModuleById).toHaveBeenCalledWith(1)
+      expect(result.payload).toEqual(
+        moduleData
+      )
+
+      expect(
+        mockedGetModuleById
+      ).toHaveBeenCalledWith(1)
     })
 
     it("handles failure", async () => {
@@ -135,17 +167,23 @@ describe("moduleThunks CRUD", () => {
         moduleData
       )
 
-      const result = await addModule(createPayload)(
+      const result = await addModule(
+        createPayload
+      )(
         vi.fn(),
         vi.fn(),
         undefined
       )
 
-      expect(result.payload).toEqual(moduleData)
+      expect(result.payload).toEqual(
+        moduleData
+      )
 
       expect(
         mockedCreateModule
-      ).toHaveBeenCalledWith(createPayload)
+      ).toHaveBeenCalledWith(
+        createPayload
+      )
     })
 
     it("handles create failure", async () => {
@@ -153,7 +191,9 @@ describe("moduleThunks CRUD", () => {
         new Error("Create failed")
       )
 
-      const result = await addModule(createPayload)(
+      const result = await addModule(
+        createPayload
+      )(
         vi.fn(),
         vi.fn(),
         undefined
@@ -253,3 +293,4 @@ describe("moduleThunks CRUD", () => {
     })
   })
 })
+

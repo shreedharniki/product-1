@@ -15,9 +15,18 @@ import type {
 // Get Modules
 // ===============================
 
-export const fetchModules = async () => {
-  return getModules()
+// export const fetchModules = async () => {
+//   return getModules()
+// }
+
+//rate limit pagination
+export const fetchModules = async (
+  limit: number,
+  offset: number,
+) => {
+  return getModules(limit, offset)
 }
+
 export const fetchModuleById = async (
   id: number,
 ) => {

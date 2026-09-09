@@ -1,4 +1,7 @@
 
+
+
+
 // import { createAsyncThunk } from "@reduxjs/toolkit"
 
 // import {
@@ -15,6 +18,42 @@
 // } from "./moduleTypes"
 
 // /* -------------------------------------------------------------------------- */
+// /* Error Helper                                                               */
+// /* -------------------------------------------------------------------------- */
+
+// interface ApiErrorResponse {
+//   message?: string
+// }
+
+// interface ApiError {
+//   response?: {
+//     data?: ApiErrorResponse
+//   }
+//   message?: string
+// }
+
+// const getErrorMessage = (
+//   error: unknown,
+//   fallback: string
+// ): string => {
+//   if (typeof error === "object" && error !== null) {
+//     const apiError = error as ApiError
+
+//     return (
+//       apiError.response?.data?.message ||
+//       apiError.message ||
+//       fallback
+//     )
+//   }
+
+//   if (error instanceof Error) {
+//     return error.message || fallback
+//   }
+
+//   return fallback
+// }
+
+// /* -------------------------------------------------------------------------- */
 // /* Fetch Modules                                                              */
 // /* -------------------------------------------------------------------------- */
 
@@ -23,11 +62,12 @@
 //   async (_, { rejectWithValue }) => {
 //     try {
 //       return await getModules()
-//     } catch (error: any) {
+//     } catch (error: unknown) {
 //       return rejectWithValue(
-//         error?.response?.data?.message ||
-//           error?.message ||
+//         getErrorMessage(
+//           error,
 //           "Failed to fetch modules."
+//         )
 //       )
 //     }
 //   }
@@ -39,14 +79,18 @@
 
 // export const fetchModuleById = createAsyncThunk(
 //   "modules/fetchModuleById",
-//   async (id: number | string, { rejectWithValue }) => {
+//   async (
+//     id: number | string,
+//     { rejectWithValue }
+//   ) => {
 //     try {
 //       return await getModuleById(id)
-//     } catch (error: any) {
+//     } catch (error: unknown) {
 //       return rejectWithValue(
-//         error?.response?.data?.message ||
-//           error?.message ||
+//         getErrorMessage(
+//           error,
 //           "Failed to fetch module."
+//         )
 //       )
 //     }
 //   }
@@ -58,14 +102,18 @@
 
 // export const addModule = createAsyncThunk(
 //   "modules/addModule",
-//   async (data: CreateModulePayload, { rejectWithValue }) => {
+//   async (
+//     data: CreateModulePayload,
+//     { rejectWithValue }
+//   ) => {
 //     try {
 //       return await createModule(data)
-//     } catch (error: any) {
+//     } catch (error: unknown) {
 //       return rejectWithValue(
-//         error?.response?.data?.message ||
-//           error?.message ||
+//         getErrorMessage(
+//           error,
 //           "Failed to create module."
+//         )
 //       )
 //     }
 //   }
@@ -77,14 +125,18 @@
 
 // export const editModule = createAsyncThunk(
 //   "modules/editModule",
-//   async (data: UpdateModulePayload, { rejectWithValue }) => {
+//   async (
+//     data: UpdateModulePayload,
+//     { rejectWithValue }
+//   ) => {
 //     try {
 //       return await updateModule(data)
-//     } catch (error: any) {
+//     } catch (error: unknown) {
 //       return rejectWithValue(
-//         error?.response?.data?.message ||
-//           error?.message ||
+//         getErrorMessage(
+//           error,
 //           "Failed to update module."
+//         )
 //       )
 //     }
 //   }
@@ -96,23 +148,24 @@
 
 // export const removeModule = createAsyncThunk(
 //   "modules/removeModule",
-//   async (id: number, { rejectWithValue }) => {
+//   async (
+//     id: number,
+//     { rejectWithValue }
+//   ) => {
 //     try {
 //       await deleteModule(id)
 
 //       return id
-//     } catch (error: any) {
+//     } catch (error: unknown) {
 //       return rejectWithValue(
-//         error?.response?.data?.message ||
-//           error?.message ||
+//         getErrorMessage(
+//           error,
 //           "Failed to delete module."
+//         )
 //       )
 //     }
 //   }
 // )
-
-
-
 
 
 import { createAsyncThunk } from "@reduxjs/toolkit"
@@ -131,7 +184,7 @@ import type {
 } from "./moduleTypes"
 
 /* -------------------------------------------------------------------------- */
-/* Error Helper                                                               */
+/* Error Types                                                                */
 /* -------------------------------------------------------------------------- */
 
 interface ApiErrorResponse {
@@ -140,6 +193,7 @@ interface ApiErrorResponse {
 
 interface ApiError {
   response?: {
+    status?: number
     data?: ApiErrorResponse
   }
   message?: string
@@ -149,8 +203,15 @@ const getErrorMessage = (
   error: unknown,
   fallback: string
 ): string => {
-  if (typeof error === "object" && error !== null) {
+  if (
+    typeof error === "object" &&
+    error !== null
+  ) {
     const apiError = error as ApiError
+
+    if (apiError.response?.status === 429) {
+      return "Too many requests. Please wait a moment and try again."
+    }
 
     return (
       apiError.response?.data?.message ||
@@ -172,9 +233,18 @@ const getErrorMessage = (
 
 export const fetchModules = createAsyncThunk(
   "modules/fetchModules",
-  async (_, { rejectWithValue }) => {
+  async (
+    {
+      page = 1,
+      limit = 10,
+    }: {
+      page?: number
+      limit?: number
+    } = {},
+    { rejectWithValue }
+  ) => {
     try {
-      return await getModules()
+      return await getModules(page, limit)
     } catch (error: unknown) {
       return rejectWithValue(
         getErrorMessage(

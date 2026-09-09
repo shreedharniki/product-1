@@ -1,30 +1,73 @@
 
+// import type { RootState } from "@/app/store"
+
+// /* -------------------------------------------------------------------------- */
+// /* Modules                                                                    */
+// /* -------------------------------------------------------------------------- */
+
+// export const selectModules = (state: RootState) =>
+//   state.modules.modules
+
+// /* -------------------------------------------------------------------------- */
+// /* Loading                                                                     */
+// /* -------------------------------------------------------------------------- */
+
+// export const selectModulesLoading = (state: RootState) =>
+//   state.modules.loading
+
+// /* -------------------------------------------------------------------------- */
+// /* Error                                                                       */
+// /* -------------------------------------------------------------------------- */
+
+// export const selectModulesError = (state: RootState) =>
+//   state.modules.error
+
+// /* -------------------------------------------------------------------------- */
+// /* Success                                                                     */
+// /* -------------------------------------------------------------------------- */
+
+// export const selectModulesSuccess = (state: RootState) =>
+//   state.modules.success
+
+
 import type { RootState } from "@/app/store"
 
 /* -------------------------------------------------------------------------- */
 /* Modules                                                                    */
 /* -------------------------------------------------------------------------- */
 
-export const selectModules = (state: RootState) =>
-  state.modules.modules
+export const selectModules = (
+  state: RootState
+) => state.modules.modules
 
 /* -------------------------------------------------------------------------- */
-/* Loading                                                                     */
+/* Pagination                                                                 */
 /* -------------------------------------------------------------------------- */
 
-export const selectModulesLoading = (state: RootState) =>
-  state.modules.loading
+export const selectModulesPagination = (
+  state: RootState
+) => state.modules.pagination
 
 /* -------------------------------------------------------------------------- */
-/* Error                                                                       */
+/* Loading                                                                    */
 /* -------------------------------------------------------------------------- */
 
-export const selectModulesError = (state: RootState) =>
-  state.modules.error
+export const selectModulesLoading = (
+  state: RootState
+) => state.modules.loading
 
 /* -------------------------------------------------------------------------- */
-/* Success                                                                     */
+/* Error                                                                      */
 /* -------------------------------------------------------------------------- */
 
-export const selectModulesSuccess = (state: RootState) =>
-  state.modules.success
+export const selectModulesError = (
+  state: RootState
+) => state.modules.error
+
+/* -------------------------------------------------------------------------- */
+/* Success                                                                    */
+/* -------------------------------------------------------------------------- */
+
+export const selectModulesSuccess = (
+  state: RootState
+) => state.modules.success

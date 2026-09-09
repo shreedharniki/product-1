@@ -29,38 +29,97 @@ export interface ModuleRow extends RowDataPacket {
 // Get Modules
 // ============================
 
-export const getModules = async (): Promise<ModuleRow[]> => {
+// export const getModules = async (): Promise<ModuleRow[]> => {
+//   let conn
+
+//   try {
+//     conn = await pool.getConnection()
+
+//     const [rows] = await conn.execute<ModuleRow[]>(`
+//       SELECT
+//         id,
+//         module_code,
+//         module_name,
+//         module_type,
+//         capacity_type,
+//         consumable_type,
+//         display_order,
+//         status,
+//         created_at,
+//         updated_at,
+//         deleted_at
+//       FROM modules
+//       WHERE deleted_at IS NULL
+//       ORDER BY display_order ASC
+//     `)
+
+//     return rows
+//   } finally {
+//     if (conn) {
+//       conn.release()
+//     }
+//   }
+// }
+// ============================
+// Get Modules pagination and rate limit
+// ============================
+
+export interface PaginatedModules {
+  rows: ModuleRow[]
+  total: number
+}
+
+export const getModules = async (
+  limit: number,
+  offset: number,
+): Promise<PaginatedModules> => {
   let conn
 
   try {
     conn = await pool.getConnection()
 
-    const [rows] = await conn.execute<ModuleRow[]>(`
-      SELECT
-        id,
-        module_code,
-        module_name,
-        module_type,
-        capacity_type,
-        consumable_type,
-        display_order,
-        status,
-        created_at,
-        updated_at,
-        deleted_at
-      FROM modules
-      WHERE deleted_at IS NULL
-      ORDER BY display_order ASC
-    `)
+    const [rows] = await conn.execute<ModuleRow[]>(
+      `
+        SELECT
+          id,
+          module_code,
+          module_name,
+          module_type,
+          capacity_type,
+          consumable_type,
+          display_order,
+          status,
+          created_at,
+          updated_at,
+          deleted_at
+        FROM modules
+        WHERE deleted_at IS NULL
+        ORDER BY display_order ASC
+        LIMIT ? OFFSET ?
+      `,
+      [limit, offset],
+    )
 
-    return rows
+    const [countRows] = await conn.execute<RowDataPacket[]>(
+      `
+        SELECT COUNT(*) AS total
+        FROM modules
+        WHERE deleted_at IS NULL
+      `,
+    )
+
+    const total = Number(countRows[0]?.total ?? 0)
+
+    return {
+      rows,
+      total,
+    }
   } finally {
     if (conn) {
       conn.release()
     }
   }
 }
-
 // ============================
 // Get Module By ID
 // ============================

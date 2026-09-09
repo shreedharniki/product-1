@@ -1,5 +1,4 @@
 
-
 import { useEffect, useState } from "react"
 
 import {
@@ -8,8 +7,8 @@ import {
   Pencil,
   Eye,
   Trash2,
-
 } from "lucide-react"
+
 import {
   AlertDialog,
   AlertDialogAction,
@@ -22,9 +21,13 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
+
 import { NavLink } from "react-router-dom"
 
-import { useDispatch, useSelector } from "react-redux"
+import {
+  useDispatch,
+  useSelector,
+} from "react-redux"
 
 import type { AppDispatch } from "@/app/store"
 
@@ -52,20 +55,34 @@ import {
   selectModules,
   selectModulesLoading,
   selectModulesError,
+  selectModulesPagination,
 } from "../modulesSelectors"
 
-import { fetchModules,removeModule } from "../moduleThunks"
+import {
+  fetchModules,
+  removeModule,
+} from "../moduleThunks"
 
-const PAGE_SIZE = 11
+const PAGE_SIZE = 12
 
 export default function ModulesTable() {
   const dispatch = useDispatch<AppDispatch>()
 
   const modules = useSelector(selectModules)
-  const loading = useSelector(selectModulesLoading)
-  const error = useSelector(selectModulesError)
+  // console.log("modules", modules)
+  const loading = useSelector(
+    selectModulesLoading
+  )
+  const error = useSelector(
+    selectModulesError
+  )
 
-  const [currentPage, setCurrentPage] = useState(1)
+  const pagination = useSelector(
+    selectModulesPagination
+  )
+
+  const [currentPage, setCurrentPage] =
+    useState(1)
 
   const [view, setView] = useState<
     "list" | "grid"
@@ -76,63 +93,82 @@ export default function ModulesTable() {
   /* ------------------------------------------------------------------------ */
 
   useEffect(() => {
-    void dispatch(fetchModules())
-  }, [dispatch])
+    void dispatch(
+      fetchModules({
+        page: currentPage,
+        limit: PAGE_SIZE,
+      })
+    )
+  }, [dispatch, currentPage])
 
   /* ------------------------------------------------------------------------ */
   /* Pagination                                                               */
   /* ------------------------------------------------------------------------ */
 
-  const totalPages = Math.max(
-    1,
-    Math.ceil(modules.length / PAGE_SIZE)
-  )
+  const handlePageChange = (
+    page: number
+  ) => {
+    if (
+      page < 1 ||
+      page > pagination.totalPages
+    ) {
+      return
+    }
 
-  const startIndex =
-    (currentPage - 1) * PAGE_SIZE
-
-  const endIndex =
-    startIndex + PAGE_SIZE
-
-  const currentModules = modules.slice(
-    startIndex,
-    endIndex
-  )
-
-  const handlePageChange = (page: number) => {
     setCurrentPage(page)
   }
 
-  /* -------   Delete function*/
-//  const handleDelete = async (id: number) => {
-//   const confirmed = window.confirm(
-//     "Are you sure you want to delete this module?"
-//   )
+  /* ------------------------------------------------------------------------ */
+  /* Delete                                                                   */
+  /* ------------------------------------------------------------------------ */
 
-//   if (!confirmed) {
-//     return
-//   }
+  const handleDelete = async (
+    id: number
+  ) => {
+    const result = await dispatch(
+      removeModule(id)
+    )
 
-//   const result = await dispatch(removeModule(id))
+    if (
+      removeModule.rejected.match(result)
+    ) {
+      console.error(result.payload)
+      return
+    }
 
-//   if (removeModule.rejected.match(result)) {
-//     console.error(result.payload)
-//   }
-// }
-
-const handleDelete = async (id: number) => {
-  const result = await dispatch(removeModule(id))
-
-  if (removeModule.rejected.match(result)) {
-    console.error(result.payload)
+    /*
+     * If the last item on the current page
+     * was deleted, go back one page.
+     */
+    if (
+      modules.length === 1 &&
+      currentPage > 1
+    ) {
+      setCurrentPage(
+        (page) => page - 1
+      )
+    } else {
+      /*
+       * Refresh current page because
+       * backend pagination has changed.
+       */
+      void dispatch(
+        fetchModules({
+          page: currentPage,
+          limit: PAGE_SIZE,
+        })
+      )
+    }
   }
-}
 
   /* ------------------------------------------------------------------------ */
   /* Loading                                                                  */
   /* ------------------------------------------------------------------------ */
 
-  if (loading && modules.length === 0) {
+  if (
+    loading &&
+    modules.length === 0
+  ) {
     return (
       <div className="flex min-h-[300px] items-center justify-center">
         <p className="text-sm text-muted-foreground">
@@ -146,7 +182,10 @@ const handleDelete = async (id: number) => {
   /* Error                                                                    */
   /* ------------------------------------------------------------------------ */
 
-  if (error && modules.length === 0) {
+  if (
+    error &&
+    modules.length === 0
+  ) {
     return (
       <div className="rounded-md border border-destructive/30 p-6 text-center">
         <p className="text-sm text-destructive">
@@ -156,7 +195,12 @@ const handleDelete = async (id: number) => {
         <Button
           className="mt-4"
           onClick={() => {
-            void dispatch(fetchModules())
+            void dispatch(
+              fetchModules({
+                page: currentPage,
+                limit: PAGE_SIZE,
+              })
+            )
           }}
         >
           Try Again
@@ -164,6 +208,20 @@ const handleDelete = async (id: number) => {
       </div>
     )
   }
+
+
+  const firstItem =
+    pagination.total === 0
+      ? 0
+      : (pagination.page - 1) *
+          pagination.limit +
+        1
+
+  const lastItem = Math.min(
+    pagination.page *
+      pagination.limit,
+    pagination.total
+  )
 
   return (
     <div className="w-full space-y-4">
@@ -180,6 +238,13 @@ const handleDelete = async (id: number) => {
               Add Module
             </Button>
           </NavLink>
+          {/* {modules.length >= 1 && (
+            <NavLink to="/modules/sub/add">
+              <Button className="cursor-pointer">
+                Add Sub Module
+              </Button>
+            </NavLink>
+          )} */}
         </div>
 
         {/* List / Grid Toggle */}
@@ -194,7 +259,9 @@ const handleDelete = async (id: number) => {
                 : "ghost"
             }
             size="icon"
-            onClick={() => setView("list")}
+            onClick={() =>
+              setView("list")
+            }
             title="List View"
           >
             <List className="size-4" />
@@ -208,7 +275,9 @@ const handleDelete = async (id: number) => {
                 : "ghost"
             }
             size="icon"
-            onClick={() => setView("grid")}
+            onClick={() =>
+              setView("grid")
+            }
             title="Grid View"
           >
             <LayoutGrid className="size-4" />
@@ -271,7 +340,7 @@ const handleDelete = async (id: number) => {
 
             <TableBody>
 
-              {currentModules.length === 0 ? (
+              {modules.length === 0 ? (
                 <TableRow>
                   <TableCell
                     colSpan={9}
@@ -281,12 +350,15 @@ const handleDelete = async (id: number) => {
                   </TableCell>
                 </TableRow>
               ) : (
-                currentModules.map(
+                modules.map(
                   (module, index) => (
-                    <TableRow key={module.id}>
+                    <TableRow
+                      key={module.id}
+                    >
 
                       <TableCell>
-                        {startIndex +
+                        {(pagination.page - 1) *
+                          pagination.limit +
                           index +
                           1}
                       </TableCell>
@@ -295,7 +367,7 @@ const handleDelete = async (id: number) => {
                         {module.module_name}
                       </TableCell>
 
-                      <TableCell  className="capitalize">
+                      <TableCell className="capitalize">
                         {module.module_code}
                       </TableCell>
 
@@ -310,12 +382,12 @@ const handleDelete = async (id: number) => {
                           "-"}
                       </TableCell>
 
-                      <TableCell  className="capitalize">
+                      <TableCell className="capitalize">
                         {module.consumable_type ??
                           "-"}
                       </TableCell>
 
-                      <TableCell  className="capitalize">
+                      <TableCell>
                         {module.display_order}
                       </TableCell>
 
@@ -340,10 +412,10 @@ const handleDelete = async (id: number) => {
                         <div className="flex justify-end gap-1">
 
                           <Button
-                           
                             variant="ghost"
                             size="icon"
                             title="View"
+                          
                           >
                             <NavLink
                               to={`/modules/view/${module.id}`}
@@ -353,10 +425,10 @@ const handleDelete = async (id: number) => {
                           </Button>
 
                           <Button
-                        
                             variant="ghost"
                             size="icon"
                             title="Edit"
+                           
                           >
                             <NavLink
                               to={`/modules/edit/${module.id}`}
@@ -364,59 +436,68 @@ const handleDelete = async (id: number) => {
                               <Pencil className="size-4" />
                             </NavLink>
                           </Button>
-                          {/* <Button
-                            variant="ghost"
-                            size="icon"
-                            title="Delete"
-                            onClick={() => handleDelete(module.id)}
-                          >
-                            <Trash2 className="size-4 text-destructive" />
-                          </Button> */}
 
                           <AlertDialog>
-  <AlertDialogTrigger >
-    <Button
-      variant="ghost"
-      size="icon"
-      title="Delete"
-    >
-      <Trash2 className="size-4 text-destructive" />
-    </Button>
-  </AlertDialogTrigger>
 
-  <AlertDialogContent size="sm">
-    <AlertDialogHeader>
-      <AlertDialogMedia className="bg-destructive/10 text-destructive dark:bg-destructive/20">
-        <Trash2 className="size-5" />
-      </AlertDialogMedia>
+                            <AlertDialogTrigger
+                          
+                            >
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                title="Delete"
+                              >
+                                <Trash2 className="size-4 text-destructive" />
+                              </Button>
+                            </AlertDialogTrigger>
 
-      <AlertDialogTitle>
-        Delete Module?
-      </AlertDialogTitle>
+                            <AlertDialogContent size="sm">
 
-      <AlertDialogDescription>
-        Are you sure you want to delete{" "}
-        <span className="font-semibold text-foreground">
-          {module.module_name}
-        </span>
-        ? This action cannot be undone.
-      </AlertDialogDescription>
-    </AlertDialogHeader>
+                              <AlertDialogHeader>
 
-    <AlertDialogFooter>
-      <AlertDialogCancel variant="outline">
-        Cancel
-      </AlertDialogCancel>
+                                <AlertDialogMedia className="bg-destructive/10 text-destructive dark:bg-destructive/20">
+                                  <Trash2 className="size-5" />
+                                </AlertDialogMedia>
 
-      <AlertDialogAction
-        variant="destructive"
-        onClick={() => handleDelete(module.id)}
-      >
-        Delete
-      </AlertDialogAction>
-    </AlertDialogFooter>
-  </AlertDialogContent>
-</AlertDialog>
+                                <AlertDialogTitle>
+                                  Delete Module?
+                                </AlertDialogTitle>
+
+                                <AlertDialogDescription>
+                                  Are you sure you
+                                  want to delete{" "}
+                                  <span className="font-semibold text-foreground">
+                                    {module.module_name}
+                                  </span>
+                                  ? This action
+                                  cannot be undone.
+                                </AlertDialogDescription>
+
+                              </AlertDialogHeader>
+
+                              <AlertDialogFooter>
+
+                                <AlertDialogCancel variant="outline">
+                                  Cancel
+                                </AlertDialogCancel>
+
+                                <AlertDialogAction
+                                  variant="destructive"
+                                  onClick={() =>
+                                    handleDelete(
+                                      module.id
+                                    )
+                                  }
+                                >
+                                  Delete
+                                </AlertDialogAction>
+
+                              </AlertDialogFooter>
+
+                            </AlertDialogContent>
+
+                          </AlertDialog>
+
                         </div>
                       </TableCell>
 
@@ -439,14 +520,14 @@ const handleDelete = async (id: number) => {
       {view === "grid" && (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
 
-          {currentModules.length === 0 ? (
+          {modules.length === 0 ? (
             <div className="col-span-full rounded-md border p-8 text-center">
               <p className="text-sm text-muted-foreground">
                 No modules found.
               </p>
             </div>
           ) : (
-            currentModules.map(
+            modules.map(
               (module, index) => (
                 <div
                   key={module.id}
@@ -460,7 +541,11 @@ const handleDelete = async (id: number) => {
                     <div className="min-w-0">
 
                       <p className="text-xs text-muted-foreground">
-                        #{startIndex + index + 1}
+                        #
+                        {(pagination.page - 1) *
+                          pagination.limit +
+                          index +
+                          1}
                       </p>
 
                       <h3 className="mt-1 truncate font-semibold">
@@ -508,7 +593,7 @@ const handleDelete = async (id: number) => {
                         Capacity Type
                       </p>
 
-                      <p className="mt-1 text-lg font-semibold">
+                      <p className="mt-1 text-lg font-semibold capitalize">
                         {module.capacity_type ??
                           "-"}
                       </p>
@@ -565,9 +650,9 @@ const handleDelete = async (id: number) => {
                   <div className="mt-5 flex justify-end gap-2 border-t pt-4">
 
                     <Button
-                    
                       variant="outline"
                       size="sm"
+                     
                     >
                       <NavLink
                         to={`/modules/view/${module.id}`}
@@ -578,8 +663,8 @@ const handleDelete = async (id: number) => {
                     </Button>
 
                     <Button
-                     
                       size="sm"
+                      
                     >
                       <NavLink
                         to={`/modules/edit/${module.id}`}
@@ -588,50 +673,68 @@ const handleDelete = async (id: number) => {
                         Edit
                       </NavLink>
                     </Button>
-<AlertDialog>
-  <AlertDialogTrigger >
-    <Button
-      variant="ghost"
-      size="icon"
-      title="Delete"
-    >
-      <Trash2 className="size-4 text-destructive" />
-    </Button>
-  </AlertDialogTrigger>
 
-  <AlertDialogContent size="sm">
-    <AlertDialogHeader>
-      <AlertDialogMedia className="bg-destructive/10 text-destructive dark:bg-destructive/20">
-        <Trash2 className="size-5" />
-      </AlertDialogMedia>
+                    <AlertDialog>
 
-      <AlertDialogTitle>
-        Delete Module?
-      </AlertDialogTitle>
+                      <AlertDialogTrigger
+                       
+                      >
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          title="Delete"
+                        >
+                          <Trash2 className="size-4 text-destructive" />
+                        </Button>
+                      </AlertDialogTrigger>
 
-      <AlertDialogDescription>
-        Are you sure you want to delete{" "}
-        <span className="font-semibold text-foreground">
-          {module.module_name}
-        </span>
-        ? This action cannot be undone.
-      </AlertDialogDescription>
-    </AlertDialogHeader>
+                      <AlertDialogContent size="sm">
 
-    <AlertDialogFooter>
-      <AlertDialogCancel variant="outline">
-        Cancel
-      </AlertDialogCancel>
+                        <AlertDialogHeader>
 
-      <AlertDialogAction
-        variant="destructive"
-        onClick={() => handleDelete(module.id)}
-      >
-        Delete
-      </AlertDialogAction>
-    </AlertDialogFooter>
-  </AlertDialogContent>
-</AlertDialog>
+                          <AlertDialogMedia className="bg-destructive/10 text-destructive dark:bg-destructive/20">
+                            <Trash2 className="size-5" />
+                          </AlertDialogMedia>
+
+                          <AlertDialogTitle>
+                            Delete Module?
+                          </AlertDialogTitle>
+
+                          <AlertDialogDescription>
+                            Are you sure you
+                            want to delete{" "}
+                            <span className="font-semibold text-foreground">
+                              {module.module_name}
+                            </span>
+                            ? This action cannot be
+                            undone.
+                          </AlertDialogDescription>
+
+                        </AlertDialogHeader>
+
+                        <AlertDialogFooter>
+
+                          <AlertDialogCancel variant="outline">
+                            Cancel
+                          </AlertDialogCancel>
+
+                          <AlertDialogAction
+                            variant="destructive"
+                            onClick={() =>
+                              handleDelete(
+                                module.id
+                              )
+                            }
+                          >
+                            Delete
+                          </AlertDialogAction>
+
+                        </AlertDialogFooter>
+
+                      </AlertDialogContent>
+
+                    </AlertDialog>
+
                   </div>
 
                 </div>
@@ -646,20 +749,17 @@ const handleDelete = async (id: number) => {
       {/* PAGINATION                                                         */}
       {/* ================================================================== */}
 
-      {modules.length > 0 && (
+      {pagination.total > 0 && (
         <div className="flex flex-col items-center gap-3 sm:flex-row sm:justify-between">
 
           <div className="text-sm text-muted-foreground">
 
             Showing{" "}
-            {startIndex + 1}{" "}
+            {firstItem}{" "}
             to{" "}
-            {Math.min(
-              endIndex,
-              modules.length
-            )}{" "}
+            {lastItem}{" "}
             of{" "}
-            {modules.length}{" "}
+            {pagination.total}{" "}
             modules
 
           </div>
@@ -675,14 +775,16 @@ const handleDelete = async (id: number) => {
                   onClick={(event) => {
                     event.preventDefault()
 
-                    if (currentPage > 1) {
-                      setCurrentPage(
-                        (page) => page - 1
+                    if (
+                      pagination.page > 1
+                    ) {
+                      handlePageChange(
+                        pagination.page - 1
                       )
                     }
                   }}
                   className={
-                    currentPage === 1
+                    pagination.page === 1
                       ? "pointer-events-none opacity-50"
                       : "cursor-pointer"
                   }
@@ -692,19 +794,23 @@ const handleDelete = async (id: number) => {
 
               {Array.from(
                 {
-                  length: totalPages,
+                  length:
+                    pagination.totalPages,
                 },
                 (_, index) => {
-                  const page = index + 1
+                  const page =
+                    index + 1
 
                   return (
                     <PaginationItem
                       key={page}
                     >
+
                       <PaginationLink
                         href="#"
                         isActive={
-                          currentPage === page
+                          pagination.page ===
+                          page
                         }
                         onClick={(event) => {
                           event.preventDefault()
@@ -716,6 +822,7 @@ const handleDelete = async (id: number) => {
                       >
                         {page}
                       </PaginationLink>
+
                     </PaginationItem>
                   )
                 }
@@ -729,17 +836,17 @@ const handleDelete = async (id: number) => {
                     event.preventDefault()
 
                     if (
-                      currentPage <
-                      totalPages
+                      pagination.page <
+                      pagination.totalPages
                     ) {
-                      setCurrentPage(
-                        (page) => page + 1
+                      handlePageChange(
+                        pagination.page + 1
                       )
                     }
                   }}
                   className={
-                    currentPage ===
-                    totalPages
+                    pagination.page ===
+                    pagination.totalPages
                       ? "pointer-events-none opacity-50"
                       : "cursor-pointer"
                   }
@@ -753,7 +860,6 @@ const handleDelete = async (id: number) => {
 
         </div>
       )}
-
 
     </div>
   )

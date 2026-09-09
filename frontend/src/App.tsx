@@ -1,63 +1,5 @@
 
 
-// import { Route, Routes } from "react-router-dom"
-// import { lazy, Suspense } from "react"
-// import Layout from "@/components/layout/Layout"
-// import Dashboard from "@/pages/Dashboard";
-// import Organizations from "@/pages/Organizations"
-//  import OrganizationsTable from "@/features/organizations/pages/Organizations"
-//   import AddOrganizations from "@/features/organizations/pages/AddOrganization"
-//    import EditOrganizations from "@/features/organizations/pages/EditOrganizations"
-//   import ViewOrganizations from "@/features/organizations/pages/ViewOrganizations"
-//  import DashboardSkeleton from "@/features/dashboards/components/DashboardSkeleton"
-
-
-// function App() {
-//   return (
-//     <>
-//     <Routes>
-//      <Route element={<Layout />}>
-//       <Route path="/dashboard" element={<Dashboard />} />
-      
-//         <Route path="/organizations" element={<Organizations />}>
-            
-         
-//             <Route
-//               index
-//               element={<OrganizationsTable />}
-//             />
-
-           
-//             <Route
-//               path="add"
-//               element={<AddOrganizations />}
-//             />
-
-           
-//           <Route
-//               path="details"
-//               element={<ViewOrganizations />}
-//             />
-            
-
-          
-//             <Route
-//               path="edit"
-//               element={<EditOrganizations />}
-//             /> 
-           
-//           </Route> 
-
-//         </Route>
-      
-//     </Routes>
-     
-//       </>
-//   )
-// }
-
-// export default App
-
 import { lazy, Suspense } from "react"
 import { Route, Routes } from "react-router-dom"
 
@@ -104,8 +46,18 @@ const EditModule = lazy(
 const ViewModule = lazy(
   () => import("@/features/modules/pages/ViewModule")
 )
+const SubModules = lazy(
+  () => import("@/pages/Modules")
+)
 
 
+const SubModuleTable = lazy(
+  () => import("@/features/sub_modules/components/SubModuleTable")
+)
+
+const AddSubModule = lazy(
+  () =>import("@/features/sub_modules/pages/AddSubModule")
+)
 function App() {
   return (
     <Suspense fallback={<DashboardSkeleton />}>
@@ -169,15 +121,31 @@ function App() {
             />
             {/* /modules/edit */}
             <Route
-  path="/modules/edit/:id"
-  element={<EditModule />}
-/>
+              path="/modules/edit/:id"
+              element={<EditModule />}
+            />
 
-<Route
-  path="/modules/view/:id"
-  element={<ViewModule />}
-/>
+            <Route
+              path="/modules/view/:id"
+              element={<ViewModule />}
+            />
           
+          </Route>
+
+          {/* Sub Modules */}
+          <Route
+            path="/submodule"
+            element={<SubModules />}
+          >
+            {/* /modules/sub */}
+            <Route
+              index
+              element={<SubModuleTable />}
+            />
+             <Route
+              path="add"
+              element={<AddSubModule />}
+            />
           </Route>
         </Route>
       </Routes>

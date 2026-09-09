@@ -16,20 +16,67 @@ import type {
     UpdateModuleData,
 } from "../modulesTypes"
 
+import {
+  getPaginationParams,
+  getPaginationMeta,
+} from "../../../utils/pagination"
+
 // ============================
 // Get Modules
 // ============================
 
+// export const getModules = async (
+//   _req: Request,
+//   res: Response,
+// ) => {
+//   try {
+//     const modules = await fetchModules()
+
+//     return res.status(200).json({
+//       success: true,
+//       data: modules,
+//     })
+//   } catch (error) {
+//     console.error(
+//       "GET MODULES ERROR:",
+//       error,
+//     )
+
+//     return res.status(500).json({
+//       success: false,
+//       message: "Server error",
+//     })
+//   }
+// }
+
+// pagination and rate limit
 export const getModules = async (
-  _req: Request,
+  req: Request,
   res: Response,
 ) => {
   try {
-    const modules = await fetchModules()
+    const {
+      page,
+      limit,
+      offset,
+    } = getPaginationParams(
+      req.query.page,
+      req.query.limit,
+    )
+
+    const result = await fetchModules(
+      limit,
+      offset,
+    )
 
     return res.status(200).json({
       success: true,
-      data: modules,
+      data: result.rows,
+      pagination: getPaginationMeta(
+        page,
+        limit,
+        result.total,
+      ),
     })
   } catch (error) {
     console.error(
@@ -43,7 +90,6 @@ export const getModules = async (
     })
   }
 }
-
 
 // ============================
 // Get Module By ID
