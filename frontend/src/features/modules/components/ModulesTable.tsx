@@ -63,7 +63,7 @@ import {
   removeModule,
 } from "../moduleThunks"
 
-const PAGE_SIZE = 12
+const PAGE_SIZE = 10
 
 export default function ModulesTable() {
   const dispatch = useDispatch<AppDispatch>()
