@@ -21,7 +21,7 @@ export const getPaginationParams = (
   )
 
   const limit = Math.min(
-    Math.max(Number(limitParam) || 12, 1),
+    Math.max(Number(limitParam) || 10, 1),
     100,
   )
 
