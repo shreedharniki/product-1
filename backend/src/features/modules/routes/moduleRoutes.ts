@@ -23,33 +23,78 @@ import {
   removeModule,
 } from "../controllers/modulesController"
 
+
+// const router = Router()
+// // Get all modules
+// router.get(
+//   "/modules",
+//   getModules,
+// )
+
+// // Get module by ID
+// router.get(
+//   "/modules/:id",
+//   getModule,
+// )
+// // Create module
+// router.post(
+//   "/modules",
+//   postModule,
+// )
+
+// // Update module
+// router.put(
+//   "/modules/:id",
+//   putModule,
+// )
+
+// // Soft delete module
+// router.delete(
+//   "/modules/:id",
+//   removeModule,
+// )
+// export default router
+
+import {
+  apiRateLimit,
+  writeRateLimit,
+} from "../../../middleware/rateLimitMiddleware"
+
 const router = Router()
-// Get all modules
+
+// GET modules
 router.get(
   "/modules",
+  apiRateLimit,
   getModules,
 )
 
-// Get module by ID
+// GET module by ID
 router.get(
   "/modules/:id",
+  apiRateLimit,
   getModule,
 )
-// Create module
+
+// CREATE module
 router.post(
   "/modules",
+  writeRateLimit,
   postModule,
 )
 
-// Update module
+// UPDATE module
 router.put(
   "/modules/:id",
+  writeRateLimit,
   putModule,
 )
 
-// Soft delete module
+// DELETE module
 router.delete(
   "/modules/:id",
+  writeRateLimit,
   removeModule,
 )
+
 export default router

@@ -22,6 +22,9 @@ import {
 import { fetchModuleById } from "../moduleThunks"
 
 import type { Module } from "../moduleTypes"
+import SubModule from "../components/SubModule"
+import AddModule from "./AddModule"
+
 
 export default function ViewModule() {
   const { id } = useParams<{
@@ -79,6 +82,7 @@ export default function ViewModule() {
   }
 
   return (
+    <>
     <Card className="w-full">
 
       <CardHeader className="flex flex-row items-center justify-between">
@@ -198,5 +202,8 @@ export default function ViewModule() {
       </CardContent>
 
     </Card>
+    <AddModule  />
+    <SubModule moduleId={module.id} />
+    </>
   )
 }
