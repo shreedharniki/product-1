@@ -69,7 +69,10 @@ function App() {
             path="/dashboard"
             element={<Dashboard />}
           />
-
+         <Route
+            path="/"
+            element={<Dashboard />}
+          />
           {/* Organizations */}
           <Route
             path="/organizations"
