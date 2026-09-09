@@ -2,18 +2,19 @@
 
 
 
-import SubModuleForm from "../components/SubModuleForm"
+import SubModuleForms from "../components/SubModuleForms"
+import type { SubModuleFormData } from "../subModuleValidation"
 
 export default function AddSubModule() {
- const handleSubmit = async () => {
-     console.log("data submit")
- 
-     
-   }
+  const handleSubmit = async (
+    data: SubModuleFormData,
+  ): Promise<void> => {
+    console.log("data submit:", data)
+  }
+
   return (
-       <SubModuleForm
-       
-       onSubmit={handleSubmit}
-       />
+    <SubModuleForms
+      onSubmit={handleSubmit}
+    />
   )
 }
