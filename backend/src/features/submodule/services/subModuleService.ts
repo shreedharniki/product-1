@@ -16,7 +16,7 @@ import {
 import type {
   CreateSubModuleRequest,
   SubModuleWithPermissions,
-    SubModule,
+    
 } from "../subModuleTypes"
 
 export const create = async (
