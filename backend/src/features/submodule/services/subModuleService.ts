@@ -16,7 +16,7 @@ import {
 import type {
   CreateSubModuleRequest,
   SubModuleWithPermissions,
-    SubModule,
+    
 } from "../subModuleTypes"
 
 export const create = async (
@@ -59,11 +59,38 @@ export const create = async (
   }
 }
 
+// export const getAll = async (
+//   moduleId?: number,
+// ): Promise<SubModule[]> => {
+//   return findSubModules(moduleId)
+// }
+
 export const getAll = async (
   moduleId?: number,
-): Promise<SubModule[]> => {
-  return findSubModules(moduleId)
+): Promise<SubModuleWithPermissions[]> => {
+  const subModules = await findSubModules(moduleId)
+
+  const subModulesWithPermissions = await Promise.all(
+    subModules.map(async (subModule) => {
+      const permissions = await findBySubModuleId(
+        subModule.id,
+      )
+
+      return {
+        ...subModule,
+        permissions: permissions.map((item) => ({
+          role_id: item.role_id,
+          permission: item.permission,
+        })),
+      }
+    }),
+  )
+
+  return subModulesWithPermissions
 }
+
+
+
 
 export const getById = async (
   id: number,

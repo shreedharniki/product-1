@@ -33,7 +33,6 @@ export const getSubModules = async (
     data: result,
   })
 }
-
 export const getSubModuleById = async (
   req: Request,
   res: Response,
