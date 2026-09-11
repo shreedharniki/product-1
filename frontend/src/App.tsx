@@ -58,6 +58,9 @@ const SubModuleTable = lazy(
 const AddSubModule = lazy(
   () =>import("@/features/sub_modules/pages/AddSubModule")
 )
+const EditSubModule = lazy(
+  () => import ("@/features/sub_modules/pages/EditSubModule")
+  )
 function App() {
   return (
     <Suspense fallback={<DashboardSkeleton />}>
@@ -148,6 +151,10 @@ function App() {
              <Route
               path="add"
               element={<AddSubModule />}
+            />
+            <Route 
+            path="/submodule/edit/:id"
+            element={<EditSubModule/>}
             />
           </Route>
         </Route>
