@@ -41,7 +41,7 @@ export const authRateLimit = rateLimit({
 
 export const writeRateLimit = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  limit: 30,
+  limit: 3000,
   standardHeaders: "draft-7",
   legacyHeaders: false,
 

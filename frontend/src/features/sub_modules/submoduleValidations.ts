@@ -1,23 +1,24 @@
+
 import * as z from "zod"
 
 export const subModulePermissionSchema = z.object({
   role_id: z
     .number()
-    .int()
-    .positive(),
+    .int("Role ID must be a whole number.")
+    .positive("Role ID must be greater than 0."),
 
   permission: z
     .number()
-    .int()
-    .min(0)
-    .max(7),
+    .int("Permission must be a whole number.")
+    .min(0, "Permission cannot be less than 0.")
+    .max(7, "Permission cannot be greater than 7."),
 })
 
 export const subModuleSchema = z.object({
   module_id: z
     .number()
-    .int()
-    .positive("Please select a module."),
+    .int("Module ID must be a whole number.")
+    .positive("Please select a parent module."),
 
   sub_module_code: z
     .string()
@@ -60,9 +61,7 @@ export const subModuleSchema = z.object({
 
   display_order: z
     .number()
-    .int(
-      "Display order must be a whole number.",
-    )
+    .int("Display order must be a whole number.")
     .min(
       0,
       "Display order cannot be negative.",
@@ -83,11 +82,6 @@ export const subModuleSchema = z.object({
       "Permissions must be configured for all roles.",
     ),
 })
-
-export type SubModulePermission =
-  z.infer<
-    typeof subModulePermissionSchema
-  >
 
 export type SubModuleFormData =
   z.infer<typeof subModuleSchema>

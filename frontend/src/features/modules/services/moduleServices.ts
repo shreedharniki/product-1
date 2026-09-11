@@ -120,7 +120,23 @@ import type {
 /* -------------------------------------------------------------------------- */
 /* Get Modules                                                                */
 /* -------------------------------------------------------------------------- */
+export const getModulesList = async (): Promise<Module[]> => {
+  const response = await api.get("/v1/moduleslist")
 
+  if (Array.isArray(response.data)) {
+    return response.data
+  }
+
+  if (Array.isArray(response.data?.data)) {
+    return response.data.data
+  }
+
+  if (Array.isArray(response.data?.modules)) {
+    return response.data.modules
+  }
+
+  return []
+}
 export const getModules = async (
   page = 1,
   limit = 10

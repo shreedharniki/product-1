@@ -1,12 +1,219 @@
 
-// import { createSlice, type PayloadAction } from "@reduxjs/toolkit"
+// // import { createSlice, type PayloadAction } from "@reduxjs/toolkit"
+
+// // import type {
+// //   Module,
+// //   ModulesState,
+// // } from "./moduleTypes"
+
+// // import {
+// //   fetchModules,
+// //   fetchModuleById,
+// //   addModule,
+// //   editModule,
+// //   removeModule,
+// // } from "./moduleThunks"
+
+// // /* -------------------------------------------------------------------------- */
+// // /* Initial State                                                              */
+// // /* -------------------------------------------------------------------------- */
+
+// // const initialState: ModulesState = {
+// //   modules: [],
+// //   loading: false,
+// //   error: null,
+// //   success: false,
+// // }
+
+// // /* -------------------------------------------------------------------------- */
+// // /* Module Slice                                                               */
+// // /* -------------------------------------------------------------------------- */
+
+// // const moduleSlice = createSlice({
+// //   name: "modules",
+
+// //   initialState,
+
+// //   reducers: {
+// //     clearModuleError: (state) => {
+// //       state.error = null
+// //     },
+
+// //     clearModuleSuccess: (state) => {
+// //       state.success = false
+// //     },
+
+// //     clearModules: (state) => {
+// //       state.modules = []
+// //     },
+// //   },
+
+// //   extraReducers: (builder) => {
+// //     /* ---------------------------------------------------------------------- */
+// //     /* Fetch Modules                                                          */
+// //     /* ---------------------------------------------------------------------- */
+
+// //     builder
+// //       .addCase(fetchModules.pending, (state) => {
+// //         state.loading = true
+// //         state.error = null
+// //       })
+
+// //       .addCase(
+// //         fetchModules.fulfilled,
+// //         (state, action: PayloadAction<Module[]>) => {
+// //           state.loading = false
+// //           state.modules = action.payload
+// //         }
+// //       )
+
+// //       .addCase(fetchModules.rejected, (state, action) => {
+// //         state.loading = false
+// //         state.error =
+// //           (action.payload as string) ||
+// //           "Failed to fetch modules."
+// //       })
+
+// //     /* ---------------------------------------------------------------------- */
+// //     /* Fetch Module By ID                                                     */
+// //     /* ---------------------------------------------------------------------- */
+
+// //     builder
+// //       .addCase(fetchModuleById.pending, (state) => {
+// //         state.loading = true
+// //         state.error = null
+// //       })
+
+// //       .addCase(fetchModuleById.fulfilled, (state) => {
+// //         state.loading = false
+// //       })
+
+// //       .addCase(fetchModuleById.rejected, (state, action) => {
+// //         state.loading = false
+// //         state.error =
+// //           (action.payload as string) ||
+// //           "Failed to fetch module."
+// //       })
+
+// //     /* ---------------------------------------------------------------------- */
+// //     /* Add Module                                                             */
+// //     /* ---------------------------------------------------------------------- */
+
+// //     builder
+// //       .addCase(addModule.pending, (state) => {
+// //         state.loading = true
+// //         state.error = null
+// //         state.success = false
+// //       })
+
+// //       .addCase(
+// //         addModule.fulfilled,
+// //         (state, action: PayloadAction<Module>) => {
+// //           state.loading = false
+// //           state.success = true
+
+// //           state.modules.push(action.payload)
+// //         }
+// //       )
+
+// //       .addCase(addModule.rejected, (state, action) => {
+// //         state.loading = false
+// //         state.error =
+// //           (action.payload as string) ||
+// //           "Failed to create module."
+// //       })
+
+// //     /* ---------------------------------------------------------------------- */
+// //     /* Edit Module                                                            */
+// //     /* ---------------------------------------------------------------------- */
+
+// //     builder
+// //       .addCase(editModule.pending, (state) => {
+// //         state.loading = true
+// //         state.error = null
+// //         state.success = false
+// //       })
+
+// //       .addCase(
+// //         editModule.fulfilled,
+// //         (state, action: PayloadAction<Module>) => {
+// //           state.loading = false
+// //           state.success = true
+
+// //           const index = state.modules.findIndex(
+// //             (module) => module.id === action.payload.id
+// //           )
+
+// //           if (index !== -1) {
+// //             state.modules[index] = action.payload
+// //           }
+// //         }
+// //       )
+
+// //       .addCase(editModule.rejected, (state, action) => {
+// //         state.loading = false
+// //         state.error =
+// //           (action.payload as string) ||
+// //           "Failed to update module."
+// //       })
+
+// //     /* ---------------------------------------------------------------------- */
+// //     /* Delete Module                                                          */
+// //     /* ---------------------------------------------------------------------- */
+
+// //     builder
+// //       .addCase(removeModule.pending, (state) => {
+// //         state.loading = true
+// //         state.error = null
+// //       })
+
+// //       .addCase(removeModule.fulfilled, (state, action) => {
+// //         state.loading = false
+
+// //         state.modules = state.modules.filter(
+// //           (module) => module.id !== action.payload
+// //         )
+// //       })
+
+// //       .addCase(removeModule.rejected, (state, action) => {
+// //         state.loading = false
+// //         state.error =
+// //           (action.payload as string) ||
+// //           "Failed to delete module."
+// //       })
+// //   },
+// // })
+
+// // /* -------------------------------------------------------------------------- */
+// // /* Actions                                                                    */
+// // /* -------------------------------------------------------------------------- */
+
+// // export const {
+// //   clearModuleError,
+// //   clearModuleSuccess,
+// //   clearModules,
+// // } = moduleSlice.actions
+
+// // /* -------------------------------------------------------------------------- */
+// // /* Reducer                                                                    */
+// // /* -------------------------------------------------------------------------- */
+
+// // export default moduleSlice.reducer
+
+
+// import {
+//   createSlice,
+//   type PayloadAction,
+// } from "@reduxjs/toolkit"
 
 // import type {
 //   Module,
+//   ModulesResponse,
 //   ModulesState,
 // } from "./moduleTypes"
 
 // import {
+//     fetchModulesList,
 //   fetchModules,
 //   fetchModuleById,
 //   addModule,
@@ -20,6 +227,14 @@
 
 // const initialState: ModulesState = {
 //   modules: [],
+
+//   pagination: {
+//     page: 1,
+//     limit: 10,
+//     total: 0,
+//     totalPages: 0,
+//   },
+
 //   loading: false,
 //   error: null,
 //   success: false,
@@ -45,6 +260,13 @@
 
 //     clearModules: (state) => {
 //       state.modules = []
+
+//       state.pagination = {
+//         page: 1,
+//         limit: 10,
+//         total: 0,
+//         totalPages: 0,
+//       }
 //     },
 //   },
 
@@ -61,19 +283,60 @@
 
 //       .addCase(
 //         fetchModules.fulfilled,
-//         (state, action: PayloadAction<Module[]>) => {
+//         (
+//           state,
+//           action: PayloadAction<ModulesResponse>
+//         ) => {
 //           state.loading = false
-//           state.modules = action.payload
+
+//           state.modules = action.payload.data
+
+//           state.pagination =
+//             action.payload.pagination
 //         }
 //       )
 
-//       .addCase(fetchModules.rejected, (state, action) => {
-//         state.loading = false
-//         state.error =
-//           (action.payload as string) ||
-//           "Failed to fetch modules."
+//       .addCase(
+//         fetchModulesList.rejected,
+//         (state, action) => {
+//           state.loading = false
+
+//           state.error =
+//             (action.payload as string) ||
+//             "Failed to fetch modules."
+//         }
+//       )
+// builder
+//       .addCase(fetchModules.pending, (state) => {
+//         state.loading = true
+//         state.error = null
 //       })
 
+//       .addCase(
+//         fetchModulesList.fulfilled,
+//         (
+//           state,
+//           action: PayloadAction<ModulesResponse>
+//         ) => {
+//           state.loading = false
+
+//           state.modules = action.payload.data
+
+//           state.pagination =
+//             action.payload.pagination
+//         }
+//       )
+
+//       .addCase(
+//         fetchModulesList.rejected,
+//         (state, action) => {
+//           state.loading = false
+
+//           state.error =
+//             (action.payload as string) ||
+//             "Failed to fetch modules."
+//         }
+//       )
 //     /* ---------------------------------------------------------------------- */
 //     /* Fetch Module By ID                                                     */
 //     /* ---------------------------------------------------------------------- */
@@ -84,16 +347,23 @@
 //         state.error = null
 //       })
 
-//       .addCase(fetchModuleById.fulfilled, (state) => {
-//         state.loading = false
-//       })
+//       .addCase(
+//         fetchModuleById.fulfilled,
+//         (state) => {
+//           state.loading = false
+//         }
+//       )
 
-//       .addCase(fetchModuleById.rejected, (state, action) => {
-//         state.loading = false
-//         state.error =
-//           (action.payload as string) ||
-//           "Failed to fetch module."
-//       })
+//       .addCase(
+//         fetchModuleById.rejected,
+//         (state, action) => {
+//           state.loading = false
+
+//           state.error =
+//             (action.payload as string) ||
+//             "Failed to fetch module."
+//         }
+//       )
 
 //     /* ---------------------------------------------------------------------- */
 //     /* Add Module                                                             */
@@ -108,20 +378,29 @@
 
 //       .addCase(
 //         addModule.fulfilled,
-//         (state, action: PayloadAction<Module>) => {
+//         (
+//           state,
+//           action: PayloadAction<Module>
+//         ) => {
 //           state.loading = false
 //           state.success = true
 
-//           state.modules.push(action.payload)
+//           state.modules.push(
+//             action.payload
+//           )
 //         }
 //       )
 
-//       .addCase(addModule.rejected, (state, action) => {
-//         state.loading = false
-//         state.error =
-//           (action.payload as string) ||
-//           "Failed to create module."
-//       })
+//       .addCase(
+//         addModule.rejected,
+//         (state, action) => {
+//           state.loading = false
+
+//           state.error =
+//             (action.payload as string) ||
+//             "Failed to create module."
+//         }
+//       )
 
 //     /* ---------------------------------------------------------------------- */
 //     /* Edit Module                                                            */
@@ -136,26 +415,37 @@
 
 //       .addCase(
 //         editModule.fulfilled,
-//         (state, action: PayloadAction<Module>) => {
+//         (
+//           state,
+//           action: PayloadAction<Module>
+//         ) => {
 //           state.loading = false
 //           state.success = true
 
-//           const index = state.modules.findIndex(
-//             (module) => module.id === action.payload.id
-//           )
+//           const index =
+//             state.modules.findIndex(
+//               (module) =>
+//                 module.id ===
+//                 action.payload.id
+//             )
 
 //           if (index !== -1) {
-//             state.modules[index] = action.payload
+//             state.modules[index] =
+//               action.payload
 //           }
 //         }
 //       )
 
-//       .addCase(editModule.rejected, (state, action) => {
-//         state.loading = false
-//         state.error =
-//           (action.payload as string) ||
-//           "Failed to update module."
-//       })
+//       .addCase(
+//         editModule.rejected,
+//         (state, action) => {
+//           state.loading = false
+
+//           state.error =
+//             (action.payload as string) ||
+//             "Failed to update module."
+//         }
+//       )
 
 //     /* ---------------------------------------------------------------------- */
 //     /* Delete Module                                                          */
@@ -167,36 +457,49 @@
 //         state.error = null
 //       })
 
-//       .addCase(removeModule.fulfilled, (state, action) => {
-//         state.loading = false
+//       .addCase(
+//         removeModule.fulfilled,
+//         (state, action) => {
+//           state.loading = false
 
-//         state.modules = state.modules.filter(
-//           (module) => module.id !== action.payload
-//         )
-//       })
+//           state.modules =
+//             state.modules.filter(
+//               (module) =>
+//                 module.id !==
+//                 action.payload
+//             )
 
-//       .addCase(removeModule.rejected, (state, action) => {
-//         state.loading = false
-//         state.error =
-//           (action.payload as string) ||
-//           "Failed to delete module."
-//       })
+//           state.pagination.total = Math.max(
+//             0,
+//             state.pagination.total - 1
+//           )
+
+//           state.pagination.totalPages =
+//             Math.ceil(
+//               state.pagination.total /
+//                 state.pagination.limit
+//             )
+//         }
+//       )
+
+//       .addCase(
+//         removeModule.rejected,
+//         (state, action) => {
+//           state.loading = false
+
+//           state.error =
+//             (action.payload as string) ||
+//             "Failed to delete module."
+//         }
+//       )
 //   },
 // })
-
-// /* -------------------------------------------------------------------------- */
-// /* Actions                                                                    */
-// /* -------------------------------------------------------------------------- */
 
 // export const {
 //   clearModuleError,
 //   clearModuleSuccess,
 //   clearModules,
 // } = moduleSlice.actions
-
-// /* -------------------------------------------------------------------------- */
-// /* Reducer                                                                    */
-// /* -------------------------------------------------------------------------- */
 
 // export default moduleSlice.reducer
 
@@ -214,6 +517,7 @@ import type {
 
 import {
   fetchModules,
+   fetchModulesList,
   fetchModuleById,
   addModule,
   editModule,
@@ -271,14 +575,17 @@ const moduleSlice = createSlice({
 
   extraReducers: (builder) => {
     /* ---------------------------------------------------------------------- */
-    /* Fetch Modules                                                          */
+    /* Fetch Modules - Existing API                                           */
     /* ---------------------------------------------------------------------- */
 
     builder
-      .addCase(fetchModules.pending, (state) => {
-        state.loading = true
-        state.error = null
-      })
+      .addCase(
+        fetchModules.pending,
+        (state) => {
+          state.loading = true
+          state.error = null
+        }
+      )
 
       .addCase(
         fetchModules.fulfilled,
@@ -288,7 +595,8 @@ const moduleSlice = createSlice({
         ) => {
           state.loading = false
 
-          state.modules = action.payload.data
+          state.modules =
+            action.payload.data
 
           state.pagination =
             action.payload.pagination
@@ -307,14 +615,54 @@ const moduleSlice = createSlice({
       )
 
     /* ---------------------------------------------------------------------- */
+    /* Fetch Modules List - NO Pagination                                     */
+    /* ---------------------------------------------------------------------- */
+
+    builder
+      .addCase(
+      fetchModulesList.pending,
+        (state) => {
+          state.loading = true
+          state.error = null
+        }
+      )
+
+      .addCase(
+      fetchModulesList.fulfilled,
+        (
+          state,
+          action: PayloadAction<Module[]>
+        ) => {
+          state.loading = false
+
+          state.modules =
+            action.payload
+        }
+      )
+
+      .addCase(
+        fetchModulesList.rejected,
+        (state, action) => {
+          state.loading = false
+
+          state.error =
+            (action.payload as string) ||
+            "Failed to fetch modules."
+        }
+      )
+
+    /* ---------------------------------------------------------------------- */
     /* Fetch Module By ID                                                     */
     /* ---------------------------------------------------------------------- */
 
     builder
-      .addCase(fetchModuleById.pending, (state) => {
-        state.loading = true
-        state.error = null
-      })
+      .addCase(
+        fetchModuleById.pending,
+        (state) => {
+          state.loading = true
+          state.error = null
+        }
+      )
 
       .addCase(
         fetchModuleById.fulfilled,
@@ -339,11 +687,14 @@ const moduleSlice = createSlice({
     /* ---------------------------------------------------------------------- */
 
     builder
-      .addCase(addModule.pending, (state) => {
-        state.loading = true
-        state.error = null
-        state.success = false
-      })
+      .addCase(
+        addModule.pending,
+        (state) => {
+          state.loading = true
+          state.error = null
+          state.success = false
+        }
+      )
 
       .addCase(
         addModule.fulfilled,
@@ -376,11 +727,14 @@ const moduleSlice = createSlice({
     /* ---------------------------------------------------------------------- */
 
     builder
-      .addCase(editModule.pending, (state) => {
-        state.loading = true
-        state.error = null
-        state.success = false
-      })
+      .addCase(
+        editModule.pending,
+        (state) => {
+          state.loading = true
+          state.error = null
+          state.success = false
+        }
+      )
 
       .addCase(
         editModule.fulfilled,
@@ -421,10 +775,13 @@ const moduleSlice = createSlice({
     /* ---------------------------------------------------------------------- */
 
     builder
-      .addCase(removeModule.pending, (state) => {
-        state.loading = true
-        state.error = null
-      })
+      .addCase(
+        removeModule.pending,
+        (state) => {
+          state.loading = true
+          state.error = null
+        }
+      )
 
       .addCase(
         removeModule.fulfilled,
@@ -438,16 +795,15 @@ const moduleSlice = createSlice({
                 action.payload
             )
 
-          state.pagination.total = Math.max(
-            0,
-            state.pagination.total - 1
-          )
+          if (state.pagination.total > 0) {
+            state.pagination.total -= 1
 
-          state.pagination.totalPages =
-            Math.ceil(
-              state.pagination.total /
-                state.pagination.limit
-            )
+            state.pagination.totalPages =
+              Math.ceil(
+                state.pagination.total /
+                  state.pagination.limit
+              )
+          }
         }
       )
 
@@ -464,10 +820,18 @@ const moduleSlice = createSlice({
   },
 })
 
+/* -------------------------------------------------------------------------- */
+/* Actions                                                                    */
+/* -------------------------------------------------------------------------- */
+
 export const {
   clearModuleError,
   clearModuleSuccess,
   clearModules,
 } = moduleSlice.actions
+
+/* -------------------------------------------------------------------------- */
+/* Reducer                                                                    */
+/* -------------------------------------------------------------------------- */
 
 export default moduleSlice.reducer

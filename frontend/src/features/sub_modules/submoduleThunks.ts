@@ -6,7 +6,7 @@ import {
   createSubModule,
   updateSubModule,
   deleteSubModule,
-} from "./services/submoduleServices"
+} from "./services/submoduleService" 
 
 import type {
   CreateSubModulePayload,
@@ -64,6 +64,7 @@ const getErrorMessage = (
 /* -------------------------------------------------------------------------- */
 /* GET ALL                                                                    */
 /* -------------------------------------------------------------------------- */
+//page limi
 
 export const fetchSubModules = createAsyncThunk(
   "submodules/fetchSubModules",

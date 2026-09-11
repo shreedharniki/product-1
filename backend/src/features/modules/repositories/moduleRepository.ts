@@ -29,37 +29,37 @@ export interface ModuleRow extends RowDataPacket {
 // Get Modules
 // ============================
 
-// export const getModules = async (): Promise<ModuleRow[]> => {
-//   let conn
+export const getModulesList = async (): Promise<ModuleRow[]> => {
+  let conn
 
-//   try {
-//     conn = await pool.getConnection()
+  try {
+    conn = await pool.getConnection()
 
-//     const [rows] = await conn.execute<ModuleRow[]>(`
-//       SELECT
-//         id,
-//         module_code,
-//         module_name,
-//         module_type,
-//         capacity_type,
-//         consumable_type,
-//         display_order,
-//         status,
-//         created_at,
-//         updated_at,
-//         deleted_at
-//       FROM modules
-//       WHERE deleted_at IS NULL
-//       ORDER BY display_order ASC
-//     `)
+    const [rows] = await conn.execute<ModuleRow[]>(`
+      SELECT
+        id,
+        module_code,
+        module_name,
+        module_type,
+        capacity_type,
+        consumable_type,
+        display_order,
+        status,
+        created_at,
+        updated_at,
+        deleted_at
+      FROM modules
+      WHERE deleted_at IS NULL
+      ORDER BY display_order ASC
+    `)
 
-//     return rows
-//   } finally {
-//     if (conn) {
-//       conn.release()
-//     }
-//   }
-// }
+    return rows
+  } finally {
+    if (conn) {
+      conn.release()
+    }
+  }
+}
 // ============================
 // Get Modules pagination and rate limit
 // ============================
