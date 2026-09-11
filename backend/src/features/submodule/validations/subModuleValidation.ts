@@ -37,7 +37,7 @@ export const createSubModuleSchema = z.object({
   display_order: z
     .number()
     .int()
-    .min(1, "Display order must be at least 1"),
+    .min(0, "Display order must be at least 1"),
 
   note: z
     .string()

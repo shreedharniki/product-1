@@ -171,6 +171,7 @@
 import { createAsyncThunk } from "@reduxjs/toolkit"
 
 import {
+   getModulesList,
   getModules,
   getModuleById,
   createModule,
@@ -179,6 +180,7 @@ import {
 } from "./services/moduleServices"
 
 import type {
+    Module,
   CreateModulePayload,
   UpdateModulePayload,
 } from "./moduleTypes"
@@ -227,6 +229,26 @@ const getErrorMessage = (
   return fallback
 }
 
+
+export const fetchModulesList = createAsyncThunk<
+  Module[],
+  void,
+  { rejectValue: string }
+>(
+  "modules/fetchModulesList",
+  async (_, { rejectWithValue }) => {
+    try {
+      return await getModulesList()
+    } catch (error: unknown) {
+      return rejectWithValue(
+        getErrorMessage(
+          error,
+          "Failed to fetch modules."
+        )
+      )
+    }
+  }
+)
 /* -------------------------------------------------------------------------- */
 /* Fetch Modules                                                              */
 /* -------------------------------------------------------------------------- */

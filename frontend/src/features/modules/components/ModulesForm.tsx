@@ -74,7 +74,7 @@ export default function ModulesForm({
         initialData?.consumable_type ?? null,
 
       display_order:
-        initialData?.display_order ?? 0,
+        initialData?.display_order ?? 1,
 
       status:
         initialData?.status ?? "active",

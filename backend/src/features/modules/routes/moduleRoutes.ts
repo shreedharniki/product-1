@@ -16,6 +16,7 @@
 import { Router } from "express"
 
 import {
+  getModulesList,
   getModules,
   getModule,
   postModule,
@@ -61,6 +62,10 @@ import {
 } from "../../../middleware/rateLimitMiddleware"
 
 const router = Router()
+router.get(
+  "/modulesList",
+  getModulesList,
+)
 
 // GET modules
 router.get(

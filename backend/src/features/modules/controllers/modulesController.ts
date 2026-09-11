@@ -4,6 +4,7 @@ import type {
 } from "express"
 
 import {
+  fetchModulesList,
   fetchModules,
     fetchModuleById,
   createModule,
@@ -25,29 +26,29 @@ import {
 // Get Modules
 // ============================
 
-// export const getModules = async (
-//   _req: Request,
-//   res: Response,
-// ) => {
-//   try {
-//     const modules = await fetchModules()
+export const getModulesList = async (
+  _req: Request,
+  res: Response,
+) => {
+  try {
+    const modulesList = await fetchModulesList()
 
-//     return res.status(200).json({
-//       success: true,
-//       data: modules,
-//     })
-//   } catch (error) {
-//     console.error(
-//       "GET MODULES ERROR:",
-//       error,
-//     )
+    return res.status(200).json({
+      success: true,
+      data: modulesList,
+    })
+  } catch (error) {
+    console.error(
+      "GET MODULES ERROR:",
+      error,
+    )
 
-//     return res.status(500).json({
-//       success: false,
-//       message: "Server error",
-//     })
-//   }
-// }
+    return res.status(500).json({
+      success: false,
+      message: "Server error",
+    })
+  }
+}
 
 // pagination and rate limit
 export const getModules = async (

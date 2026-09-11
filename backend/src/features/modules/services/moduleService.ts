@@ -1,4 +1,5 @@
 import {
+  getModulesList,
   getModules,
     getModuleById,
   insertModule,
@@ -15,9 +16,9 @@ import type {
 // Get Modules
 // ===============================
 
-// export const fetchModules = async () => {
-//   return getModules()
-// }
+export const fetchModulesList = async () => {
+  return getModulesList()
+}
 
 //rate limit pagination
 export const fetchModules = async (
