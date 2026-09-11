@@ -255,58 +255,94 @@ export default function SubmoduleForm({
   /* Form                                                                     */
   /* ------------------------------------------------------------------------ */
 
-  const form = useForm({
-    defaultValues: {
-      module_id:
-        initialData?.module_id ?? 0,
+//   const form = useForm({
+//     defaultValues: {
+//       module_id:
+//         initialData?.module_id ?? 0,
 
-      sub_module_code:
-        initialData?.sub_module_code ?? "",
+//       sub_module_code:
+//         initialData?.sub_module_code ?? "",
 
-      sub_module_name:
-        initialData?.sub_module_name ?? "",
+//       sub_module_name:
+//         initialData?.sub_module_name ?? "",
 
-      sub_module_status:
-        initialData?.sub_module_status ??
-        "active",
+//       sub_module_status:
+//         initialData?.sub_module_status ??
+//         "active",
 
-      display_order:
-        initialData?.display_order ?? 1,
+//       display_order:
+//         initialData?.display_order ?? 1,
 
-      note:
-        initialData?.note ?? "",
+//       note:
+//         initialData?.note ?? "",
 
-      permissions:
-        defaultPermissions,
-    } satisfies SubModuleFormData,
+//       permissions:
+//         defaultPermissions,
+//     } satisfies SubModuleFormData,
 
-    validators: {
-      onSubmit: ({ value }) => {
-        const result =
-          subModuleSchema.safeParse(value)
+//     // validators: {
+//     //   onSubmit: ({ value }) => {
+//     //     const result =
+//     //       subModuleSchema.safeParse(value)
 
-        if (result.success) {
-          return undefined
-        }
+//     //     if (result.success) {
+//     //       return undefined
+//     //     }
 
-        return result.error.issues.map(
-          (issue) => issue.message,
-        )
-      },
-    },
+//     //     return result.error.issues.map(
+//     //       (issue) => issue.message,
+//     //     )
+//     //   },
+//     // },
+//         validators: {
+//         onSubmit: subModuleSchema,
+//         },
 
-    onSubmit: async ({ value }) => {
-      const result =
-        subModuleSchema.safeParse(value)
+//     onSubmit: async ({ value }) => {
+//       const result =
+//         subModuleSchema.safeParse(value)
 
-      if (!result.success) {
-        return
-      }
+//       if (!result.success) {
+//         return
+//       }
 
-      await onSubmit(result.data)
-    },
-  })
+//       await onSubmit(result.data)
+//     },
+//   })
 
+const form = useForm({
+  defaultValues: {
+    module_id:
+      initialData?.module_id ?? 0,
+
+    sub_module_code:
+      initialData?.sub_module_code ?? "",
+
+    sub_module_name:
+      initialData?.sub_module_name ?? "",
+
+    sub_module_status:
+      initialData?.sub_module_status ??
+      "active",
+
+    display_order:
+      initialData?.display_order ?? 1,
+
+    note:
+      initialData?.note ?? "",
+
+    permissions:
+      defaultPermissions,
+  } satisfies SubModuleFormData,
+
+  validators: {
+    onSubmit: subModuleSchema,
+  },
+
+  onSubmit: async ({ value }) => {
+    await onSubmit(value)
+  },
+})
   return (
     <Card className="w-full">
       {/* ------------------------------------------------------------------ */}
