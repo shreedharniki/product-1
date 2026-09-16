@@ -100,8 +100,14 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Check Docker files
+        run: |
+          pwd
+          ls -la
+          test -f docker-compose.yml
+
       - name: Setup Docker Buildx
         uses: docker/setup-buildx-action@v3
 
       - name: Build Docker images
-        run: docker compose build        
+        run: docker compose -f docker-compose.yml build       
