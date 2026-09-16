@@ -79,7 +79,7 @@ const handleSubmit = async (
     if (
       editSubModule.fulfilled.match(result)
     ) {
-      navigate("/submodules")
+      navigate("/submodule")
     }
   }
               if (pageLoading) {
@@ -124,7 +124,7 @@ const handleSubmit = async (
                loading={loading}
                onSubmit={handleSubmit}
                onCancel={() =>
-                 navigate("/submodules")
+                 navigate("/submodule")
                }
              />
        

@@ -132,15 +132,15 @@ const PERMISSION = {
 const DEFAULT_PERMISSIONS: SubModulePermission[] = [
   {
     role_id: 1,
-    permission: 7,
+    permission: 0,
   },
   {
     role_id: 2,
-    permission: 6,
+    permission: 0,
   },
   {
     role_id: 3,
-    permission: 4,
+    permission: 0,
   },
   {
     role_id: 4,
@@ -1046,6 +1046,7 @@ const form = useForm({
 
       <CardFooter className="flex justify-end gap-3 border-t pt-6">
         <Button
+         className="cursor-pointer"
           type="button"
           variant="outline"
           onClick={() => {
@@ -1062,6 +1063,7 @@ const form = useForm({
         </Button>
 
         <Button
+         className="cursor-pointer"
           type="submit"
           form="sub-module-form"
           disabled={loading}

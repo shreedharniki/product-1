@@ -34,3 +34,4 @@ pages → screens/routes
 Api  
 module http://localhost:5000/api/v1/modules?page=2&limit=10
 submodule http://localhost:5000/api/v1/sub-modules
+ subscription-plans   http://localhost:5000/api/v1/subscription-plans

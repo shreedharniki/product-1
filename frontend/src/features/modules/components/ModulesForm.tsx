@@ -615,6 +615,7 @@ export default function ModulesForm({
       <CardFooter className="flex justify-end">
         <Field orientation="horizontal">
           <Button
+           className="cursor-pointer"
             type="button"
             variant="outline"
             onClick={() => {
@@ -630,6 +631,7 @@ export default function ModulesForm({
           </Button>
 
           <Button
+           className="cursor-pointer"
             type="submit"
             form="module-form"
             disabled={loading}

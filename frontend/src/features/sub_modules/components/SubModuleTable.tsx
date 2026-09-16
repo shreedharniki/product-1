@@ -330,6 +330,7 @@ console.log(modules)
         <div className="flex items-center gap-1 rounded-md border p-1">
 
           <Button
+           className="cursor-pointer"
             type="button"
             variant={
               view === "list"
@@ -346,6 +347,7 @@ console.log(modules)
           </Button>
 
           <Button
+           className="cursor-pointer"
             type="button"
             variant={
               view === "grid"
@@ -553,7 +555,7 @@ console.log(modules)
 
                             {/* VIEW */}
 
-                            <Button
+                            {/* <Button
                               variant="ghost"
                               size="icon"
                               title="View"
@@ -564,7 +566,7 @@ console.log(modules)
                               >
                                 <Eye className="size-4" />
                               </NavLink>
-                            </Button>
+                            </Button> */}
 
                             {/* EDIT */}
 
@@ -592,8 +594,9 @@ console.log(modules)
                                   variant="ghost"
                                   size="icon"
                                   title="Delete"
+                                  className="cursor-pointer"
                                 >
-                                  <Trash2 className="size-4 text-destructive" />
+                                  <Trash2 className="size-4 text-destructive cursor-pointer" />
                                 </Button>
                               </AlertDialogTrigger>
 
@@ -603,7 +606,7 @@ console.log(modules)
 
                                 <AlertDialogHeader>
 
-                                  <AlertDialogMedia className="bg-destructive/10 text-destructive dark:bg-destructive/20">
+                                  <AlertDialogMedia className="bg-destructive/10 text-destructive dark:bg-destructive/20 ">
                                     <Trash2 className="size-5" />
                                   </AlertDialogMedia>
 
@@ -628,12 +631,14 @@ console.log(modules)
                                 <AlertDialogFooter>
 
                                   <AlertDialogCancel
+                                   className="cursor-pointer"
                                     variant="outline"
                                   >
                                     Cancel
                                   </AlertDialogCancel>
 
                                   <AlertDialogAction
+                                  className="cursor-pointer"
                                     variant="destructive"
                                     onClick={() =>
                                       void handleDelete(
@@ -862,7 +867,7 @@ console.log(modules)
 
                     <div className="mt-5 flex justify-end gap-2 border-t pt-4">
 
-                      <Button
+                      {/* <Button
                         variant="outline"
                         size="sm"
                       
@@ -873,7 +878,7 @@ console.log(modules)
                           <Eye className="mr-2 size-4" />
                           View
                         </NavLink>
-                      </Button>
+                      </Button> */}
 
                       <Button
                         size="sm"

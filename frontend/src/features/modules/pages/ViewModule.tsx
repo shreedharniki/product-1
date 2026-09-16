@@ -184,6 +184,7 @@ export default function ViewModule() {
         <div className="mt-6">
 
           <Button
+           className="cursor-pointer"
             type="button"
             variant="outline"
             onClick={() =>

@@ -61,6 +61,22 @@ const AddSubModule = lazy(
 const EditSubModule = lazy(
   () => import ("@/features/sub_modules/pages/EditSubModule")
   )
+
+  const SubscriptionPlans = lazy(
+    ()=> import ("@/pages/SubscriptionPalns")
+  )
+    const AddSubscriptionPlans = lazy(
+    ()=> import ("@/features/subscription/pages/AddSubscriptionPlans")
+  )
+    const SubscriptionPlansTable = lazy(
+    ()=> import ("@/features/subscription/components/SubscriptionPlansTable")
+  )
+   const EditSubscriptionPlans = lazy(
+    ()=> import ("@/features/subscription/pages/EditSubscriptionPlans")
+  )
+   const ViewSubscriptionPlans = lazy(
+    ()=> import ("@/features/subscription/pages/ViewSubscriptionPlans")
+  )
 function App() {
   return (
     <Suspense fallback={<DashboardSkeleton />}>
@@ -157,6 +173,31 @@ function App() {
             element={<EditSubModule/>}
             />
           </Route>
+
+
+          <Route
+            path="/subscriptionplans"
+            element={<SubscriptionPlans />}
+          >
+           
+           <Route
+              index
+              element={<SubscriptionPlansTable />}
+            />
+             <Route
+              path="add"
+              element={<AddSubscriptionPlans />}
+            />
+            <Route
+              path="/subscriptionplans/edit/:id"
+              element={<EditSubscriptionPlans />}
+            />
+            <Route
+              path="/subscriptionplans/view/:id"
+              element={<ViewSubscriptionPlans />}
+            />
+          </Route>
+
         </Route>
       </Routes>
     </Suspense>
