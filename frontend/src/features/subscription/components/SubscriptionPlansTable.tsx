@@ -1,4 +1,910 @@
 
+// import { useEffect, useState } from "react"
+
+// import {
+//   List,
+//   LayoutGrid,
+//   Pencil,
+//   Eye,
+//   Trash2,
+// } from "lucide-react"
+
+// import {
+//   AlertDialog,
+//   AlertDialogAction,
+//   AlertDialogCancel,
+//   AlertDialogContent,
+//   AlertDialogDescription,
+//   AlertDialogFooter,
+//   AlertDialogHeader,
+//   AlertDialogMedia,
+//   AlertDialogTitle,
+//   AlertDialogTrigger,
+// } from "@/components/ui/alert-dialog"
+
+// import { NavLink } from "react-router-dom"
+
+// import {
+//   useDispatch,
+//   useSelector,
+// } from "react-redux"
+
+// import type { AppDispatch } from "@/app/store"
+
+// import {
+//   Table,
+//   TableHeader,
+//   TableBody,
+//   TableHead,
+//   TableRow,
+//   TableCell,
+// } from "@/components/ui/table"
+
+// import {
+//   Pagination,
+//   PaginationContent,
+//   PaginationItem,
+//   PaginationLink,
+//   PaginationNext,
+//   PaginationPrevious,
+// } from "@/components/ui/pagination"
+
+// import { Button } from "@/components/ui/button"
+
+// import {
+//   selectSubscriptionPlans,
+//   selectSubscriptionPlansLoading,
+//   selectSubscriptionPlansError,
+// } from "../subscriptionPlanSelectors"
+
+// import {
+//   fetchSubscriptionPlans,
+//   deleteSubscriptionPlan,
+// } from "../subscriptionPlanThunks"
+
+// const PAGE_SIZE = 10
+
+// export default function SubscriptionPlansTable() {
+//   const dispatch = useDispatch<AppDispatch>()
+
+//   // const plans = useSelector(
+//   //   selectSubscriptionPlans,
+//   // )
+//   const plans =
+//   useSelector(selectSubscriptionPlans) ?? []
+// console.log(plans)
+//   const loading = useSelector(
+//     selectSubscriptionPlansLoading,
+//   )
+
+//   const error = useSelector(
+//     selectSubscriptionPlansError,
+//   )
+
+//   const [currentPage, setCurrentPage] =
+//     useState(1)
+
+//   const [view, setView] = useState<
+//     "list" | "grid"
+//   >("list")
+
+//   /*
+//    * Since the subscription API returns
+//    * all plans without pagination, pagination
+//    * is handled on the frontend.
+//    */
+//   const total = plans.length
+
+//   const totalPages = Math.max(
+//     1,
+//     Math.ceil(total / PAGE_SIZE),
+//   )
+
+//   const paginatedPlans = plans.slice(
+//     (currentPage - 1) * PAGE_SIZE,
+//     currentPage * PAGE_SIZE,
+//   )
+
+//   /*
+//    * Fetch Subscription Plans
+//    */
+//   useEffect(() => {
+//     void dispatch(fetchSubscriptionPlans())
+//   }, [dispatch])
+
+//   /*
+//    * Make sure current page is valid
+//    * after deleting the last item.
+//    */
+//   useEffect(() => {
+//     if (
+//       currentPage > totalPages &&
+//       currentPage > 1
+//     ) {
+//       setCurrentPage(totalPages)
+//     }
+//   }, [currentPage, totalPages])
+
+//   /*
+//    * Pagination
+//    */
+//   const handlePageChange = (
+//     page: number,
+//   ) => {
+//     if (
+//       page < 1 ||
+//       page > totalPages
+//     ) {
+//       return
+//     }
+
+//     setCurrentPage(page)
+//   }
+
+//   /*
+//    * Delete
+//    */
+//   const handleDelete = async (
+//     id: number,
+//   ) => {
+//     const result = await dispatch(
+//       deleteSubscriptionPlan(id),
+//     )
+
+//     if (
+//       deleteSubscriptionPlan.rejected.match(
+//         result,
+//       )
+//     ) {
+//       console.error(result.payload)
+//       return
+//     }
+
+//     /*
+//      * Refresh list after successful delete.
+//      */
+//     void dispatch(fetchSubscriptionPlans())
+//   }
+
+//   /*
+//    * Loading
+//    */
+//   if (
+//     loading &&
+//     plans.length === 0
+//   ) {
+//     return (
+//       <div className="flex min-h-[300px] items-center justify-center">
+//         <p className="text-sm text-muted-foreground">
+//           Loading subscription plans...
+//         </p>
+//       </div>
+//     )
+//   }
+
+//   /*
+//    * Error
+//    */
+//   if (
+//     error &&
+//     plans.length === 0
+//   ) {
+//     return (
+//       <div className="rounded-md border border-destructive/30 p-6 text-center">
+//         <p className="text-sm text-destructive">
+//           {error}
+//         </p>
+
+//         <Button
+//           className="mt-4"
+//           onClick={() => {
+//             void dispatch(
+//               fetchSubscriptionPlans(),
+//             )
+//           }}
+//         >
+//           Try Again
+//         </Button>
+//       </div>
+//     )
+//   }
+
+//   /*
+//    * Display range
+//    */
+//   const firstItem =
+//     total === 0
+//       ? 0
+//       : (currentPage - 1) *
+//           PAGE_SIZE +
+//         1
+
+//   const lastItem = Math.min(
+//     currentPage * PAGE_SIZE,
+//     total,
+//   )
+
+//   return (
+//     <div className="w-full space-y-4">
+//       {/* ================================================================ */}
+//       {/* HEADER                                                           */}
+//       {/* ================================================================ */}
+
+//       <div className="flex items-center justify-between">
+//         <div>
+//           <NavLink to="/subscriptionplans/add">
+//             <Button className="cursor-pointer">
+//               Add Subscription Plan
+//             </Button>
+//           </NavLink>
+//         </div>
+
+//         {/* List / Grid Toggle */}
+//         <div className="flex items-center gap-1 rounded-md border p-1">
+//           <Button
+//            className="cursor-pointer"
+//             type="button"
+//             variant={
+//               view === "list"
+//                 ? "default"
+//                 : "ghost"
+//             }
+//             size="icon"
+//             onClick={() =>
+//               setView("list")
+//             }
+//             title="List View"
+//           >
+//             <List className="size-4" />
+//           </Button>
+
+//           <Button
+//            className="cursor-pointer"
+//             type="button"
+//             variant={
+//               view === "grid"
+//                 ? "default"
+//                 : "ghost"
+//             }
+//             size="icon"
+//             onClick={() =>
+//               setView("grid")
+//             }
+//             title="Grid View"
+//           >
+//             <LayoutGrid className="size-4" />
+//           </Button>
+//         </div>
+//       </div>
+
+//       {/* ================================================================ */}
+//       {/* LIST VIEW                                                        */}
+//       {/* ================================================================ */}
+
+//       {view === "list" && (
+//         <div className="overflow-hidden rounded-md border">
+//           <Table>
+//             <TableHeader>
+//               <TableRow>
+//                 <TableHead>
+//                   Sl.no
+//                 </TableHead>
+
+//                 <TableHead>
+//                   Plan Name
+//                 </TableHead>
+
+//                 <TableHead>
+//                   Plan Code
+//                 </TableHead>
+
+//                 <TableHead>
+//                   Module ID
+//                 </TableHead>
+
+//                 <TableHead>
+//                   Plan Type
+//                 </TableHead>
+
+//                 <TableHead>
+//                   Quantity
+//                 </TableHead>
+
+//                 <TableHead>
+//                   Duration
+//                 </TableHead>
+
+//                 <TableHead>
+//                   Price
+//                 </TableHead>
+
+//                 <TableHead>
+//                   GST
+//                 </TableHead>
+
+//                 <TableHead>
+//                   Total Price
+//                 </TableHead>
+
+//                 <TableHead>
+//                   AMC Price
+//                 </TableHead>
+
+//                 <TableHead>
+//                   Status
+//                 </TableHead>
+
+//                 <TableHead className="text-right">
+//                   Actions
+//                 </TableHead>
+//               </TableRow>
+//             </TableHeader>
+
+//             <TableBody>
+//               {paginatedPlans.length === 0 ? (
+//                 <TableRow>
+//                   <TableCell
+//                     colSpan={13}
+//                     className="h-24 text-center"
+//                   >
+//                     No subscription plans
+//                     found.
+//                   </TableCell>
+//                 </TableRow>
+//               ) : (
+//                 paginatedPlans.map(
+//                   (plan, index) => (
+//                     <TableRow
+//                       key={plan.id}
+//                     >
+//                       {/* Sl No */}
+//                       <TableCell>
+//                         {(currentPage - 1) *
+//                           PAGE_SIZE +
+//                           index +
+//                           1}
+//                       </TableCell>
+
+//                       {/* Plan Name */}
+//                       <TableCell className="font-medium">
+//                         {plan.plan_name}
+//                       </TableCell>
+
+//                       {/* Plan Code */}
+//                       <TableCell>
+//                         {plan.plan_code}
+//                       </TableCell>
+
+//                       {/* Module ID */}
+//                       <TableCell>
+//                         {plan.module_id}
+//                       </TableCell>
+
+//                       {/* Plan Type */}
+//                       <TableCell className="capitalize">
+//                         {plan.plan_type}
+//                       </TableCell>
+
+//                       {/* Quantity */}
+//                       <TableCell>
+//                         {plan.plan_quantity ??
+//                           "-"}
+//                       </TableCell>
+
+//                       {/* Duration */}
+//                       <TableCell>
+//                         {plan.plan_duration_months ??
+//                           "-"}
+//                         {plan.plan_duration_months
+//                           ? " Months"
+//                           : ""}
+//                       </TableCell>
+
+//                       {/* Price */}
+//                       <TableCell>
+//                         ₹
+//                         {Number(
+//                           plan.plan_price,
+//                         ).toFixed(2)}
+//                       </TableCell>
+
+//                       {/* GST */}
+//                       <TableCell>
+//                         {Number(
+//                           plan.plan_gst_percentage,
+//                         ).toFixed(2)}
+//                         %
+//                       </TableCell>
+
+//                       {/* Total */}
+//                       <TableCell>
+//                         ₹
+//                         {Number(
+//                           plan.plan_total_price,
+//                         ).toFixed(2)}
+//                       </TableCell>
+
+//                       {/* AMC */}
+//                       <TableCell>
+//                         {plan.plan_amc_price ===
+//                         null
+//                           ? "-"
+//                           : `₹${Number(
+//                               plan.plan_amc_price,
+//                             ).toFixed(2)}`}
+//                       </TableCell>
+
+//                       {/* Status */}
+//                       <TableCell>
+//                         <span
+//                           className={
+//                             plan.plan_status ===
+//                             "active"
+//                               ? "rounded-full bg-green-100 px-2.5 py-1 text-xs font-medium text-green-700 capitalize"
+//                               : "rounded-full bg-red-100 px-2.5 py-1 text-xs font-medium text-red-700 capitalize"
+//                           }
+//                         >
+//                           {plan.plan_status}
+//                         </span>
+//                       </TableCell>
+
+//                       {/* Actions */}
+//                       <TableCell>
+//                         <div className="flex justify-end gap-1">
+//                           {/* View */}
+//                           <Button
+//                             variant="ghost"
+//                             size="icon"
+//                             title="View"
+                           
+//                           >
+//                             <NavLink
+//                               to={`/subscriptionplans/view/${plan.id}`}
+//                             >
+//                               <Eye className="size-4" />
+//                             </NavLink>
+//                           </Button>
+
+//                           {/* Edit */}
+//                           <Button
+//                             variant="ghost"
+//                             size="icon"
+//                             title="Edit"
+                           
+//                           >
+//                             <NavLink
+//                               to={`/subscriptionplans/edit/${plan.id}`}
+//                             >
+//                               <Pencil className="size-4" />
+//                             </NavLink>
+//                           </Button>
+
+//                           {/* Delete */}
+//                           <AlertDialog>
+//                             <AlertDialogTrigger
+                           
+//                             >
+//                               <Button
+//                                className="cursor-pointer"
+//                                 variant="ghost"
+//                                 size="icon"
+//                                 title="Delete"
+//                               >
+//                                 <Trash2 className="size-4 text-destructive" />
+//                               </Button>
+//                             </AlertDialogTrigger>
+
+//                             <AlertDialogContent size="sm">
+//                               <AlertDialogHeader>
+//                                 <AlertDialogMedia className="bg-destructive/10 text-destructive dark:bg-destructive/20">
+//                                   <Trash2 className="size-5" />
+//                                 </AlertDialogMedia>
+
+//                                 <AlertDialogTitle>
+//                                   Delete Subscription
+//                                   Plan?
+//                                 </AlertDialogTitle>
+
+//                                 <AlertDialogDescription>
+//                                   Are you sure you
+//                                   want to delete{" "}
+//                                   <span className="font-semibold text-foreground">
+//                                     {
+//                                       plan.plan_name
+//                                     }
+//                                   </span>
+//                                   ? This action
+//                                   cannot be undone.
+//                                 </AlertDialogDescription>
+//                               </AlertDialogHeader>
+
+//                               <AlertDialogFooter>
+//                                 <AlertDialogCancel variant="outline"  className="cursor-pointer">
+//                                   Cancel
+//                                 </AlertDialogCancel>
+
+//                                 <AlertDialogAction
+//                                  className="cursor-pointer"
+//                                   variant="destructive"
+//                                   onClick={() =>
+//                                     void handleDelete(
+//                                       plan.id,
+//                                     )
+//                                   }
+//                                 >
+//                                   Delete
+//                                 </AlertDialogAction>
+//                               </AlertDialogFooter>
+//                             </AlertDialogContent>
+//                           </AlertDialog>
+//                         </div>
+//                       </TableCell>
+//                     </TableRow>
+//                   ),
+//                 )
+//               )}
+//             </TableBody>
+//           </Table>
+//         </div>
+//       )}
+
+//       {/* ================================================================ */}
+//       {/* GRID VIEW                                                        */}
+//       {/* ================================================================ */}
+
+//       {view === "grid" && (
+//         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+//           {paginatedPlans.length === 0 ? (
+//             <div className="col-span-full rounded-md border p-8 text-center">
+//               <p className="text-sm text-muted-foreground">
+//                 No subscription plans
+//                 found.
+//               </p>
+//             </div>
+//           ) : (
+//             paginatedPlans.map(
+//               (plan, index) => (
+//                 <div
+//                   key={plan.id}
+//                   className="rounded-lg border bg-card p-5 shadow-sm transition-shadow hover:shadow-md"
+//                 >
+//                   {/* Card Header */}
+//                   <div className="flex items-start justify-between gap-3">
+//                     <div className="min-w-0">
+//                       <p className="text-xs text-muted-foreground">
+//                         #
+//                         {(currentPage - 1) *
+//                           PAGE_SIZE +
+//                           index +
+//                           1}
+//                       </p>
+
+//                       <h3 className="mt-1 truncate font-semibold">
+//                         {plan.plan_name}
+//                       </h3>
+
+//                       <p className="mt-1 text-sm text-muted-foreground">
+//                         {plan.plan_code}
+//                       </p>
+//                     </div>
+
+//                     <span
+//                       className={
+//                         plan.plan_status ===
+//                         "active"
+//                           ? "shrink-0 rounded-full bg-green-100 px-2.5 py-1 text-xs font-medium text-green-700"
+//                           : "shrink-0 rounded-full bg-red-100 px-2.5 py-1 text-xs font-medium text-red-700"
+//                       }
+//                     >
+//                       {plan.plan_status}
+//                     </span>
+//                   </div>
+
+//                   {/* Main Stats */}
+//                   <div className="mt-4 grid grid-cols-2 gap-3">
+//                     <div className="rounded-md bg-muted/50 p-3">
+//                       <p className="text-xs text-muted-foreground">
+//                         Plan Type
+//                       </p>
+
+//                       <p className="mt-1 text-lg font-semibold capitalize">
+//                         {plan.plan_type}
+//                       </p>
+//                     </div>
+
+//                     <div className="rounded-md bg-muted/50 p-3">
+//                       <p className="text-xs text-muted-foreground">
+//                         Price
+//                       </p>
+
+//                       <p className="mt-1 text-lg font-semibold">
+//                         ₹
+//                         {Number(
+//                           plan.plan_price,
+//                         ).toFixed(2)}
+//                       </p>
+//                     </div>
+//                   </div>
+
+//                   {/* Details */}
+//                   <div className="mt-4 space-y-2 text-sm">
+//                     <div className="flex justify-between gap-3">
+//                       <span className="text-muted-foreground">
+//                         Module ID
+//                       </span>
+
+//                       <span className="font-medium">
+//                         {plan.module_id}
+//                       </span>
+//                     </div>
+
+//                     <div className="flex justify-between gap-3">
+//                       <span className="text-muted-foreground">
+//                         Quantity
+//                       </span>
+
+//                       <span className="font-medium">
+//                         {plan.plan_quantity ??
+//                           "-"}
+//                       </span>
+//                     </div>
+
+//                     <div className="flex justify-between gap-3">
+//                       <span className="text-muted-foreground">
+//                         Duration
+//                       </span>
+
+//                       <span className="font-medium">
+//                         {plan.plan_duration_months ??
+//                           "-"}
+//                         {plan.plan_duration_months
+//                           ? " Months"
+//                           : ""}
+//                       </span>
+//                     </div>
+
+//                     <div className="flex justify-between gap-3">
+//                       <span className="text-muted-foreground">
+//                         GST
+//                       </span>
+
+//                       <span className="font-medium">
+//                         {Number(
+//                           plan.plan_gst_percentage,
+//                         ).toFixed(2)}
+//                         %
+//                       </span>
+//                     </div>
+
+//                     <div className="flex justify-between gap-3">
+//                       <span className="text-muted-foreground">
+//                         Total Price
+//                       </span>
+
+//                       <span className="font-medium">
+//                         ₹
+//                         {Number(
+//                           plan.plan_total_price,
+//                         ).toFixed(2)}
+//                       </span>
+//                     </div>
+
+//                     <div className="flex justify-between gap-3">
+//                       <span className="text-muted-foreground">
+//                         AMC Price
+//                       </span>
+
+//                       <span className="font-medium">
+//                         {plan.plan_amc_price ===
+//                         null
+//                           ? "-"
+//                           : `₹${Number(
+//                               plan.plan_amc_price,
+//                             ).toFixed(2)}`}
+//                       </span>
+//                     </div>
+//                   </div>
+
+//                   {/* Actions */}
+//                   <div className="mt-5 flex justify-end gap-2 border-t pt-4">
+//                     {/* View */}
+//                     <Button
+//                       variant="outline"
+//                       size="sm"
+                     
+//                     >
+//                       <NavLink
+//                         to={`/subscription-plans/view/${plan.id}`}
+//                       >
+//                         <Eye className="mr-2 size-4" />
+//                         View
+//                       </NavLink>
+//                     </Button>
+
+//                     {/* Edit */}
+//                     <Button
+//                       size="sm"
+                      
+//                     >
+//                       <NavLink
+//                         to={`/subscription-plans/edit/${plan.id}`}
+//                       >
+//                         <Pencil className="mr-2 size-4" />
+//                         Edit
+//                       </NavLink>
+//                     </Button>
+
+//                     {/* Delete */}
+//                     <AlertDialog>
+//                       <AlertDialogTrigger
+                       
+//                       >
+//                         <Button
+//                           variant="ghost"
+//                           size="icon"
+//                           title="Delete"
+//                         >
+//                           <Trash2 className="size-4 text-destructive" />
+//                         </Button>
+//                       </AlertDialogTrigger>
+
+//                       <AlertDialogContent size="sm">
+//                         <AlertDialogHeader>
+//                           <AlertDialogMedia className="bg-destructive/10 text-destructive dark:bg-destructive/20">
+//                             <Trash2 className="size-5" />
+//                           </AlertDialogMedia>
+
+//                           <AlertDialogTitle>
+//                             Delete Subscription
+//                             Plan?
+//                           </AlertDialogTitle>
+
+//                           <AlertDialogDescription>
+//                             Are you sure you
+//                             want to delete{" "}
+//                             <span className="font-semibold text-foreground">
+//                               {
+//                                 plan.plan_name
+//                               }
+//                             </span>
+//                             ? This action cannot
+//                             be undone.
+//                           </AlertDialogDescription>
+//                         </AlertDialogHeader>
+
+//                         <AlertDialogFooter>
+//                           <AlertDialogCancel variant="outline">
+//                             Cancel
+//                           </AlertDialogCancel>
+
+//                           <AlertDialogAction
+//                             variant="destructive"
+//                             onClick={() =>
+//                               void handleDelete(
+//                                 plan.id,
+//                               )
+//                             }
+//                           >
+//                             Delete
+//                           </AlertDialogAction>
+//                         </AlertDialogFooter>
+//                       </AlertDialogContent>
+//                     </AlertDialog>
+//                   </div>
+//                 </div>
+//               ),
+//             )
+//           )}
+//         </div>
+//       )}
+
+//       {/* ================================================================ */}
+//       {/* PAGINATION                                                       */}
+//       {/* ================================================================ */}
+
+//       {total > 0 && (
+//         <div className="flex flex-col items-center gap-3 sm:flex-row sm:justify-between">
+//           <div className="text-sm text-muted-foreground">
+//             Showing{" "}
+//             {firstItem}{" "}
+//             to{" "}
+//             {lastItem}{" "}
+//             of{" "}
+//             {total}{" "}
+//             subscription plans
+//           </div>
+
+//           <Pagination className="mx-0 w-auto">
+//             <PaginationContent>
+//               {/* Previous */}
+//               <PaginationItem>
+//                 <PaginationPrevious
+//                   href="#"
+//                   onClick={(event) => {
+//                     event.preventDefault()
+
+//                     if (currentPage > 1) {
+//                       handlePageChange(
+//                         currentPage - 1,
+//                       )
+//                     }
+//                   }}
+//                   className={
+//                     currentPage === 1
+//                       ? "pointer-events-none opacity-50"
+//                       : "cursor-pointer"
+//                   }
+//                 />
+//               </PaginationItem>
+
+//               {/* Pages */}
+//               {Array.from(
+//                 {
+//                   length: totalPages,
+//                 },
+//                 (_, index) => {
+//                   const page =
+//                     index + 1
+
+//                   return (
+//                     <PaginationItem
+//                       key={page}
+//                     >
+//                       <PaginationLink
+//                         href="#"
+//                         isActive={
+//                           currentPage ===
+//                           page
+//                         }
+//                         onClick={(
+//                           event,
+//                         ) => {
+//                           event.preventDefault()
+
+//                           handlePageChange(
+//                             page,
+//                           )
+//                         }}
+//                       >
+//                         {page}
+//                       </PaginationLink>
+//                     </PaginationItem>
+//                   )
+//                 },
+//               )}
+
+//               {/* Next */}
+//               <PaginationItem>
+//                 <PaginationNext
+//                   href="#"
+//                   onClick={(event) => {
+//                     event.preventDefault()
+
+//                     if (
+//                       currentPage <
+//                       totalPages
+//                     ) {
+//                       handlePageChange(
+//                         currentPage + 1,
+//                       )
+//                     }
+//                   }}
+//                   className={
+//                     currentPage ===
+//                     totalPages
+//                       ? "pointer-events-none opacity-50"
+//                       : "cursor-pointer"
+//                   }
+//                 />
+//               </PaginationItem>
+//             </PaginationContent>
+//           </Pagination>
+//         </div>
+//       )}
+//     </div>
+//   )
+// }
+
 import { useEffect, useState } from "react"
 
 import {
@@ -67,12 +973,9 @@ const PAGE_SIZE = 10
 export default function SubscriptionPlansTable() {
   const dispatch = useDispatch<AppDispatch>()
 
-  // const plans = useSelector(
-  //   selectSubscriptionPlans,
-  // )
   const plans =
-  useSelector(selectSubscriptionPlans) ?? []
-console.log(plans)
+    useSelector(selectSubscriptionPlans) ?? []
+
   const loading = useSelector(
     selectSubscriptionPlansLoading,
   )
@@ -89,10 +992,11 @@ console.log(plans)
   >("list")
 
   /*
-   * Since the subscription API returns
-   * all plans without pagination, pagination
-   * is handled on the frontend.
+   * ================================================================
+   * DATA
+   * ================================================================
    */
+
   const total = plans.length
 
   const totalPages = Math.max(
@@ -100,34 +1004,43 @@ console.log(plans)
     Math.ceil(total / PAGE_SIZE),
   )
 
+  /*
+   * Instead of calling setCurrentPage() inside
+   * useEffect when data changes, calculate a safe
+   * page number.
+   *
+   * Example:
+   * currentPage = 3
+   * totalPages = 2
+   *
+   * safeCurrentPage = 2
+   */
+  const safeCurrentPage = Math.min(
+    currentPage,
+    totalPages,
+  )
+
   const paginatedPlans = plans.slice(
-    (currentPage - 1) * PAGE_SIZE,
-    currentPage * PAGE_SIZE,
+    (safeCurrentPage - 1) * PAGE_SIZE,
+    safeCurrentPage * PAGE_SIZE,
   )
 
   /*
-   * Fetch Subscription Plans
+   * ================================================================
+   * FETCH SUBSCRIPTION PLANS
+   * ================================================================
    */
+
   useEffect(() => {
     void dispatch(fetchSubscriptionPlans())
   }, [dispatch])
 
   /*
-   * Make sure current page is valid
-   * after deleting the last item.
+   * ================================================================
+   * PAGINATION
+   * ================================================================
    */
-  useEffect(() => {
-    if (
-      currentPage > totalPages &&
-      currentPage > 1
-    ) {
-      setCurrentPage(totalPages)
-    }
-  }, [currentPage, totalPages])
 
-  /*
-   * Pagination
-   */
   const handlePageChange = (
     page: number,
   ) => {
@@ -142,8 +1055,11 @@ console.log(plans)
   }
 
   /*
-   * Delete
+   * ================================================================
+   * DELETE
+   * ================================================================
    */
+
   const handleDelete = async (
     id: number,
   ) => {
@@ -167,8 +1083,11 @@ console.log(plans)
   }
 
   /*
-   * Loading
+   * ================================================================
+   * LOADING
+   * ================================================================
    */
+
   if (
     loading &&
     plans.length === 0
@@ -183,8 +1102,11 @@ console.log(plans)
   }
 
   /*
-   * Error
+   * ================================================================
+   * ERROR
+   * ================================================================
    */
+
   if (
     error &&
     plans.length === 0
@@ -196,7 +1118,7 @@ console.log(plans)
         </p>
 
         <Button
-          className="mt-4"
+          className="mt-4 cursor-pointer"
           onClick={() => {
             void dispatch(
               fetchSubscriptionPlans(),
@@ -210,25 +1132,34 @@ console.log(plans)
   }
 
   /*
-   * Display range
+   * ================================================================
+   * DISPLAY RANGE
+   * ================================================================
    */
+
   const firstItem =
     total === 0
       ? 0
-      : (currentPage - 1) *
+      : (safeCurrentPage - 1) *
           PAGE_SIZE +
         1
 
   const lastItem = Math.min(
-    currentPage * PAGE_SIZE,
+    safeCurrentPage * PAGE_SIZE,
     total,
   )
 
+  /*
+   * ================================================================
+   * RENDER
+   * ================================================================
+   */
+
   return (
     <div className="w-full space-y-4">
-      {/* ================================================================ */}
-      {/* HEADER                                                           */}
-      {/* ================================================================ */}
+      {/* ============================================================
+          HEADER
+          ============================================================ */}
 
       <div className="flex items-center justify-between">
         <div>
@@ -242,7 +1173,7 @@ console.log(plans)
         {/* List / Grid Toggle */}
         <div className="flex items-center gap-1 rounded-md border p-1">
           <Button
-           className="cursor-pointer"
+            className="cursor-pointer"
             type="button"
             variant={
               view === "list"
@@ -259,7 +1190,7 @@ console.log(plans)
           </Button>
 
           <Button
-           className="cursor-pointer"
+            className="cursor-pointer"
             type="button"
             variant={
               view === "grid"
@@ -277,9 +1208,9 @@ console.log(plans)
         </div>
       </div>
 
-      {/* ================================================================ */}
-      {/* LIST VIEW                                                        */}
-      {/* ================================================================ */}
+      {/* ============================================================
+          LIST VIEW
+          ============================================================ */}
 
       {view === "list" && (
         <div className="overflow-hidden rounded-md border">
@@ -359,7 +1290,7 @@ console.log(plans)
                     >
                       {/* Sl No */}
                       <TableCell>
-                        {(currentPage - 1) *
+                        {(safeCurrentPage - 1) *
                           PAGE_SIZE +
                           index +
                           1}
@@ -452,47 +1383,47 @@ console.log(plans)
                       <TableCell>
                         <div className="flex justify-end gap-1">
                           {/* View */}
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            title="View"
-                           
+                          <NavLink
+                            to={`/subscriptionplans/view/${plan.id}`}
                           >
-                            <NavLink
-                              to={`/subscriptionplans/view/${plan.id}`}
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              title="View"
+                              className="cursor-pointer"
                             >
                               <Eye className="size-4" />
-                            </NavLink>
-                          </Button>
+                            </Button>
+                          </NavLink>
 
                           {/* Edit */}
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            title="Edit"
-                           
+                          <NavLink
+                            to={`/subscriptionplans/edit/${plan.id}`}
                           >
-                            <NavLink
-                              to={`/subscriptionplans/edit/${plan.id}`}
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              title="Edit"
+                              className="cursor-pointer"
                             >
                               <Pencil className="size-4" />
-                            </NavLink>
-                          </Button>
+                            </Button>
+                          </NavLink>
 
                           {/* Delete */}
                           <AlertDialog>
                             <AlertDialogTrigger
-                           
-                            >
-                              <Button
-                               className="cursor-pointer"
-                                variant="ghost"
-                                size="icon"
-                                title="Delete"
-                              >
-                                <Trash2 className="size-4 text-destructive" />
-                              </Button>
-                            </AlertDialogTrigger>
+                              render={
+                                <Button
+                                  className="cursor-pointer"
+                                  variant="ghost"
+                                  size="icon"
+                                  title="Delete"
+                                >
+                                  <Trash2 className="size-4 text-destructive" />
+                                </Button>
+                              }
+                            />
 
                             <AlertDialogContent size="sm">
                               <AlertDialogHeader>
@@ -519,12 +1450,15 @@ console.log(plans)
                               </AlertDialogHeader>
 
                               <AlertDialogFooter>
-                                <AlertDialogCancel variant="outline"  className="cursor-pointer">
+                                <AlertDialogCancel
+                                  variant="outline"
+                                  className="cursor-pointer"
+                                >
                                   Cancel
                                 </AlertDialogCancel>
 
                                 <AlertDialogAction
-                                 className="cursor-pointer"
+                                  className="cursor-pointer"
                                   variant="destructive"
                                   onClick={() =>
                                     void handleDelete(
@@ -548,9 +1482,9 @@ console.log(plans)
         </div>
       )}
 
-      {/* ================================================================ */}
-      {/* GRID VIEW                                                        */}
-      {/* ================================================================ */}
+      {/* ============================================================
+          GRID VIEW
+          ============================================================ */}
 
       {view === "grid" && (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -573,7 +1507,7 @@ console.log(plans)
                     <div className="min-w-0">
                       <p className="text-xs text-muted-foreground">
                         #
-                        {(currentPage - 1) *
+                        {(safeCurrentPage - 1) *
                           PAGE_SIZE +
                           index +
                           1}
@@ -708,45 +1642,46 @@ console.log(plans)
                   {/* Actions */}
                   <div className="mt-5 flex justify-end gap-2 border-t pt-4">
                     {/* View */}
-                    <Button
-                      variant="outline"
-                      size="sm"
-                     
+                    <NavLink
+                      to={`/subscription-plans/view/${plan.id}`}
                     >
-                      <NavLink
-                        to={`/subscription-plans/view/${plan.id}`}
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="cursor-pointer"
                       >
                         <Eye className="mr-2 size-4" />
                         View
-                      </NavLink>
-                    </Button>
+                      </Button>
+                    </NavLink>
 
                     {/* Edit */}
-                    <Button
-                      size="sm"
-                      
+                    <NavLink
+                      to={`/subscription-plans/edit/${plan.id}`}
                     >
-                      <NavLink
-                        to={`/subscription-plans/edit/${plan.id}`}
+                      <Button
+                        size="sm"
+                        className="cursor-pointer"
                       >
                         <Pencil className="mr-2 size-4" />
                         Edit
-                      </NavLink>
-                    </Button>
+                      </Button>
+                    </NavLink>
 
                     {/* Delete */}
                     <AlertDialog>
                       <AlertDialogTrigger
-                       
-                      >
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          title="Delete"
-                        >
-                          <Trash2 className="size-4 text-destructive" />
-                        </Button>
-                      </AlertDialogTrigger>
+                        render={
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            title="Delete"
+                            className="cursor-pointer"
+                          >
+                            <Trash2 className="size-4 text-destructive" />
+                          </Button>
+                        }
+                      />
 
                       <AlertDialogContent size="sm">
                         <AlertDialogHeader>
@@ -773,12 +1708,16 @@ console.log(plans)
                         </AlertDialogHeader>
 
                         <AlertDialogFooter>
-                          <AlertDialogCancel variant="outline">
+                          <AlertDialogCancel
+                            variant="outline"
+                            className="cursor-pointer"
+                          >
                             Cancel
                           </AlertDialogCancel>
 
                           <AlertDialogAction
                             variant="destructive"
+                            className="cursor-pointer"
                             onClick={() =>
                               void handleDelete(
                                 plan.id,
@@ -798,9 +1737,9 @@ console.log(plans)
         </div>
       )}
 
-      {/* ================================================================ */}
-      {/* PAGINATION                                                       */}
-      {/* ================================================================ */}
+      {/* ============================================================
+          PAGINATION
+          ============================================================ */}
 
       {total > 0 && (
         <div className="flex flex-col items-center gap-3 sm:flex-row sm:justify-between">
@@ -823,14 +1762,16 @@ console.log(plans)
                   onClick={(event) => {
                     event.preventDefault()
 
-                    if (currentPage > 1) {
+                    if (
+                      safeCurrentPage > 1
+                    ) {
                       handlePageChange(
-                        currentPage - 1,
+                        safeCurrentPage - 1,
                       )
                     }
                   }}
                   className={
-                    currentPage === 1
+                    safeCurrentPage === 1
                       ? "pointer-events-none opacity-50"
                       : "cursor-pointer"
                   }
@@ -852,8 +1793,9 @@ console.log(plans)
                     >
                       <PaginationLink
                         href="#"
+                        className="cursor-pointer"
                         isActive={
-                          currentPage ===
+                          safeCurrentPage ===
                           page
                         }
                         onClick={(
@@ -881,16 +1823,16 @@ console.log(plans)
                     event.preventDefault()
 
                     if (
-                      currentPage <
+                      safeCurrentPage <
                       totalPages
                     ) {
                       handlePageChange(
-                        currentPage + 1,
+                        safeCurrentPage + 1,
                       )
                     }
                   }}
                   className={
-                    currentPage ===
+                    safeCurrentPage ===
                     totalPages
                       ? "pointer-events-none opacity-50"
                       : "cursor-pointer"
