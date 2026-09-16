@@ -1,5 +1,5 @@
 import  pool  from "../../../config/database"
-import type { PoolConnection, ResultSetHeader, RowDataPacket } from "mysql2/promise"
+// import type { PoolConnection, ResultSetHeader, RowDataPacket } from "mysql2/promise"
 import type {
   CreateSubscriptionPlanPayload,
   SubscriptionPlan,
