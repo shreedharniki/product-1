@@ -402,6 +402,20 @@ import type {
 
 /*
  * ================================================================
+ * MYSQL QUERY VALUE
+ * ================================================================
+ */
+
+type QueryValue =
+  | string
+  | number
+  | boolean
+  | null
+  | Date
+  | Buffer
+
+/*
+ * ================================================================
  * CREATE SUBSCRIPTION PLAN
  * ================================================================
  */
@@ -451,9 +465,10 @@ export const createSubscriptionPlan = async (
     insertId: number
   }
 
-  const plan = await findSubscriptionPlanById(
-    insertResult.insertId,
-  )
+  const plan =
+    await findSubscriptionPlanById(
+      insertResult.insertId,
+    )
 
   if (!plan) {
     throw new Error(
@@ -466,7 +481,7 @@ export const createSubscriptionPlan = async (
 
 /*
  * ================================================================
- * FIND ALL SUBSCRIPTION PLANS
+ * FIND ALL
  * ================================================================
  */
 
@@ -485,7 +500,7 @@ export const findAllSubscriptionPlans =
 
 /*
  * ================================================================
- * FIND SUBSCRIPTION PLAN BY ID
+ * FIND BY ID
  * ================================================================
  */
 
@@ -511,7 +526,7 @@ export const findSubscriptionPlanById = async (
 
 /*
  * ================================================================
- * FIND SUBSCRIPTION PLAN BY CODE
+ * FIND BY CODE
  * ================================================================
  */
 
@@ -538,7 +553,7 @@ export const findSubscriptionPlanByCode =
 
 /*
  * ================================================================
- * UPDATE SUBSCRIPTION PLAN
+ * UPDATE
  * ================================================================
  */
 
@@ -547,13 +562,15 @@ export const updateSubscriptionPlan = async (
   data: UpdateSubscriptionPlanPayload,
 ): Promise<SubscriptionPlan | null> => {
   const fields: string[] = []
-  const values: unknown[] = []
 
   /*
-   * Get the current plan.
-   *
-   * This is required because plan_type may not be included
-   * in a partial update.
+   * IMPORTANT:
+   * Do not use unknown[] here.
+   */
+  const values: QueryValue[] = []
+
+  /*
+   * Get existing plan.
    */
   const currentPlan =
     await findSubscriptionPlanById(id)
@@ -563,12 +580,7 @@ export const updateSubscriptionPlan = async (
   }
 
   /*
-   * Determine the final plan type.
-   *
-   * Example:
-   * Existing = subscription
-   * Update    = perpetual
-   * Final     = perpetual
+   * Determine final plan type.
    */
   const finalPlanType =
     data.plan_type ?? currentPlan.plan_type
@@ -606,14 +618,8 @@ export const updateSubscriptionPlan = async (
 
   /*
    * --------------------------------------------------
-   * PLAN DURATION
+   * DURATION
    * --------------------------------------------------
-   *
-   * Subscription:
-   *   Keep/update duration.
-   *
-   * Perpetual:
-   *   Clear duration.
    */
 
   if (finalPlanType === "subscription") {
@@ -637,7 +643,7 @@ export const updateSubscriptionPlan = async (
 
   /*
    * --------------------------------------------------
-   * COMMON PRICE FIELDS
+   * PRICE
    * --------------------------------------------------
    */
 
@@ -674,14 +680,8 @@ export const updateSubscriptionPlan = async (
 
   /*
    * --------------------------------------------------
-   * AMC FIELDS
+   * AMC
    * --------------------------------------------------
-   *
-   * Perpetual:
-   *   Keep/update AMC information.
-   *
-   * Subscription:
-   *   Clear all AMC information.
    */
 
   if (finalPlanType === "perpetual") {
@@ -738,8 +738,7 @@ export const updateSubscriptionPlan = async (
     }
   } else {
     /*
-     * Subscription plans should not retain
-     * AMC data.
+     * Subscription plans do not use AMC.
      */
 
     fields.push(
@@ -780,10 +779,6 @@ export const updateSubscriptionPlan = async (
     return currentPlan
   }
 
-  /*
-   * Update timestamp.
-   */
-
   fields.push(
     "updated_at = CURRENT_TIMESTAMP",
   )
@@ -804,7 +799,7 @@ export const updateSubscriptionPlan = async (
 
 /*
  * ================================================================
- * DELETE SUBSCRIPTION PLAN
+ * DELETE
  * ================================================================
  */
 

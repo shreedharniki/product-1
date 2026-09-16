@@ -62,7 +62,6 @@
 //   plan_status?: PlanStatus;
 // }
 
-
 export type PlanType =
   | "subscription"
   | "perpetual"
@@ -71,9 +70,15 @@ export type PlanStatus =
   | "active"
   | "inactive"
 
+/*
+ * ================================================================
+ * SUBSCRIPTION PLAN
+ * ================================================================
+ */
+
 export interface SubscriptionPlan {
   id: number
-  module_id: number
+  module_id: number | null
 
   plan_name: string
   plan_code: string
@@ -94,8 +99,8 @@ export interface SubscriptionPlan {
 
   plan_status: PlanStatus
 
-  created_at?: string
-  updated_at?: string
+  created_at?: string | Date
+  updated_at?: string | Date
 
   message?: string
 }
@@ -107,7 +112,7 @@ export interface SubscriptionPlan {
  */
 
 export interface CreateSubscriptionPlanPayload {
-  module_id: number
+  module_id: number | null
 
   plan_name: string
   plan_code: string
@@ -136,7 +141,7 @@ export interface CreateSubscriptionPlanPayload {
  */
 
 export interface UpdateSubscriptionPlanPayload {
-  module_id?: number
+  module_id?: number | null
 
   plan_name?: string
   plan_code?: string
