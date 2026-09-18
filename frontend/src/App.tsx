@@ -51,8 +51,8 @@ const SubModules = lazy(
 )
 
 
-const SubModuleTable = lazy(
-  () => import("@/features/sub_modules/components/SubModuleTable")
+const SubModule = lazy(
+  () => import("@/features/sub_modules/pages/SubModule")
 )
 
 const AddSubModule = lazy(
@@ -68,14 +68,30 @@ const EditSubModule = lazy(
     const AddSubscriptionPlans = lazy(
     ()=> import ("@/features/subscription/pages/AddSubscriptionPlans")
   )
-    const SubscriptionPlansTable = lazy(
-    ()=> import ("@/features/subscription/components/SubscriptionPlansTable")
+    const SubscriptionPlan = lazy(
+    ()=> import ("@/features/subscription/pages/SubscriptionPlans")
   )
    const EditSubscriptionPlans = lazy(
     ()=> import ("@/features/subscription/pages/EditSubscriptionPlans")
   )
    const ViewSubscriptionPlans = lazy(
     ()=> import ("@/features/subscription/pages/ViewSubscriptionPlans")
+  )
+
+  const SubscriptionBundle =lazy(
+    ()=> import ("@/pages/SubscriptionBundle")
+  )
+ const SubscriptionBundles = lazy(
+    ()=> import ("@/features/subscription_bundles/pages/SubscriptionBundles")
+  )
+const AddSubscriptionBundle = lazy(
+    ()=> import ("@/features/subscription_bundles/pages/AddSubscriptionBundle")
+  )
+   const EditSubscriptionBundle = lazy(
+    ()=> import ("@/features/subscription_bundles/pages/EditSubscriptionBundle")
+  )
+   const ViewSubscriptionBundle = lazy(
+    ()=> import ("@/features/subscription_bundles/pages/ViewSubscriptionBundle")
   )
 function App() {
   return (
@@ -162,7 +178,7 @@ function App() {
             {/* /modules/sub */}
             <Route
               index
-              element={<SubModuleTable />}
+              element={<SubModule />}
             />
              <Route
               path="add"
@@ -182,7 +198,7 @@ function App() {
            
            <Route
               index
-              element={<SubscriptionPlansTable />}
+              element={<SubscriptionPlan />}
             />
              <Route
               path="add"
@@ -195,6 +211,27 @@ function App() {
             <Route
               path="/subscriptionplans/view/:id"
               element={<ViewSubscriptionPlans />}
+            />
+          </Route>
+          <Route
+            path="/subscriptionbundles"
+            element={<SubscriptionBundle />}
+          >
+            <Route
+              index
+              element={<SubscriptionBundles />}
+            />
+            <Route
+            path="add"
+            element={<AddSubscriptionBundle/>}
+           />
+           <Route
+              path="/subscriptionbundles/edit/:id"
+              element={<EditSubscriptionBundle />}
+            />
+            <Route
+              path="/subscriptionbundles/view/:id"
+              element={<ViewSubscriptionBundle />}
             />
           </Route>
 

@@ -1,6 +1,10 @@
-import SubscriptionPlansTable from "../components/SubscriptionPlansTable"
 
-export default function SubscriptionPlans() {
+
+
+
+import SubscriptionBundlesTable from "../components/SubscriptionBundlesTable"
+
+export default function SubscriptionBundles() {
   return (
     <div className="w-full space-y-6">
 
@@ -14,7 +18,7 @@ export default function SubscriptionPlans() {
         </p>
       </div> */}
 
-      <SubscriptionPlansTable />
+      <SubscriptionBundlesTable />
 
     </div>
   )

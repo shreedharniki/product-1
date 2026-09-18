@@ -5,12 +5,15 @@ import moduleReducer from "../features/modules/moduleSlice"
 import submoduleReducer from "../features/sub_modules/submoduleSlice"
 
 import subscriptionPlansReducer from "../features/subscription/subscriptionPlanSlice"
+import subscriptionBundlesReducer from "@/features/subscription_bundles/subscriptionBundleSlice"
 export const store = configureStore({
   reducer: {
     // organizations: organizationReducer,
     modules: moduleReducer,
     submodules: submoduleReducer,
    subscriptionPlans: subscriptionPlansReducer,
+  subscriptionBundles: subscriptionBundlesReducer,
+   
   },
 })
 

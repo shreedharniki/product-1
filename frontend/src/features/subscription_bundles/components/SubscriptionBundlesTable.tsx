@@ -1,3 +1,13 @@
+// export default function SbscriptionBundlesTable(){
+
+//   return(
+//     <>
+// table
+
+//     </>
+//   )
+// }
+
 
 import { useEffect, useState } from "react"
 
@@ -52,30 +62,30 @@ import {
 import { Button } from "@/components/ui/button"
 
 import {
-  selectSubscriptionPlans,
-  selectSubscriptionPlansLoading,
-  selectSubscriptionPlansError,
-} from "../subscriptionPlanSelectors"
+  selectSubscriptionBundles,
+  selectSubscriptionBundleLoading,
+  selectSubscriptionBundleError,
+} from "../subscriptionBundleSelectors"
 
 import {
-  fetchSubscriptionPlans,
-  deleteSubscriptionPlan,
-} from "../subscriptionPlanThunks"
+  fetchSubscriptionBundles,
+  removeSubscriptionBundle,
+} from "../subscriptionBundleThunks"
 
 const PAGE_SIZE = 10
 
-export default function SubscriptionPlansTable() {
+export default function SubscriptionBundlesTable() {
   const dispatch = useDispatch<AppDispatch>()
 
-  const plans =
-    useSelector(selectSubscriptionPlans) ?? []
+  const bundles =
+    useSelector(selectSubscriptionBundles) ?? []
 
   const loading = useSelector(
-    selectSubscriptionPlansLoading,
+    selectSubscriptionBundleLoading,
   )
 
   const error = useSelector(
-    selectSubscriptionPlansError,
+    selectSubscriptionBundleError,
   )
 
   const [currentPage, setCurrentPage] =
@@ -91,42 +101,35 @@ export default function SubscriptionPlansTable() {
    * ================================================================
    */
 
-  const total = plans.length
+  const total = bundles.length
 
   const totalPages = Math.max(
     1,
     Math.ceil(total / PAGE_SIZE),
   )
 
-  /*
-   * Instead of calling setCurrentPage() inside
-   * useEffect when data changes, calculate a safe
-   * page number.
-   *
-   * Example:
-   * currentPage = 3
-   * totalPages = 2
-   *
-   * safeCurrentPage = 2
-   */
   const safeCurrentPage = Math.min(
     currentPage,
     totalPages,
   )
 
-  const paginatedPlans = plans.slice(
-    (safeCurrentPage - 1) * PAGE_SIZE,
-    safeCurrentPage * PAGE_SIZE,
-  )
+  const paginatedBundles =
+    bundles.slice(
+      (safeCurrentPage - 1) *
+        PAGE_SIZE,
+      safeCurrentPage * PAGE_SIZE,
+    )
 
   /*
    * ================================================================
-   * FETCH SUBSCRIPTION PLANS
+   * FETCH SUBSCRIPTION BUNDLES
    * ================================================================
    */
 
   useEffect(() => {
-    void dispatch(fetchSubscriptionPlans())
+    void dispatch(
+      fetchSubscriptionBundles(),
+    )
   }, [dispatch])
 
   /*
@@ -158,11 +161,11 @@ export default function SubscriptionPlansTable() {
     id: number,
   ) => {
     const result = await dispatch(
-      deleteSubscriptionPlan(id),
+      removeSubscriptionBundle(id),
     )
 
     if (
-      deleteSubscriptionPlan.rejected.match(
+      removeSubscriptionBundle.rejected.match(
         result,
       )
     ) {
@@ -170,10 +173,9 @@ export default function SubscriptionPlansTable() {
       return
     }
 
-    /*
-     * Refresh list after successful delete.
-     */
-    void dispatch(fetchSubscriptionPlans())
+    void dispatch(
+      fetchSubscriptionBundles(),
+    )
   }
 
   /*
@@ -184,12 +186,12 @@ export default function SubscriptionPlansTable() {
 
   if (
     loading &&
-    plans.length === 0
+    bundles.length === 0
   ) {
     return (
       <div className="flex min-h-[300px] items-center justify-center">
         <p className="text-sm text-muted-foreground">
-          Loading subscription plans...
+          Loading subscription bundles...
         </p>
       </div>
     )
@@ -203,7 +205,7 @@ export default function SubscriptionPlansTable() {
 
   if (
     error &&
-    plans.length === 0
+    bundles.length === 0
   ) {
     return (
       <div className="rounded-md border border-destructive/30 p-6 text-center">
@@ -215,7 +217,7 @@ export default function SubscriptionPlansTable() {
           className="mt-4 cursor-pointer"
           onClick={() => {
             void dispatch(
-              fetchSubscriptionPlans(),
+              fetchSubscriptionBundles(),
             )
           }}
         >
@@ -257,14 +259,15 @@ export default function SubscriptionPlansTable() {
 
       <div className="flex items-center justify-between">
         <div>
-          <NavLink to="/subscriptionplans/add">
+          <NavLink to="/subscriptionbundles/add">
             <Button className="cursor-pointer">
-              Add Subscription Plan
+              Add Subscription Bundle
             </Button>
           </NavLink>
         </div>
 
         {/* List / Grid Toggle */}
+
         <div className="flex items-center gap-1 rounded-md border p-1">
           <Button
             className="cursor-pointer"
@@ -316,23 +319,15 @@ export default function SubscriptionPlansTable() {
                 </TableHead>
 
                 <TableHead>
-                  Plan Name
+                  Bundle Name
                 </TableHead>
 
                 <TableHead>
-                  Plan Code
+                  Bundle Code
                 </TableHead>
 
                 <TableHead>
-                  Module ID
-                </TableHead>
-
-                <TableHead>
-                  Plan Type
-                </TableHead>
-
-                <TableHead>
-                  Quantity
+                  Bundle Type
                 </TableHead>
 
                 <TableHead>
@@ -356,6 +351,14 @@ export default function SubscriptionPlansTable() {
                 </TableHead>
 
                 <TableHead>
+                  AMC Duration
+                </TableHead>
+
+                <TableHead>
+                  Plans
+                </TableHead>
+
+                <TableHead>
                   Status
                 </TableHead>
 
@@ -366,119 +369,147 @@ export default function SubscriptionPlansTable() {
             </TableHeader>
 
             <TableBody>
-              {paginatedPlans.length === 0 ? (
+              {paginatedBundles.length ===
+              0 ? (
                 <TableRow>
                   <TableCell
                     colSpan={13}
                     className="h-24 text-center"
                   >
-                    No subscription plans
+                    No subscription bundles
                     found.
                   </TableCell>
                 </TableRow>
               ) : (
-                paginatedPlans.map(
-                  (plan, index) => (
+                paginatedBundles.map(
+                  (bundle, index) => (
                     <TableRow
-                      key={plan.id}
+                      key={bundle.id}
                     >
                       {/* Sl No */}
+
                       <TableCell>
-                        {(safeCurrentPage - 1) *
+                        {(safeCurrentPage -
+                          1) *
                           PAGE_SIZE +
                           index +
                           1}
                       </TableCell>
 
-                      {/* Plan Name */}
+                      {/* Bundle Name */}
+
                       <TableCell className="font-medium">
-                        {plan.plan_name}
+                        {
+                          bundle.bundle_name
+                        }
                       </TableCell>
 
-                      {/* Plan Code */}
+                      {/* Bundle Code */}
+
                       <TableCell>
-                        {plan.plan_code}
+                        {
+                          bundle.bundle_code
+                        }
                       </TableCell>
 
-                      {/* Module ID */}
-                      <TableCell>
-                        {plan.module_id}
-                      </TableCell>
+                      {/* Bundle Type */}
 
-                      {/* Plan Type */}
                       <TableCell className="capitalize">
-                        {plan.plan_type}
-                      </TableCell>
-
-                      {/* Quantity */}
-                      <TableCell>
-                        {plan.plan_quantity ??
-                          "-"}
+                        {
+                          bundle.bundle_type
+                        }
                       </TableCell>
 
                       {/* Duration */}
+
                       <TableCell>
-                        {plan.plan_duration_months ??
+                        {bundle.bundle_duration_months ??
                           "-"}
-                        {plan.plan_duration_months
+                        {bundle.bundle_duration_months
                           ? " Months"
                           : ""}
                       </TableCell>
 
                       {/* Price */}
+
                       <TableCell>
                         ₹
                         {Number(
-                          plan.plan_price,
+                          bundle.bundle_price,
                         ).toFixed(2)}
                       </TableCell>
 
                       {/* GST */}
+
                       <TableCell>
                         {Number(
-                          plan.plan_gst_percentage,
+                          bundle.bundle_gst_percentage,
                         ).toFixed(2)}
                         %
                       </TableCell>
 
-                      {/* Total */}
+                      {/* Total Price */}
+
                       <TableCell>
                         ₹
                         {Number(
-                          plan.plan_total_price,
+                          bundle.bundle_total_price,
                         ).toFixed(2)}
                       </TableCell>
 
-                      {/* AMC */}
+                      {/* AMC Price */}
+
                       <TableCell>
-                        {plan.plan_amc_price ===
+                        {bundle.bundle_amc_price ===
                         null
                           ? "-"
                           : `₹${Number(
-                              plan.plan_amc_price,
+                              bundle.bundle_amc_price,
                             ).toFixed(2)}`}
                       </TableCell>
 
+                      {/* AMC Duration */}
+
+                      <TableCell>
+                        {bundle.bundle_amc_duration_months ??
+                          "-"}
+                        {bundle.bundle_amc_duration_months
+                          ? " Months"
+                          : ""}
+                      </TableCell>
+
+                      {/* Plans */}
+
+                      <TableCell>
+                        {bundle.plan_ids?.length ??
+                          0}
+                      </TableCell>
+
                       {/* Status */}
+
                       <TableCell>
                         <span
                           className={
-                            plan.plan_status ===
+                            bundle.bundle_status ===
                             "active"
                               ? "rounded-full bg-green-100 px-2.5 py-1 text-xs font-medium text-green-700 capitalize"
                               : "rounded-full bg-red-100 px-2.5 py-1 text-xs font-medium text-red-700 capitalize"
                           }
                         >
-                          {plan.plan_status}
+                          {
+                            bundle.bundle_status
+                          }
                         </span>
                       </TableCell>
 
                       {/* Actions */}
+
                       <TableCell>
                         <div className="flex justify-end gap-1">
                           {/* View */}
+
                           <NavLink
-                            to={`/subscriptionplans/view/${plan.id}`}
+                            to={`/subscriptionbundles/view/${bundle.id}`}
                           >
                             <Button
                               variant="ghost"
@@ -491,8 +522,9 @@ export default function SubscriptionPlansTable() {
                           </NavLink>
 
                           {/* Edit */}
+
                           <NavLink
-                            to={`/subscriptionplans/edit/${plan.id}`}
+                            to={`/subscriptionbundles/edit/${bundle.id}`}
                           >
                             <Button
                               variant="ghost"
@@ -505,6 +537,7 @@ export default function SubscriptionPlansTable() {
                           </NavLink>
 
                           {/* Delete */}
+
                           <AlertDialog>
                             <AlertDialogTrigger
                               render={
@@ -527,7 +560,7 @@ export default function SubscriptionPlansTable() {
 
                                 <AlertDialogTitle>
                                   Delete Subscription
-                                  Plan?
+                                  Bundle?
                                 </AlertDialogTitle>
 
                                 <AlertDialogDescription>
@@ -535,7 +568,7 @@ export default function SubscriptionPlansTable() {
                                   want to delete{" "}
                                   <span className="font-semibold text-foreground">
                                     {
-                                      plan.plan_name
+                                      bundle.bundle_name
                                     }
                                   </span>
                                   ? This action
@@ -556,7 +589,7 @@ export default function SubscriptionPlansTable() {
                                   variant="destructive"
                                   onClick={() =>
                                     void handleDelete(
-                                      plan.id,
+                                      bundle.id,
                                     )
                                   }
                                 >
@@ -582,61 +615,73 @@ export default function SubscriptionPlansTable() {
 
       {view === "grid" && (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {paginatedPlans.length === 0 ? (
+          {paginatedBundles.length ===
+          0 ? (
             <div className="col-span-full rounded-md border p-8 text-center">
               <p className="text-sm text-muted-foreground">
-                No subscription plans
+                No subscription bundles
                 found.
               </p>
             </div>
           ) : (
-            paginatedPlans.map(
-              (plan, index) => (
+            paginatedBundles.map(
+              (bundle, index) => (
                 <div
-                  key={plan.id}
+                  key={bundle.id}
                   className="rounded-lg border bg-card p-5 shadow-sm transition-shadow hover:shadow-md"
                 >
                   {/* Card Header */}
+
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
                       <p className="text-xs text-muted-foreground">
                         #
-                        {(safeCurrentPage - 1) *
+                        {(safeCurrentPage -
+                          1) *
                           PAGE_SIZE +
                           index +
                           1}
                       </p>
 
                       <h3 className="mt-1 truncate font-semibold">
-                        {plan.plan_name}
+                        {
+                          bundle.bundle_name
+                        }
                       </h3>
 
                       <p className="mt-1 text-sm text-muted-foreground">
-                        {plan.plan_code}
+                        {
+                          bundle.bundle_code
+                        }
                       </p>
                     </div>
 
                     <span
                       className={
-                        plan.plan_status ===
+                        bundle.bundle_status ===
                         "active"
                           ? "shrink-0 rounded-full bg-green-100 px-2.5 py-1 text-xs font-medium text-green-700"
                           : "shrink-0 rounded-full bg-red-100 px-2.5 py-1 text-xs font-medium text-red-700"
                       }
                     >
-                      {plan.plan_status}
+                      {
+                        bundle.bundle_status
+                      }
                     </span>
                   </div>
 
                   {/* Main Stats */}
+
                   <div className="mt-4 grid grid-cols-2 gap-3">
                     <div className="rounded-md bg-muted/50 p-3">
                       <p className="text-xs text-muted-foreground">
-                        Plan Type
+                        Bundle Type
                       </p>
 
                       <p className="mt-1 text-lg font-semibold capitalize">
-                        {plan.plan_type}
+                        {
+                          bundle.bundle_type
+                        }
                       </p>
                     </div>
 
@@ -648,44 +693,24 @@ export default function SubscriptionPlansTable() {
                       <p className="mt-1 text-lg font-semibold">
                         ₹
                         {Number(
-                          plan.plan_price,
+                          bundle.bundle_price,
                         ).toFixed(2)}
                       </p>
                     </div>
                   </div>
 
                   {/* Details */}
+
                   <div className="mt-4 space-y-2 text-sm">
-                    <div className="flex justify-between gap-3">
-                      <span className="text-muted-foreground">
-                        Module ID
-                      </span>
-
-                      <span className="font-medium">
-                        {plan.module_id}
-                      </span>
-                    </div>
-
-                    <div className="flex justify-between gap-3">
-                      <span className="text-muted-foreground">
-                        Quantity
-                      </span>
-
-                      <span className="font-medium">
-                        {plan.plan_quantity ??
-                          "-"}
-                      </span>
-                    </div>
-
                     <div className="flex justify-between gap-3">
                       <span className="text-muted-foreground">
                         Duration
                       </span>
 
                       <span className="font-medium">
-                        {plan.plan_duration_months ??
+                        {bundle.bundle_duration_months ??
                           "-"}
-                        {plan.plan_duration_months
+                        {bundle.bundle_duration_months
                           ? " Months"
                           : ""}
                       </span>
@@ -698,7 +723,7 @@ export default function SubscriptionPlansTable() {
 
                       <span className="font-medium">
                         {Number(
-                          plan.plan_gst_percentage,
+                          bundle.bundle_gst_percentage,
                         ).toFixed(2)}
                         %
                       </span>
@@ -712,7 +737,7 @@ export default function SubscriptionPlansTable() {
                       <span className="font-medium">
                         ₹
                         {Number(
-                          plan.plan_total_price,
+                          bundle.bundle_total_price,
                         ).toFixed(2)}
                       </span>
                     </div>
@@ -723,21 +748,48 @@ export default function SubscriptionPlansTable() {
                       </span>
 
                       <span className="font-medium">
-                        {plan.plan_amc_price ===
+                        {bundle.bundle_amc_price ===
                         null
                           ? "-"
                           : `₹${Number(
-                              plan.plan_amc_price,
+                              bundle.bundle_amc_price,
                             ).toFixed(2)}`}
+                      </span>
+                    </div>
+
+                    <div className="flex justify-between gap-3">
+                      <span className="text-muted-foreground">
+                        AMC Duration
+                      </span>
+
+                      <span className="font-medium">
+                        {bundle.bundle_amc_duration_months ??
+                          "-"}
+                        {bundle.bundle_amc_duration_months
+                          ? " Months"
+                          : ""}
+                      </span>
+                    </div>
+
+                    <div className="flex justify-between gap-3">
+                      <span className="text-muted-foreground">
+                        Plans
+                      </span>
+
+                      <span className="font-medium">
+                        {bundle.plan_ids?.length ??
+                          0}
                       </span>
                     </div>
                   </div>
 
                   {/* Actions */}
+
                   <div className="mt-5 flex justify-end gap-2 border-t pt-4">
                     {/* View */}
+
                     <NavLink
-                      to={`/subscription-plans/view/${plan.id}`}
+                      to={`/subscription-bundles/view/${bundle.id}`}
                     >
                       <Button
                         variant="outline"
@@ -750,8 +802,9 @@ export default function SubscriptionPlansTable() {
                     </NavLink>
 
                     {/* Edit */}
+
                     <NavLink
-                      to={`/subscription-plans/edit/${plan.id}`}
+                      to={`/subscription-bundles/edit/${bundle.id}`}
                     >
                       <Button
                         size="sm"
@@ -763,6 +816,7 @@ export default function SubscriptionPlansTable() {
                     </NavLink>
 
                     {/* Delete */}
+
                     <AlertDialog>
                       <AlertDialogTrigger
                         render={
@@ -785,7 +839,7 @@ export default function SubscriptionPlansTable() {
 
                           <AlertDialogTitle>
                             Delete Subscription
-                            Plan?
+                            Bundle?
                           </AlertDialogTitle>
 
                           <AlertDialogDescription>
@@ -793,11 +847,11 @@ export default function SubscriptionPlansTable() {
                             want to delete{" "}
                             <span className="font-semibold text-foreground">
                               {
-                                plan.plan_name
+                                bundle.bundle_name
                               }
                             </span>
-                            ? This action cannot
-                            be undone.
+                            ? This action
+                            cannot be undone.
                           </AlertDialogDescription>
                         </AlertDialogHeader>
 
@@ -814,7 +868,7 @@ export default function SubscriptionPlansTable() {
                             className="cursor-pointer"
                             onClick={() =>
                               void handleDelete(
-                                plan.id,
+                                bundle.id,
                               )
                             }
                           >
@@ -844,12 +898,13 @@ export default function SubscriptionPlansTable() {
             {lastItem}{" "}
             of{" "}
             {total}{" "}
-            subscription plans
+            subscription bundles
           </div>
 
           <Pagination className="mx-0 w-auto">
             <PaginationContent>
               {/* Previous */}
+
               <PaginationItem>
                 <PaginationPrevious
                   href="#"
@@ -873,6 +928,7 @@ export default function SubscriptionPlansTable() {
               </PaginationItem>
 
               {/* Pages */}
+
               {Array.from(
                 {
                   length: totalPages,
@@ -910,6 +966,7 @@ export default function SubscriptionPlansTable() {
               )}
 
               {/* Next */}
+
               <PaginationItem>
                 <PaginationNext
                   href="#"

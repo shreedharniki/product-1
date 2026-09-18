@@ -28,9 +28,9 @@ services:
       PORT: 5001
       DB_HOST: mysql 
       DB_PORT: 3306
-      DB_USER: u536137540_TMS_2
-      DB_PASSWORD: Tms@0309
-      DB_NAME: u536137540_TMS_2
+      DB_USER: tms_user
+      DB_PASSWORD: tms_password
+      DB_NAME: tms
      
 
 

@@ -95,6 +95,10 @@ const mainMenu: MenuItem[] = [
         title: "Subscription Plans",
         url: "/subscriptionPlans",
       },
+      {
+        title: "Subscription Bundles",
+        url: "/subscriptionBundles",
+      }
     
     ],
   },
@@ -123,9 +127,9 @@ const mainMenu: MenuItem[] = [
   },
 ]
 
-/* =========================================================
-   TEMPLE MANAGEMENT MENU
-========================================================= */
+// /* =========================================================
+//    TEMPLE MANAGEMENT MENU
+// ========================================================= */
 
 const templeMenu: MenuItem[] = [
   {
