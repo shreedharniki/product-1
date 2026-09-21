@@ -1,10 +1,10 @@
 
-
+import OrganizationForm from "../component/OrganizationForm"
 export default function AddOrganizations() {
   return (
     <>
 
-    add
+  <OrganizationForm />
     </>
 
      
