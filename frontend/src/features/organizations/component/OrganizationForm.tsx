@@ -1,2210 +1,3 @@
-// "use client"
-
-// import {
-//   useMemo,
-//   useState,
-// } from "react"
-
-// import {
-//   useForm,
-// } from "@tanstack/react-form"
-
-// import {
-//   Check,
-//   ChevronLeft,
-//   ChevronRight,
-// } from "lucide-react"
-
-// import {
-//   Button,
-// } from "@/components/ui/button"
-
-// import {
-//   Card,
-//   CardContent,
-//   CardFooter,
-//   CardHeader,
-//   CardTitle,
-// } from "@/components/ui/card"
-
-// import {
-//   Field,
-//   FieldDescription,
-//   FieldError,
-//   FieldGroup,
-//   FieldLabel,
-// } from "@/components/ui/field"
-
-// import {
-//   Input,
-// } from "@/components/ui/input"
-
-
-
-// import {
-//   Select,
-//   SelectContent,
-//   SelectItem,
-//   SelectTrigger,
-//   SelectValue,
-// } from "@/components/ui/select"
-
-// import type {
-//   CreateRegistrationPayload,
-//   RegistrationBundleOption,
-//   RegistrationFormValues,
-//   RegistrationPlanOption,
-// } from "../organizationsTypes"
-
-// import {
-//   validateRegistrationStep,
-// } from "../organizationsValidation"
-
-// /* =========================================================
-//    WIZARD STEP
-
-//    UI has only 3 steps:
-//    1. Organization
-//    2. Subscription
-//    3. Payment
-
-//    Existing validation file still treats payment as step 4.
-// ========================================================= */
-
-// type WizardStep = 1 | 2 | 3
-
-// interface FieldErrors {
-//   [key: string]: string
-// }
-
-// /* =========================================================
-//    TEMPORARY DATA
-
-//    Replace these with Redux/API data later.
-// ========================================================= */
-
-// const plans: RegistrationPlanOption[] = [
-//   {
-//     id: 1,
-//     plan_name: "Basic Plan",
-//     plan_code: "BASIC",
-//     plan_type: "subscription",
-//     price: 4999,
-//     gst_percentage: 18,
-//     duration_months: 12,
-//   },
-//   {
-//     id: 2,
-//     plan_name: "Professional Plan",
-//     plan_code: "PRO",
-//     plan_type: "subscription",
-//     price: 9999,
-//     gst_percentage: 18,
-//     duration_months: 12,
-//   },
-//   {
-//     id: 3,
-//     plan_name: "Enterprise Plan",
-//     plan_code: "ENTERPRISE",
-//     plan_type: "subscription",
-//     price: 19999,
-//     gst_percentage: 18,
-//     duration_months: 12,
-//   },
-// ]
-
-// const bundles: RegistrationBundleOption[] = [
-//   {
-//     id: 1,
-//     bundle_name: "Temple Starter Bundle",
-//     bundle_code: "TSB",
-//     bundle_type: "subscription",
-//     price: 7999,
-//     gst_percentage: 18,
-//     duration_months: 12,
-//   },
-//   {
-//     id: 2,
-//     bundle_name: "Temple Perpetual Bundle",
-//     bundle_code: "TPB",
-//     bundle_type: "perpetual",
-//     price: 29999,
-//     gst_percentage: 18,
-//     duration_months: null,
-//   },
-// ]
-
-// /* =========================================================
-//    COMPONENT
-// ========================================================= */
-
-// export default function OrganizationForm() {
-//   const [
-//     currentStep,
-//     setCurrentStep,
-//   ] = useState<WizardStep>(1)
-
-//   const [
-//     fieldErrors,
-//     setFieldErrors,
-//   ] = useState<FieldErrors>({})
-
-//   const [
-//     submitting,
-//     setSubmitting,
-//   ] = useState(false)
-
-//   /* =========================================================
-//      FORM
-//   ========================================================= */
-
-//   const form = useForm<RegistrationFormValues>({
-//     defaultValues: {
-//       organization_name: "",
-//       contact_person_name: "",
-//       email: "",
-//       phone: "",
-
-//       selection_type: "plan",
-
-//       plan_id: "",
-//       bundle_id: "",
-//       bundle_type: null,
-
-//       price: null,
-//       gst_percentage: null,
-//       total_price: null,
-//       duration_months: null,
-
-//       amc_price: null,
-//       amc_duration_months: null,
-//       amc_gst_percentage: null,
-//       amc_start_date: "",
-//       amc_end_date: "",
-
-//       payment_method: "manual",
-//       payment_reference: "",
-//       payment_date: "",
-//       payment_amount: null,
-//       payment_notes: "",
-//     },
-
-//     onSubmit: async ({ value }) => {
-//       /*
-//        * Payment is UI Step 3,
-//        * but existing validation keeps payment as Step 4.
-//        */
-//       const paymentValidation =
-//         validateRegistrationStep(
-//           4,
-//           value,
-//         )
-
-//       if (!paymentValidation.success) {
-//         setValidationErrors(
-//           paymentValidation.error.issues,
-//         )
-
-//         setCurrentStep(3)
-
-//         return
-//       }
-
-//       const fullPayloadValidation =
-//         validateAllSteps(value)
-
-//       if (!fullPayloadValidation) {
-//         return
-//       }
-
-//       try {
-//         setSubmitting(true)
-
-//         /*
-//          * Calculate final registration pricing
-//          * automatically from selected plan/bundle.
-//          */
-//         const selectedPlan =
-//           plans.find(
-//             (plan) =>
-//               String(plan.id) ===
-//               value.plan_id,
-//           ) ?? null
-
-//         const selectedBundle =
-//           bundles.find(
-//             (bundle) =>
-//               String(bundle.id) ===
-//               value.bundle_id,
-//           ) ?? null
-
-//         const pricingItem =
-//           value.selection_type === "plan"
-//             ? selectedPlan
-//             : selectedBundle
-
-//         const price =
-//           pricingItem?.price ?? 0
-
-//         const gstPercentage =
-//           pricingItem?.gst_percentage ?? 0
-
-//         const totalPrice =
-//           Number(
-//             (
-//               price +
-//               (price * gstPercentage) /
-//                 100
-//             ).toFixed(2),
-//           )
-
-//         const payload: CreateRegistrationPayload =
-//           {
-//             organization: {
-//               organization_name:
-//                 value.organization_name.trim(),
-
-//               contact_person_name:
-//                 value.contact_person_name.trim(),
-
-//               email:
-//                 value.email.trim(),
-
-//               phone:
-//                 value.phone.trim(),
-//             },
-
-//             selection: {
-//               type:
-//                 value.selection_type,
-
-//               plan_id:
-//                 value.selection_type ===
-//                   "plan" &&
-//                 value.plan_id
-//                   ? Number(value.plan_id)
-//                   : null,
-
-//               bundle_id:
-//                 value.selection_type ===
-//                   "bundle" &&
-//                 value.bundle_id
-//                   ? Number(value.bundle_id)
-//                   : null,
-
-//               price,
-
-//               gst_percentage:
-//                 gstPercentage,
-
-//               total_price:
-//                 totalPrice,
-
-//               duration_months:
-//                 pricingItem?.duration_months ??
-//                 null,
-//             },
-
-//             amc: {
-//               price:
-//                 value.selection_type ===
-//                   "bundle" &&
-//                 value.bundle_type ===
-//                   "perpetual"
-//                   ? value.amc_price
-//                   : null,
-
-//               duration_months:
-//                 value.selection_type ===
-//                   "bundle" &&
-//                 value.bundle_type ===
-//                   "perpetual"
-//                   ? value.amc_duration_months
-//                   : null,
-
-//               gst_percentage:
-//                 value.selection_type ===
-//                   "bundle" &&
-//                 value.bundle_type ===
-//                   "perpetual"
-//                   ? value.amc_gst_percentage
-//                   : null,
-
-//               start_date:
-//                 value.selection_type ===
-//                   "bundle" &&
-//                 value.bundle_type ===
-//                   "perpetual"
-//                   ? value.amc_start_date ||
-//                     null
-//                   : null,
-
-//               end_date:
-//                 value.selection_type ===
-//                   "bundle" &&
-//                 value.bundle_type ===
-//                   "perpetual"
-//                   ? value.amc_end_date ||
-//                     null
-//                   : null,
-//             },
-
-//             payment: {
-//               payment_method:
-//                 value.payment_method,
-
-//               payment_reference:
-//                 value.payment_reference.trim(),
-
-//               payment_date:
-//                 value.payment_date,
-
-//               payment_amount:
-//                 Number(
-//                   value.payment_amount ??
-//                     totalPrice,
-//                 ),
-
-//               payment_notes:
-//                 value.payment_notes.trim(),
-//             },
-//           }
-
-//         console.log(
-//           "Registration Payload:",
-//           payload,
-//         )
-
-//         /*
-//          * Replace with Redux/API later:
-//          *
-//          * await dispatch(
-//          *   createRegistration(payload),
-//          * ).unwrap()
-//          */
-
-//         alert(
-//           "Registration submitted successfully",
-//         )
-//       } catch (error) {
-//         console.error(
-//           "Registration failed:",
-//           error,
-//         )
-//       } finally {
-//         setSubmitting(false)
-//       }
-//     },
-//   })
-
-//   /* =========================================================
-//      FORM VALUES
-//   ========================================================= */
-
-//   const values =
-//     form.state.values
-
-//   /* =========================================================
-//      SELECTED PLAN
-//   ========================================================= */
-
-//   const selectedPlan =
-//     useMemo(
-//       () =>
-//         plans.find(
-//           (plan) =>
-//             String(plan.id) ===
-//             values.plan_id,
-//         ) ?? null,
-//       [values.plan_id],
-//     )
-
-//   /* =========================================================
-//      SELECTED BUNDLE
-//   ========================================================= */
-
-//   const selectedBundle =
-//     useMemo(
-//       () =>
-//         bundles.find(
-//           (bundle) =>
-//             String(bundle.id) ===
-//             values.bundle_id,
-//         ) ?? null,
-//       [values.bundle_id],
-//     )
-
-//   /* =========================================================
-//      REGISTRATION PRICING
-
-//      Pricing is calculated automatically.
-//      There is NO pricing step anymore.
-//   ========================================================= */
-
-//   const pricingItem =
-//     values.selection_type === "plan"
-//       ? selectedPlan
-//       : selectedBundle
-
-//   const registrationPrice =
-//     pricingItem?.price ?? 0
-
-//   const registrationGstPercentage =
-//     pricingItem?.gst_percentage ?? 0
-
-//   const gstAmount =
-//     useMemo(() => {
-//       return Number(
-//         (
-//           (registrationPrice *
-//             registrationGstPercentage) /
-//           100
-//         ).toFixed(2),
-//       )
-//     }, [
-//       registrationPrice,
-//       registrationGstPercentage,
-//     ])
-
-//   const registrationTotal =
-//     useMemo(() => {
-//       return Number(
-//         (
-//           registrationPrice +
-//           gstAmount
-//         ).toFixed(2),
-//       )
-//     }, [
-//       registrationPrice,
-//       gstAmount,
-//     ])
-
-//   /* =========================================================
-//      ERROR HELPER
-//   ========================================================= */
-
-//   const getError = (
-//     name: string,
-//   ) => {
-//     return fieldErrors[name]
-//   }
-
-//   const clearFieldError = (
-//     name: string,
-//   ) => {
-//     setFieldErrors(
-//       (previous) => {
-//         if (!previous[name]) {
-//           return previous
-//         }
-
-//         const next = {
-//           ...previous,
-//         }
-
-//         delete next[name]
-
-//         return next
-//       },
-//     )
-//   }
-
-//   /* =========================================================
-//      SET VALIDATION ERRORS
-//   ========================================================= */
-
-//   const setValidationErrors = (
-//     issues: Array<{
-//       path: PropertyKey[]
-//       message: string
-//     }>,
-//   ) => {
-//     const errors: FieldErrors =
-//       {}
-
-//     for (const issue of issues) {
-//       const path =
-//         issue.path
-//           .map(String)
-//           .join(".")
-
-//       if (!errors[path]) {
-//         errors[path] =
-//           issue.message
-//       }
-//     }
-
-//     setFieldErrors(errors)
-//   }
-
-//   /* =========================================================
-//      VALIDATION STEP MAPPING
-
-//      UI:
-//        1 = Organization
-//        2 = Subscription
-//        3 = Payment
-
-//      Existing validation:
-//        1 = Organization
-//        2 = Subscription
-//        4 = Payment
-//   ========================================================= */
-
-//   const getValidationStep = (
-//     step: WizardStep,
-//   ): 1 | 2 | 4 => {
-//     if (step === 3) {
-//       return 4
-//     }
-
-//     return step
-//   }
-
-//   /* =========================================================
-//      VALIDATE ALL STEPS
-//   ========================================================= */
-
-//   const validateAllSteps = (
-//     formValues: RegistrationFormValues,
-//   ) => {
-//     const allErrors: FieldErrors =
-//       {}
-
-//     const steps: WizardStep[] = [
-//       1,
-//       2,
-//       3,
-//     ]
-
-//     for (const step of steps) {
-//       const validationStep =
-//         getValidationStep(step)
-
-//       const result =
-//         validateRegistrationStep(
-//           validationStep,
-//           formValues,
-//         )
-
-//       if (!result.success) {
-//         for (
-//           const issue of
-//             result.error.issues
-//         ) {
-//           const path =
-//             issue.path
-//               .map(String)
-//               .join(".")
-
-//           if (!allErrors[path]) {
-//             allErrors[path] =
-//               issue.message
-//           }
-//         }
-
-//         setCurrentStep(step)
-//         setFieldErrors(
-//           allErrors,
-//         )
-
-//         return false
-//       }
-//     }
-
-//     setFieldErrors({})
-
-//     return true
-//   }
-
-//   /* =========================================================
-//      VALIDATE CURRENT STEP
-//   ========================================================= */
-
-//   const validateStep = (
-//     step: WizardStep,
-//   ) => {
-//     const validationStep =
-//       getValidationStep(step)
-
-//     const result =
-//       validateRegistrationStep(
-//         validationStep,
-//         form.state.values,
-//       )
-
-//     if (result.success) {
-//       setFieldErrors({})
-
-//       return true
-//     }
-
-//     setValidationErrors(
-//       result.error.issues,
-//     )
-
-//     return false
-//   }
-
-//   /* =========================================================
-//      NEXT
-//   ========================================================= */
-
-//   const handleNext = () => {
-//     if (
-//       !validateStep(
-//         currentStep,
-//       )
-//     ) {
-//       return
-//     }
-
-//     if (currentStep < 3) {
-//       /*
-//        * When moving from Subscription
-//        * to Payment, automatically set
-//        * payment amount to registration total.
-//        */
-//       if (
-//         currentStep === 2
-//       ) {
-//         form.setFieldValue(
-//           "payment_amount",
-//           registrationTotal,
-//         )
-//       }
-
-//       setCurrentStep(
-//         (currentStep + 1) as WizardStep,
-//       )
-//     }
-//   }
-
-//   /* =========================================================
-//      PREVIOUS
-//   ========================================================= */
-
-//   const handlePrevious = () => {
-//     if (currentStep > 1) {
-//       setCurrentStep(
-//         (currentStep - 1) as WizardStep,
-//       )
-
-//       setFieldErrors({})
-//     }
-//   }
-
-//   /* =========================================================
-//      SELECTION TYPE CHANGE
-//   ========================================================= */
-
-//   const handleSelectionTypeChange = (
-//     type: "plan" | "bundle",
-//   ) => {
-//     form.setFieldValue(
-//       "selection_type",
-//       type,
-//     )
-
-//     form.setFieldValue(
-//       "plan_id",
-//       "",
-//     )
-
-//     form.setFieldValue(
-//       "bundle_id",
-//       "",
-//     )
-
-//     form.setFieldValue(
-//       "bundle_type",
-//       null,
-//     )
-
-//     form.setFieldValue(
-//       "price",
-//       null,
-//     )
-
-//     form.setFieldValue(
-//       "gst_percentage",
-//       null,
-//     )
-
-//     form.setFieldValue(
-//       "total_price",
-//       null,
-//     )
-
-//     form.setFieldValue(
-//       "duration_months",
-//       null,
-//     )
-
-//     form.setFieldValue(
-//       "amc_price",
-//       null,
-//     )
-
-//     form.setFieldValue(
-//       "amc_duration_months",
-//       null,
-//     )
-
-//     form.setFieldValue(
-//       "amc_gst_percentage",
-//       null,
-//     )
-
-//     form.setFieldValue(
-//       "amc_start_date",
-//       "",
-//     )
-
-//     form.setFieldValue(
-//       "amc_end_date",
-//       "",
-//     )
-
-//     form.setFieldValue(
-//       "payment_amount",
-//       null,
-//     )
-
-//     setFieldErrors({})
-//   }
-
-//   /* =========================================================
-//      PLAN CHANGE
-//   ========================================================= */
-
-//   const handlePlanChange = (
-//     value: string,
-//   ) => {
-//     const plan =
-//       plans.find(
-//         (item) =>
-//           String(item.id) ===
-//           value,
-//       )
-
-//     form.setFieldValue(
-//       "plan_id",
-//       value,
-//     )
-
-//     form.setFieldValue(
-//       "bundle_id",
-//       "",
-//     )
-
-//     form.setFieldValue(
-//       "bundle_type",
-//       null,
-//     )
-
-//     if (!plan) {
-//       form.setFieldValue(
-//         "price",
-//         null,
-//       )
-
-//       form.setFieldValue(
-//         "gst_percentage",
-//         null,
-//       )
-
-//       form.setFieldValue(
-//         "total_price",
-//         null,
-//       )
-
-//       form.setFieldValue(
-//         "duration_months",
-//         null,
-//       )
-
-//       form.setFieldValue(
-//         "payment_amount",
-//         null,
-//       )
-
-//       clearFieldError(
-//         "plan_id",
-//       )
-
-//       return
-//     }
-
-//     const total =
-//       Number(
-//         (
-//           plan.price +
-//           (plan.price *
-//             plan.gst_percentage) /
-//             100
-//         ).toFixed(2),
-//       )
-
-//     form.setFieldValue(
-//       "price",
-//       plan.price,
-//     )
-
-//     form.setFieldValue(
-//       "gst_percentage",
-//       plan.gst_percentage,
-//     )
-
-//     form.setFieldValue(
-//       "total_price",
-//       total,
-//     )
-
-//     form.setFieldValue(
-//       "duration_months",
-//       plan.duration_months,
-//     )
-
-//     form.setFieldValue(
-//       "payment_amount",
-//       total,
-//     )
-
-//     /*
-//      * Clear AMC values because plan
-//      * does not use AMC.
-//      */
-//     form.setFieldValue(
-//       "amc_price",
-//       null,
-//     )
-
-//     form.setFieldValue(
-//       "amc_duration_months",
-//       null,
-//     )
-
-//     form.setFieldValue(
-//       "amc_gst_percentage",
-//       null,
-//     )
-
-//     form.setFieldValue(
-//       "amc_start_date",
-//       "",
-//     )
-
-//     form.setFieldValue(
-//       "amc_end_date",
-//       "",
-//     )
-
-//     clearFieldError(
-//       "plan_id",
-//     )
-//   }
-
-//   /* =========================================================
-//      BUNDLE CHANGE
-//   ========================================================= */
-
-//   const handleBundleChange = (
-//     value: string,
-//   ) => {
-//     const bundle =
-//       bundles.find(
-//         (item) =>
-//           String(item.id) ===
-//           value,
-//       )
-
-//     form.setFieldValue(
-//       "bundle_id",
-//       value,
-//     )
-
-//     form.setFieldValue(
-//       "plan_id",
-//       "",
-//     )
-
-//     if (!bundle) {
-//       form.setFieldValue(
-//         "bundle_type",
-//         null,
-//       )
-
-//       form.setFieldValue(
-//         "price",
-//         null,
-//       )
-
-//       form.setFieldValue(
-//         "gst_percentage",
-//         null,
-//       )
-
-//       form.setFieldValue(
-//         "total_price",
-//         null,
-//       )
-
-//       form.setFieldValue(
-//         "duration_months",
-//         null,
-//       )
-
-//       form.setFieldValue(
-//         "payment_amount",
-//         null,
-//       )
-
-//       clearFieldError(
-//         "bundle_id",
-//       )
-
-//       return
-//     }
-
-//     const total =
-//       Number(
-//         (
-//           bundle.price +
-//           (bundle.price *
-//             bundle.gst_percentage) /
-//             100
-//         ).toFixed(2),
-//       )
-
-//     form.setFieldValue(
-//       "bundle_type",
-//       bundle.bundle_type,
-//     )
-
-//     form.setFieldValue(
-//       "price",
-//       bundle.price,
-//     )
-
-//     form.setFieldValue(
-//       "gst_percentage",
-//       bundle.gst_percentage,
-//     )
-
-//     form.setFieldValue(
-//       "total_price",
-//       total,
-//     )
-
-//     form.setFieldValue(
-//       "payment_amount",
-//       total,
-//     )
-
-//     if (
-//       bundle.bundle_type ===
-//       "subscription"
-//     ) {
-//       form.setFieldValue(
-//         "duration_months",
-//         bundle.duration_months,
-//       )
-
-//       form.setFieldValue(
-//         "amc_price",
-//         null,
-//       )
-
-//       form.setFieldValue(
-//         "amc_duration_months",
-//         null,
-//       )
-
-//       form.setFieldValue(
-//         "amc_gst_percentage",
-//         null,
-//       )
-
-//       form.setFieldValue(
-//         "amc_start_date",
-//         "",
-//       )
-
-//       form.setFieldValue(
-//         "amc_end_date",
-//         "",
-//       )
-//     } else {
-//       /*
-//        * Perpetual bundle:
-//        * no subscription duration.
-//        */
-//       form.setFieldValue(
-//         "duration_months",
-//         null,
-//       )
-
-//       /*
-//        * Default AMC values.
-//        */
-//       form.setFieldValue(
-//         "amc_price",
-//         0,
-//       )
-
-//       form.setFieldValue(
-//         "amc_duration_months",
-//         null,
-//       )
-
-//       form.setFieldValue(
-//         "amc_gst_percentage",
-//         18,
-//       )
-
-//       form.setFieldValue(
-//         "amc_start_date",
-//         "",
-//       )
-
-//       form.setFieldValue(
-//         "amc_end_date",
-//         "",
-//       )
-//     }
-
-//     clearFieldError(
-//       "bundle_id",
-//     )
-//   }
-
-//   /* =========================================================
-//      ERROR MESSAGE COMPONENT
-//   ========================================================= */
-
-//   const ErrorMessage = ({
-//     name,
-//   }: {
-//     name: string
-//   }) => {
-//     const error =
-//       getError(name)
-
-//     if (!error) {
-//       return null
-//     }
-
-//     return (
-//       <FieldError>
-//         {error}
-//       </FieldError>
-//     )
-//   }
-
-//   /* =========================================================
-//      RENDER
-//   ========================================================= */
-
-//   return (
-//     <Card className="w-full">
-//       <CardHeader>
-//         <CardTitle>
-//           Organization Registration
-//         </CardTitle>
-
-//         {/* =====================================================
-//             STEP INDICATOR
-//         ====================================================== */}
-
-//         <div className="flex items-center justify-between pt-4">
-//           {[
-//             {
-//               id: 1,
-//               label: "Organization",
-//             },
-//             {
-//               id: 2,
-//               label: "Subscription",
-//             },
-//             {
-//               id: 3,
-//               label: "Payment",
-//             },
-//           ].map(
-//             (
-//               step,
-//               index,
-//             ) => (
-//               <div
-//                 key={step.id}
-//                 className="flex flex-1 items-center"
-//               >
-//                 <div className="flex flex-col items-center">
-//                   <div
-//                     className={`flex h-9 w-9 items-center justify-center rounded-full border text-sm font-medium ${
-//                       currentStep >=
-//                       step.id
-//                         ? "bg-primary text-primary-foreground"
-//                         : "bg-muted"
-//                     }`}
-//                   >
-//                     {currentStep >
-//                     step.id ? (
-//                       <Check className="h-4 w-4" />
-//                     ) : (
-//                       step.id
-//                     )}
-//                   </div>
-
-//                   <span className="mt-1 text-xs">
-//                     {step.label}
-//                   </span>
-//                 </div>
-
-//                 {index < 2 && (
-//                   <div className="mx-2 h-px flex-1 bg-border" />
-//                 )}
-//               </div>
-//             ),
-//           )}
-//         </div>
-//       </CardHeader>
-
-//       <CardContent>
-//         {/* =====================================================
-//             STEP 1 - ORGANIZATION
-//         ====================================================== */}
-
-//         {currentStep === 1 && (
-//           <FieldGroup>
-//             {/* ORGANIZATION NAME */}
-
-//             <form.Field
-//               name="organization_name"
-//               children={(field) => (
-//                 <Field>
-//                   <FieldLabel>
-//                     Organization Name{" "}
-//                     <span className="text-destructive">
-//                       *
-//                     </span>
-//                   </FieldLabel>
-
-//                   <Input
-//                     value={
-//                       field.state.value
-//                     }
-//                     onChange={(event) => {
-//                       field.handleChange(
-//                         event.target.value,
-//                       )
-
-//                       clearFieldError(
-//                         "organization_name",
-//                       )
-//                     }}
-//                     placeholder="Enter organization name"
-//                   />
-
-//                   <ErrorMessage
-//                     name="organization_name"
-//                   />
-//                 </Field>
-//               )}
-//             />
-
-//             {/* CONTACT PERSON */}
-
-//             <form.Field
-//               name="contact_person_name"
-//               children={(field) => (
-//                 <Field>
-//                   <FieldLabel>
-//                     Contact Person Name{" "}
-//                     <span className="text-destructive">
-//                       *
-//                     </span>
-//                   </FieldLabel>
-
-//                   <Input
-//                     value={
-//                       field.state.value
-//                     }
-//                     onChange={(event) => {
-//                       field.handleChange(
-//                         event.target.value,
-//                       )
-
-//                       clearFieldError(
-//                         "contact_person_name",
-//                       )
-//                     }}
-//                     placeholder="Enter contact person name"
-//                   />
-
-//                   <ErrorMessage
-//                     name="contact_person_name"
-//                   />
-//                 </Field>
-//               )}
-//             />
-
-//             {/* EMAIL */}
-
-//             <form.Field
-//               name="email"
-//               children={(field) => (
-//                 <Field>
-//                   <FieldLabel>
-//                     Email{" "}
-//                     <span className="text-destructive">
-//                       *
-//                     </span>
-//                   </FieldLabel>
-
-//                   <Input
-//                     type="email"
-//                     value={
-//                       field.state.value
-//                     }
-//                     onChange={(event) => {
-//                       field.handleChange(
-//                         event.target.value,
-//                       )
-
-//                       clearFieldError(
-//                         "email",
-//                       )
-//                     }}
-//                     placeholder="organization@example.com"
-//                   />
-
-//                   <FieldDescription>
-//                     This email will be used
-//                     for the organization admin.
-//                   </FieldDescription>
-
-//                   <ErrorMessage
-//                     name="email"
-//                   />
-//                 </Field>
-//               )}
-//             />
-
-//             {/* PHONE */}
-
-//             <form.Field
-//               name="phone"
-//               children={(field) => (
-//                 <Field>
-//                   <FieldLabel>
-//                     Phone{" "}
-//                     <span className="text-destructive">
-//                       *
-//                     </span>
-//                   </FieldLabel>
-
-//                   <Input
-//                     type="tel"
-//                     value={
-//                       field.state.value
-//                     }
-//                     onChange={(event) => {
-//                       field.handleChange(
-//                         event.target.value,
-//                       )
-
-//                       clearFieldError(
-//                         "phone",
-//                       )
-//                     }}
-//                     placeholder="9876543210"
-//                   />
-
-//                   <FieldDescription>
-//                     Enter a valid phone number.
-//                   </FieldDescription>
-
-//                   <ErrorMessage
-//                     name="phone"
-//                   />
-//                 </Field>
-//               )}
-//             />
-
-//             {/* ADMIN INFO */}
-
-//             <div className="rounded-lg border bg-muted/30 p-4">
-//               <p className="font-medium">
-//                 Organization Admin
-//               </p>
-
-//               <p className="mt-1 text-sm text-muted-foreground">
-//                 The contact person will be
-//                 created as the Organization
-//                 Admin after registration.
-//               </p>
-//             </div>
-//           </FieldGroup>
-//         )}
-
-//         {/* =====================================================
-//             STEP 2 - SUBSCRIPTION
-//         ====================================================== */}
-
-//         {currentStep === 2 && (
-//           <FieldGroup>
-//             {/* SELECTION TYPE */}
-
-//             <form.Field
-//               name="selection_type"
-//               children={(field) => (
-//                 <Field>
-//                   <FieldLabel>
-//                     Selection Type{" "}
-//                     <span className="text-destructive">
-//                       *
-//                     </span>
-//                   </FieldLabel>
-
-//                   <Select
-//                     value={
-//                       field.state.value
-//                     }
-//                     onValueChange={(value) => {
-//                       if (
-//                         value === "plan" ||
-//                         value === "bundle"
-//                       ) {
-//                         handleSelectionTypeChange(
-//                           value,
-//                         )
-//                       }
-//                     }}
-//                   >
-//                     <SelectTrigger>
-//                       <SelectValue placeholder="Select type" />
-//                     </SelectTrigger>
-
-//                     <SelectContent>
-//                       <SelectItem value="plan">
-//                         Subscription Plan
-//                       </SelectItem>
-
-//                       <SelectItem value="bundle">
-//                         Subscription Bundle
-//                       </SelectItem>
-//                     </SelectContent>
-//                   </Select>
-
-//                   <ErrorMessage
-//                     name="selection_type"
-//                   />
-//                 </Field>
-//               )}
-//             />
-
-//             {/* =================================================
-//                 PLAN
-//             ================================================== */}
-
-//             {values.selection_type ===
-//               "plan" && (
-//               <form.Field
-//                 name="plan_id"
-//                 children={(field) => (
-//                   <Field>
-//                     <FieldLabel>
-//                       Subscription Plan{" "}
-//                       <span className="text-destructive">
-//                         *
-//                       </span>
-//                     </FieldLabel>
-
-//                     <Select
-//                       value={
-//                         field.state.value
-//                       }
-//                       onValueChange={
-//                         handlePlanChange
-//                       }
-//                     >
-//                       <SelectTrigger>
-//                         <SelectValue placeholder="Select plan" />
-//                       </SelectTrigger>
-
-//                       <SelectContent>
-//                         {plans.map(
-//                           (plan) => (
-//                             <SelectItem
-//                               key={
-//                                 plan.id
-//                               }
-//                               value={String(
-//                                 plan.id,
-//                               )}
-//                             >
-//                               {
-//                                 plan.plan_name
-//                               }{" "}
-//                               — ₹
-//                               {plan.price.toLocaleString(
-//                                 "en-IN",
-//                               )}
-//                             </SelectItem>
-//                           ),
-//                         )}
-//                       </SelectContent>
-//                     </Select>
-
-//                     <ErrorMessage
-//                       name="plan_id"
-//                     />
-//                   </Field>
-//                 )}
-//               />
-//             )}
-
-//             {/* =================================================
-//                 BUNDLE
-//             ================================================== */}
-
-//             {values.selection_type ===
-//               "bundle" && (
-//               <>
-//                 <form.Field
-//                   name="bundle_id"
-//                   children={(field) => (
-//                     <Field>
-//                       <FieldLabel>
-//                         Subscription Bundle{" "}
-//                         <span className="text-destructive">
-//                           *
-//                         </span>
-//                       </FieldLabel>
-
-//                       <Select
-//                         value={
-//                           field.state.value
-//                         }
-//                         onValueChange={
-//                           handleBundleChange
-//                         }
-//                       >
-//                         <SelectTrigger>
-//                           <SelectValue placeholder="Select bundle" />
-//                         </SelectTrigger>
-
-//                         <SelectContent>
-//                           {bundles.map(
-//                             (
-//                               bundle,
-//                             ) => (
-//                               <SelectItem
-//                                 key={
-//                                   bundle.id
-//                                 }
-//                                 value={String(
-//                                   bundle.id,
-//                                 )}
-//                               >
-//                                 {
-//                                   bundle.bundle_name
-//                                 }{" "}
-//                                 — ₹
-//                                 {bundle.price.toLocaleString(
-//                                   "en-IN",
-//                                 )}{" "}
-//                                 (
-//                                 {
-//                                   bundle.bundle_type
-//                                 }
-//                                 )
-//                               </SelectItem>
-//                             ),
-//                           )}
-//                         </SelectContent>
-//                       </Select>
-
-//                       <ErrorMessage
-//                         name="bundle_id"
-//                       />
-//                     </Field>
-//                   )}
-//                 />
-
-//                 {/* BUNDLE DETAILS */}
-
-//                 {selectedBundle && (
-//                   <div className="rounded-lg border bg-muted/30 p-4">
-//                     <div className="grid gap-4 sm:grid-cols-4">
-//                       <div>
-//                         <p className="text-sm text-muted-foreground">
-//                           Bundle
-//                         </p>
-
-//                         <p className="font-medium">
-//                           {
-//                             selectedBundle.bundle_name
-//                           }
-//                         </p>
-//                       </div>
-
-//                       <div>
-//                         <p className="text-sm text-muted-foreground">
-//                           Type
-//                         </p>
-
-//                         <p className="font-medium capitalize">
-//                           {
-//                             selectedBundle.bundle_type
-//                           }
-//                         </p>
-//                       </div>
-
-//                       <div>
-//                         <p className="text-sm text-muted-foreground">
-//                           Price
-//                         </p>
-
-//                         <p className="font-medium">
-//                           ₹
-//                           {selectedBundle.price.toLocaleString(
-//                             "en-IN",
-//                             {
-//                               minimumFractionDigits: 2,
-//                             },
-//                           )}
-//                         </p>
-//                       </div>
-
-//                       <div>
-//                         <p className="text-sm text-muted-foreground">
-//                           Duration
-//                         </p>
-
-//                         <p className="font-medium">
-//                           {selectedBundle.duration_months
-//                             ? `${selectedBundle.duration_months} months`
-//                             : "Perpetual"}
-//                         </p>
-//                       </div>
-//                     </div>
-//                   </div>
-//                 )}
-
-//                 {/* PERPETUAL BUNDLE AMC NOTICE */}
-
-//                 {values.bundle_type ===
-//                   "perpetual" && (
-//                   <div className="rounded-lg border bg-muted/30 p-4">
-//                     <p className="font-medium">
-//                       AMC Required
-//                     </p>
-
-//                     <p className="mt-1 text-sm text-muted-foreground">
-//                       This is a perpetual bundle.
-//                       AMC details will be handled
-//                       automatically according to
-//                       the selected bundle configuration.
-//                     </p>
-//                   </div>
-//                 )}
-//               </>
-//             )}
-
-//             {/* =================================================
-//                 AUTOMATIC PRICING SUMMARY
-//             ================================================== */}
-
-//             {pricingItem && (
-//               <div className="mt-4 rounded-lg border bg-muted/30 p-4">
-//                 <h3 className="mb-4 font-semibold">
-//                   Subscription Summary
-//                 </h3>
-
-//                 <div className="space-y-2 text-sm">
-//                   <div className="flex justify-between">
-//                     <span className="text-muted-foreground">
-//                       Price
-//                     </span>
-
-//                     <span>
-//                       ₹
-//                       {registrationPrice.toLocaleString(
-//                         "en-IN",
-//                         {
-//                           minimumFractionDigits: 2,
-//                         },
-//                       )}
-//                     </span>
-//                   </div>
-
-//                   <div className="flex justify-between">
-//                     <span className="text-muted-foreground">
-//                       GST (
-//                       {
-//                         registrationGstPercentage
-//                       }
-//                       %)
-//                     </span>
-
-//                     <span>
-//                       ₹
-//                       {gstAmount.toLocaleString(
-//                         "en-IN",
-//                         {
-//                           minimumFractionDigits: 2,
-//                         },
-//                       )}
-//                     </span>
-//                   </div>
-
-//                   <div className="flex justify-between border-t pt-2 text-base font-semibold">
-//                     <span>
-//                       Registration Total
-//                     </span>
-
-//                     <span>
-//                       ₹
-//                       {registrationTotal.toLocaleString(
-//                         "en-IN",
-//                         {
-//                           minimumFractionDigits: 2,
-//                         },
-//                       )}
-//                     </span>
-//                   </div>
-//                 </div>
-//               </div>
-//             )}
-//           </FieldGroup>
-//         )}
-
-//         {/* =====================================================
-//             STEP 3 - PAYMENT
-//         ====================================================== */}
-
-//         {currentStep === 3 && (
-//           <FieldGroup>
-//             {/* PAYMENT METHOD */}
-
-//             <form.Field
-//               name="payment_method"
-//               children={(field) => (
-//                 <Field>
-//                   <FieldLabel>
-//                     Payment Method
-//                   </FieldLabel>
-
-//                   <Select
-//                     value={
-//                       field.state.value
-//                     }
-//                     onValueChange={(value) => {
-//                       if (
-//                         value ===
-//                         "manual"
-//                       ) {
-//                         field.handleChange(
-//                           "manual",
-                      
-//                         )
-//                       }
-//                     }}
-//                   >
-//                     <SelectTrigger>
-//                       <SelectValue />
-//                     </SelectTrigger>
-
-//                     <SelectContent>
-//                       <SelectItem value="manual">
-//                         Manual Payment
-//                       </SelectItem>
-//                     </SelectContent>
-//                   </Select>
-//                 </Field>
-//               )}
-//             />
-
-//             {/* PAYMENT REFERENCE */}
-
-//             <form.Field
-//               name="payment_reference"
-//               children={(field) => (
-//                 <Field>
-//                   <FieldLabel>
-//                     Payment Reference{" "}
-//                     <span className="text-destructive">
-//                       *
-//                     </span>
-//                   </FieldLabel>
-
-//                   <Input
-//                     value={
-//                       field.state.value
-//                     }
-//                     onChange={(event) => {
-//                       field.handleChange(
-//                         event.target.value,
-//                       )
-
-//                       clearFieldError(
-//                         "payment_reference",
-//                       )
-//                     }}
-//                     placeholder="Transaction / receipt number"
-//                   />
-
-//                   <ErrorMessage
-//                     name="payment_reference"
-//                   />
-//                 </Field>
-//               )}
-//             />
-
-//             {/* PAYMENT DATE */}
-
-//             <form.Field
-//               name="payment_date"
-//               children={(field) => (
-//                 <Field>
-//                   <FieldLabel>
-//                     Payment Date{" "}
-//                     <span className="text-destructive">
-//                       *
-//                     </span>
-//                   </FieldLabel>
-
-//                   <Input
-//                     type="date"
-//                     value={
-//                       field.state.value
-//                     }
-//                     onChange={(event) => {
-//                       field.handleChange(
-//                         event.target.value,
-//                       )
-
-//                       clearFieldError(
-//                         "payment_date",
-//                       )
-//                     }}
-//                   />
-
-//                   <ErrorMessage
-//                     name="payment_date"
-//                   />
-//                 </Field>
-//               )}
-//             />
-
-//             {/* PAYMENT AMOUNT */}
-
-//             {/* <form.Field
-//               name="payment_amount"
-//               children={(field) => (
-//                 <Field>
-//                   <FieldLabel>
-//                     Payment Amount{" "}
-//                     <span className="text-destructive">
-//                       *
-//                     </span>
-//                   </FieldLabel>
-
-//                   <Input
-//                     type="number"
-//                     min="0.01"
-//                     step="0.01"
-//                     value={
-//                       field.state.value ??
-//                       ""
-//                     }
-//                     onChange={(event) => {
-//                       const value =
-//                         event.target
-//                           .value
-
-//                       field.handleChange(
-//                         value === ""
-//                           ? null
-//                           : Number(value),
-//                       )
-
-//                       clearFieldError(
-//                         "payment_amount",
-//                       )
-//                     }}
-//                   />
-
-//                   <FieldDescription>
-//                     Registration total: ₹
-//                     {registrationTotal.toLocaleString(
-//                       "en-IN",
-//                       {
-//                         minimumFractionDigits: 2,
-//                       },
-//                     )}
-//                   </FieldDescription>
-
-//                   <ErrorMessage
-//                     name="payment_amount"
-//                   />
-//                 </Field>
-//               )}
-//             /> */}
-
-//             {/* PAYMENT NOTES */}
-
-//             {/* <form.Field
-//               name="payment_notes"
-//               children={(field) => (
-//                 <Field>
-//                   <FieldLabel>
-//                     Payment Notes
-//                   </FieldLabel>
-
-//                   <Textarea
-//                     value={
-//                       field.state.value
-//                     }
-//                     onChange={(event) => {
-//                       field.handleChange(
-//                         event.target.value,
-//                       )
-
-//                       clearFieldError(
-//                         "payment_notes",
-//                       )
-//                     }}
-//                     placeholder="Enter payment notes"
-//                     rows={4}
-//                   />
-
-//                   <ErrorMessage
-//                     name="payment_notes"
-//                   />
-//                 </Field>
-//               )}
-//             /> */}
-
-//             {/* =================================================
-//                 FINAL SUMMARY
-//             ================================================== */}
-
-//             {/* <div className="rounded-lg border bg-muted/30 p-4"> */}
-//               {/* <h3 className="mb-4 font-semibold">
-//                 Registration Summary
-//               </h3> */}
-
-//               {/* <div className="space-y-2 text-sm"> */}
-//                 {/* ORGANIZATION */}
-
-//                 {/* <div className="flex justify-between gap-4">
-//                   <span className="text-muted-foreground">
-//                     Organization
-//                   </span>
-
-//                   <span className="text-right font-medium">
-//                     {values.organization_name ||
-//                       "-"}
-//                   </span>
-//                 </div> */}
-
-//                 {/* CONTACT */}
-
-//                 {/* <div className="flex justify-between gap-4">
-//                   <span className="text-muted-foreground">
-//                     Contact Person
-//                   </span>
-
-//                   <span className="text-right font-medium">
-//                     {values.contact_person_name ||
-//                       "-"}
-//                   </span>
-//                 </div> */}
-
-//                 {/* EMAIL */}
-
-//                 {/* <div className="flex justify-between gap-4">
-//                   <span className="text-muted-foreground">
-//                     Email
-//                   </span>
-
-//                   <span className="text-right font-medium">
-//                     {values.email ||
-//                       "-"}
-//                   </span>
-//                 </div> */}
-
-//                 {/* PHONE */}
-
-//                 {/* <div className="flex justify-between gap-4">
-//                   <span className="text-muted-foreground">
-//                     Phone
-//                   </span>
-
-//                   <span className="font-medium">
-//                     {values.phone ||
-//                       "-"}
-//                   </span>
-//                 </div> */}
-
-//                 {/* SELECTION */}
-
-//                 {/* <div className="flex justify-between">
-//                   <span className="text-muted-foreground">
-//                     Selection
-//                   </span>
-
-//                   <span className="font-medium capitalize">
-//                     {
-//                       values.selection_type
-//                     }
-//                   </span>
-//                 </div> */}
-
-//                 {/* PLAN */}
-
-//                 {/* {values.selection_type ===
-//                   "plan" && (
-//                   <div className="flex justify-between">
-//                     <span className="text-muted-foreground">
-//                       Plan
-//                     </span>
-
-//                     <span className="font-medium">
-//                       {
-//                         selectedPlan?.plan_name ??
-//                         "-"
-//                       }
-//                     </span>
-//                   </div>
-//                 )} */}
-
-//                 {/* BUNDLE */}
-
-//                 {/* {values.selection_type ===
-//                   "bundle" && (
-//                   <>
-//                     <div className="flex justify-between">
-//                       <span className="text-muted-foreground">
-//                         Bundle
-//                       </span>
-
-//                       <span className="font-medium">
-//                         {
-//                           selectedBundle?.bundle_name ??
-//                           "-"
-//                         }
-//                       </span>
-//                     </div> */}
-
-//                     {/* <div className="flex justify-between">
-//                       <span className="text-muted-foreground">
-//                         Bundle Type
-//                       </span>
-
-//                       <span className="font-medium capitalize">
-//                         {
-//                           values.bundle_type ??
-//                           "-"
-//                         }
-//                       </span>
-//                     </div> */}
-
-//                     {/* {selectedBundle && (
-//                       <div className="flex justify-between">
-//                         <span className="text-muted-foreground">
-//                           Duration
-//                         </span>
-
-//                         <span className="font-medium">
-//                           {selectedBundle.duration_months
-//                             ? `${selectedBundle.duration_months} months`
-//                             : "Perpetual"}
-//                         </span>
-//                       </div>
-//                     )} */}
-//                   {/* </>
-//                 )} */}
-
-//                 {/* PRICE */}
-
-//                 {/* <div className="flex justify-between">
-//                   <span className="text-muted-foreground">
-//                     Price
-//                   </span>
-
-//                   <span>
-//                     ₹
-//                     {registrationPrice.toLocaleString(
-//                       "en-IN",
-//                       {
-//                         minimumFractionDigits: 2,
-//                       },
-//                     )}
-//                   </span>
-//                 </div> */}
-
-//                 {/* GST */}
-
-//                 {/* <div className="flex justify-between">
-//                   <span className="text-muted-foreground">
-//                     GST
-//                   </span>
-
-//                   <span>
-//                     {
-//                       registrationGstPercentage
-//                     }
-//                     %
-//                   </span>
-//                 </div> */}
-
-//                 {/* GST AMOUNT */}
-// {/* 
-//                 <div className="flex justify-between">
-//                   <span className="text-muted-foreground">
-//                     GST Amount
-//                   </span>
-
-//                   <span>
-//                     ₹
-//                     {gstAmount.toLocaleString(
-//                       "en-IN",
-//                       {
-//                         minimumFractionDigits: 2,
-//                       },
-//                     )}
-//                   </span>
-//                 </div> */}
-
-//                 {/* TOTAL */}
-
-//                 {/* <div className="flex justify-between border-t pt-2 text-base font-semibold">
-//                   <span>
-//                     Registration Total
-//                   </span>
-
-//                   <span>
-//                     ₹
-//                     {registrationTotal.toLocaleString(
-//                       "en-IN",
-//                       {
-//                         minimumFractionDigits: 2,
-//                       },
-//                     )}
-//                   </span>
-//                 </div> */}
-
-//                 {/* PAYMENT */}
-
-//                 {/* <div className="flex justify-between">
-//                   <span className="text-muted-foreground">
-//                     Payment Amount
-//                   </span>
-
-//                   <span className="font-medium">
-//                     ₹
-//                     {Number(
-//                       values.payment_amount ??
-//                         registrationTotal,
-//                     ).toLocaleString(
-//                       "en-IN",
-//                       {
-//                         minimumFractionDigits: 2,
-//                       },
-//                     )}
-//                   </span>
-//                 </div> */}
-//               {/* </div> */}
-//             {/* </div> */}
-//           </FieldGroup>
-//         )}
-//       </CardContent>
-
-//       {/* =====================================================
-//           FOOTER
-//       ====================================================== */}
-
-//       <CardFooter className="flex justify-between">
-//         {/* PREVIOUS */}
-
-//         <Button
-//           type="button"
-//           variant="outline"
-//           onClick={
-//             handlePrevious
-//           }
-//           disabled={
-//             currentStep === 1 ||
-//             submitting
-//           }
-//         >
-//           <ChevronLeft className="mr-2 h-4 w-4" />
-
-//           Previous
-//         </Button>
-
-//         {/* NEXT */}
-
-//         {currentStep < 3 ? (
-//           <Button
-//             type="button"
-//             onClick={
-//               handleNext
-//             }
-//             disabled={
-//               submitting
-//             }
-//           >
-//             Next
-
-//             <ChevronRight className="ml-2 h-4 w-4" />
-//           </Button>
-//         ) : (
-//           /* =================================================
-//              COMPLETE REGISTRATION
-//           ================================================== */
-
-//           <Button
-//             type="button"
-//             disabled={
-//               submitting
-//             }
-//             onClick={() => {
-//               const valid =
-//                 validateAllSteps(
-//                   form.state.values,
-//                 )
-
-//               if (!valid) {
-//                 return
-//               }
-
-//               form.handleSubmit()
-//             }}
-//           >
-//             {submitting
-//               ? "Submitting..."
-//               : "Complete Registration"}
-
-//             {!submitting && (
-//               <Check className="ml-2 h-4 w-4" />
-//             )}
-//           </Button>
-//         )}
-//       </CardFooter>
-//     </Card>
-//   )
-// }
-
-
-
-
-
 "use client"
 
 import {
@@ -2217,9 +10,16 @@ import {
 } from "@tanstack/react-form"
 
 import {
+  useSelector,
+} from "react-redux"
+
+import {
   Check,
+  ChevronsUpDown,
   ChevronLeft,
   ChevronRight,
+  Search,
+  X,
 } from "lucide-react"
 
 import {
@@ -2254,29 +54,32 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 
+import {
+  Checkbox,
+} from "@/components/ui/checkbox"
+
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
+
 import type {
-  CreateRegistrationPayload,
-  RegistrationBundleOption,
-  RegistrationFormValues,
-  RegistrationPlanOption,
+  RootState,
+} from "@/app/store"
+
+import type {
+  CreateOrganizationPayload,
 } from "../organizationsTypes"
 
 import {
+  registrationFormSchema,
   validateRegistrationStep,
+  type RegistrationFormSchema,
 } from "../organizationsValidation"
 
 /* =========================================================
-   WIZARD STEP
-
-   UI:
-   1. Organization
-   2. Subscription
-   3. Payment
-
-   Existing validation:
-   1. Organization
-   2. Subscription
-   4. Payment
+   TYPES
 ========================================================= */
 
 type WizardStep = 1 | 2 | 3
@@ -2285,414 +88,716 @@ interface FieldErrors {
   [key: string]: string
 }
 
-/* =========================================================
-   TEMPORARY DATA
+interface OrganizationFormProps {
+  onSubmit: (
+    data: CreateOrganizationPayload,
+  ) => Promise<void> | void
 
-   Replace with Redux/API data later.
-========================================================= */
+  loading?: boolean
 
-const plans: RegistrationPlanOption[] = [
-  {
-    id: 1,
-    plan_name: "Basic Plan",
-    plan_code: "BASIC",
-    plan_type: "subscription",
-    price: 4999,
-    gst_percentage: 18,
-    duration_months: 12,
-  },
-  {
-    id: 2,
-    plan_name: "Professional Plan",
-    plan_code: "PRO",
-    plan_type: "subscription",
-    price: 9999,
-    gst_percentage: 18,
-    duration_months: 12,
-  },
-  {
-    id: 3,
-    plan_name: "Enterprise Plan",
-    plan_code: "ENTERPRISE",
-    plan_type: "subscription",
-    price: 19999,
-    gst_percentage: 18,
-    duration_months: 12,
-  },
-]
-
-const bundles: RegistrationBundleOption[] = [
-  {
-    id: 1,
-    bundle_name: "Temple Starter Bundle",
-    bundle_code: "TSB",
-    bundle_type: "subscription",
-    price: 7999,
-    gst_percentage: 18,
-    duration_months: 12,
-  },
-  {
-    id: 2,
-    bundle_name: "Temple Perpetual Bundle",
-    bundle_code: "TPB",
-    bundle_type: "perpetual",
-    price: 29999,
-    gst_percentage: 18,
-    duration_months: null,
-  },
-]
+  onCancel: () => void
+}
 
 /* =========================================================
    COMPONENT
 ========================================================= */
 
-export default function OrganizationForm() {
+export default function OrganizationForm({
+  onSubmit,
+  loading = false,
+  onCancel,
+}: OrganizationFormProps) {
+  /* =======================================================
+     WIZARD
+  ======================================================= */
+
   const [
     currentStep,
     setCurrentStep,
   ] = useState<WizardStep>(1)
+
+  /* =======================================================
+     ERRORS
+  ======================================================= */
 
   const [
     fieldErrors,
     setFieldErrors,
   ] = useState<FieldErrors>({})
 
+  /* =======================================================
+     PLAN SEARCH
+  ======================================================= */
+
   const [
-    submitting,
-    setSubmitting,
+    planSearch,
+    setPlanSearch,
+  ] = useState("")
+
+  const [
+    planDropdownOpen,
+    setPlanDropdownOpen,
   ] = useState(false)
 
-  /* =========================================================
+  /* =======================================================
+     BUNDLE SEARCH
+  ======================================================= */
+
+  const [
+    bundleSearch,
+    setBundleSearch,
+  ] = useState("")
+
+  const [
+    bundleDropdownOpen,
+    setBundleDropdownOpen,
+  ] = useState(false)
+
+  /* =======================================================
+     REDUX DATA
+  ======================================================= */
+
+  const plans = useSelector(
+    (state: RootState) =>
+      state.subscriptionPlans.plans,
+  )
+
+  const bundles = useSelector(
+    (state: RootState) =>
+      state.subscriptionBundles.bundles,
+  )
+
+  /* =======================================================
      FORM
-  ========================================================= */
+  ======================================================= */
 
   const form = useForm({
     defaultValues: {
+      /* -----------------------------------------------------
+         ORGANIZATION
+      ----------------------------------------------------- */
+
       organization_name: "",
+
       contact_person_name: "",
+
       email: "",
+
       phone: "",
 
-      selection_type: "plan" as "plan" | "bundle",
+      /* -----------------------------------------------------
+         SELECTION
+      ----------------------------------------------------- */
 
-      plan_id: "",
-      bundle_id: "",
+      selection_type:
+        "plan" as "plan" | "bundle",
+
+      plan_ids: [] as number[],
+
+      bundle_id:
+        null as number | null,
+
       bundle_type:
         null as
           | "subscription"
           | "perpetual"
           | null,
 
-      price: null as number | null,
-      gst_percentage: null as number | null,
-      total_price: null as number | null,
-      duration_months: null as number | null,
-
-      amc_price: null as number | null,
-      amc_duration_months:
-        null as number | null,
-      amc_gst_percentage:
-        null as number | null,
-      amc_start_date: "",
-      amc_end_date: "",
+      /* -----------------------------------------------------
+         PAYMENT
+      ----------------------------------------------------- */
 
       payment_method:
         "manual" as "manual",
+
+      /* -----------------------------------------------------
+         BILLING
+      ----------------------------------------------------- */
+
+      billing_name: "",
+
+      billing_email: "",
+
+      billing_address: "",
+          billing_address2: "",
+
+      billing_city: "",
+
+      billing_state: "",
+
+      billing_country: "India",
+
+      billing_pincode: "",
+
+      /* -----------------------------------------------------
+         PAYMENT DETAILS
+      ----------------------------------------------------- */
+
       payment_reference: "",
+
       payment_date: "",
+
+      start_date: "",
+
       payment_amount:
         null as number | null,
+
       payment_notes: "",
     },
 
-    onSubmit: async ({ value }) => {
-      /*
-       * Payment is UI Step 3,
-       * existing validation uses Step 4.
-       */
-      const paymentValidation =
-        validateRegistrationStep(
-          4,
-          value as RegistrationFormValues,
+    onSubmit: async ({
+      value,
+    }) => {
+      const formValues =
+        value as RegistrationFormSchema
+
+      /* ===================================================
+         FINAL VALIDATION
+      =================================================== */
+
+      const validation =
+        registrationFormSchema.safeParse(
+          formValues,
         )
 
-      if (!paymentValidation.success) {
+      if (!validation.success) {
         setValidationErrors(
-          paymentValidation.error.issues,
+          validation.error.issues,
         )
 
-        setCurrentStep(3)
+        const firstIssue =
+          validation.error.issues[0]
 
-        return
-      }
+        if (firstIssue) {
+          const firstPath =
+            String(
+              firstIssue.path[0] ?? "",
+            )
 
-      const fullPayloadValidation =
-        validateAllSteps(
-          value as RegistrationFormValues,
-        )
+          /* STEP 1 */
 
-      if (!fullPayloadValidation) {
-        return
-      }
-
-      try {
-        setSubmitting(true)
-
-        const formValues =
-          value as RegistrationFormValues
-
-        /*
-         * Find selected plan.
-         */
-        const selectedPlan =
-          plans.find(
-            (plan) =>
-              String(plan.id) ===
-              formValues.plan_id,
-          ) ?? null
-
-        /*
-         * Find selected bundle.
-         */
-        const selectedBundle =
-          bundles.find(
-            (bundle) =>
-              String(bundle.id) ===
-              formValues.bundle_id,
-          ) ?? null
-
-        /*
-         * Determine pricing item.
-         */
-        const pricingItem =
-          formValues.selection_type ===
-          "plan"
-            ? selectedPlan
-            : selectedBundle
-
-        const price =
-          pricingItem?.price ?? 0
-
-        const gstPercentage =
-          pricingItem?.gst_percentage ?? 0
-
-        const totalPrice =
-          Number(
-            (
-              price +
-              (price * gstPercentage) /
-                100
-            ).toFixed(2),
-          )
-
-        const payload: CreateRegistrationPayload =
-          {
-            organization: {
-              organization_name:
-                formValues.organization_name.trim(),
-
-              contact_person_name:
-                formValues.contact_person_name.trim(),
-
-              email:
-                formValues.email.trim(),
-
-              phone:
-                formValues.phone.trim(),
-            },
-
-            selection: {
-              type:
-                formValues.selection_type,
-
-              plan_id:
-                formValues.selection_type ===
-                  "plan" &&
-                formValues.plan_id
-                  ? Number(
-                      formValues.plan_id,
-                    )
-                  : null,
-
-              bundle_id:
-                formValues.selection_type ===
-                  "bundle" &&
-                formValues.bundle_id
-                  ? Number(
-                      formValues.bundle_id,
-                    )
-                  : null,
-
-              price,
-
-              gst_percentage:
-                gstPercentage,
-
-              total_price:
-                totalPrice,
-
-              duration_months:
-                pricingItem?.duration_months ??
-                null,
-            },
-
-            amc: {
-              price:
-                formValues.selection_type ===
-                  "bundle" &&
-                formValues.bundle_type ===
-                  "perpetual"
-                  ? formValues.amc_price
-                  : null,
-
-              duration_months:
-                formValues.selection_type ===
-                  "bundle" &&
-                formValues.bundle_type ===
-                  "perpetual"
-                  ? formValues.amc_duration_months
-                  : null,
-
-              gst_percentage:
-                formValues.selection_type ===
-                  "bundle" &&
-                formValues.bundle_type ===
-                  "perpetual"
-                  ? formValues.amc_gst_percentage
-                  : null,
-
-              start_date:
-                formValues.selection_type ===
-                  "bundle" &&
-                formValues.bundle_type ===
-                  "perpetual"
-                  ? formValues.amc_start_date ||
-                    null
-                  : null,
-
-              end_date:
-                formValues.selection_type ===
-                  "bundle" &&
-                formValues.bundle_type ===
-                  "perpetual"
-                  ? formValues.amc_end_date ||
-                    null
-                  : null,
-            },
-
-            payment: {
-              payment_method:
-                formValues.payment_method,
-
-              payment_reference:
-                formValues.payment_reference.trim(),
-
-              payment_date:
-                formValues.payment_date,
-
-              payment_amount:
-                Number(
-                  formValues.payment_amount ??
-                    totalPrice,
-                ),
-
-              payment_notes:
-                formValues.payment_notes.trim(),
-            },
+          if (
+            [
+              "organization_name",
+              "contact_person_name",
+              "email",
+              "phone",
+            ].includes(firstPath)
+          ) {
+            setCurrentStep(1)
           }
 
-        console.log(
-          "Registration Payload:",
-          payload,
-        )
+          /* STEP 2 */
 
-        /*
-         * Replace with Redux/API later:
-         *
-         * await dispatch(
-         *   createRegistration(payload),
-         * ).unwrap()
-         */
+          else if (
+            [
+              "selection_type",
+              "plan_ids",
+              "bundle_id",
+              "bundle_type",
+            ].includes(firstPath)
+          ) {
+            setCurrentStep(2)
+          }
 
-        alert(
-          "Registration submitted successfully",
-        )
-      } catch (error) {
-        console.error(
-          "Registration failed:",
-          error,
-        )
-      } finally {
-        setSubmitting(false)
+          /* STEP 3 */
+
+          else {
+            setCurrentStep(3)
+          }
+        }
+
+        return
       }
+
+      /* ===================================================
+         SELECTED PLANS
+      =================================================== */
+
+      const selectedPlans =
+        plans.filter(
+          (plan) =>
+            formValues.plan_ids.includes(
+              Number(plan.id),
+            ),
+        )
+
+      /* ===================================================
+         SELECTED BUNDLE
+      =================================================== */
+
+      const selectedBundle =
+        formValues.bundle_id !== null
+          ? bundles.find(
+              (bundle) =>
+                Number(bundle.id) ===
+                Number(
+                  formValues.bundle_id,
+                ),
+            )
+          : undefined
+
+      /* ===================================================
+         PLAN VALIDATION
+      =================================================== */
+
+      if (
+        formValues.selection_type ===
+          "plan" &&
+        selectedPlans.length === 0
+      ) {
+        setFieldErrors({
+          plan_ids:
+            "Please select at least one subscription plan.",
+        })
+
+        setCurrentStep(2)
+
+        return
+      }
+
+      /* ===================================================
+         BUNDLE VALIDATION
+      =================================================== */
+
+      if (
+        formValues.selection_type ===
+          "bundle" &&
+        !selectedBundle
+      ) {
+        setFieldErrors({
+          bundle_id:
+            "Please select one subscription bundle.",
+        })
+
+        setCurrentStep(2)
+
+        return
+      }
+
+      /* ===================================================
+         BUILD ORDER ITEMS
+      =================================================== */
+
+      const orderItems =
+        formValues.selection_type ===
+        "plan"
+          ? selectedPlans.map(
+              (plan) => ({
+                plan_id:
+                  Number(plan.id),
+
+                item_name:
+                  plan.plan_name,
+
+                item_code:
+                  plan.plan_code,
+
+                license_type:
+                  plan.plan_type ===
+                  "perpetual"
+                    ? "perpetual" as const
+                    : "subscription" as const,
+
+                quantity: 1,
+
+                unit_price:
+                  Number(
+                    plan.plan_price ?? 0,
+                  ),
+
+                gst_percentage:
+                  Number(
+                    plan.plan_gst_percentage ??
+                      0,
+                  ),
+
+                ...(formValues.start_date
+                  ? {
+                      start_date:
+                        formValues.start_date,
+                    }
+                  : {}),
+              }),
+            )
+          : [
+              {
+                bundle_id:
+                  Number(
+                    selectedBundle!.id,
+                  ),
+
+                item_name:
+                  selectedBundle!.bundle_name,
+
+                item_code:
+                  selectedBundle!.bundle_code,
+
+                license_type:
+                  selectedBundle!.bundle_type ===
+                  "perpetual"
+                    ? "perpetual" as const
+                    : "subscription" as const,
+
+                quantity: 1,
+
+                unit_price:
+                  Number(
+                    selectedBundle!
+                      .bundle_price ?? 0,
+                  ),
+
+                gst_percentage:
+                  Number(
+                    selectedBundle!
+                      .bundle_gst_percentage ??
+                      0,
+                  ),
+
+                ...(formValues.start_date
+                  ? {
+                      start_date:
+                        formValues.start_date,
+                    }
+                  : {}),
+              },
+            ]
+
+      /* ===================================================
+         BUILD PAYLOAD
+      =================================================== */
+
+      const payload:
+        CreateOrganizationPayload = {
+        /* -------------------------------------------------
+           ORGANIZATION
+        ------------------------------------------------- */
+
+        org_name:
+          formValues.organization_name.trim(),
+
+        user_name:
+          formValues.contact_person_name.trim(),
+
+        org_email:
+          formValues.email.trim(),
+
+        org_phone:
+          formValues.phone.trim(),
+
+        org_country:
+          "india",
+
+        /* -------------------------------------------------
+           ORDER
+        ------------------------------------------------- */
+
+        order: {
+          item_type:
+            formValues.selection_type,
+
+          items:
+            orderItems,
+
+          payment_method:
+            "manual",
+
+          manual_payment_mode:
+            "upi",
+
+          /* -----------------------------------------------
+             BILLING
+          ----------------------------------------------- */
+
+          billing_name:
+            formValues.billing_name.trim(),
+
+          billing_email:
+            formValues.billing_email.trim(),
+
+          billing_address:
+            formValues.billing_address.trim(),
+  billing_address2:
+            formValues.billing_address2.trim(),
+          billing_city:
+            formValues.billing_city.trim(),
+
+          billing_state:
+            formValues.billing_state.trim(),
+
+          billing_country:
+            formValues.billing_country.trim(),
+
+          billing_pincode:
+            formValues.billing_pincode.trim(),
+
+          /* -----------------------------------------------
+             PAYMENT
+          ----------------------------------------------- */
+
+          manual_payment_reference:
+            formValues.payment_reference.trim(),
+
+          manual_payment_date:
+            formValues.payment_date,
+
+          start_date:
+            formValues.start_date,
+
+          note:
+            formValues.payment_notes.trim() ||
+            undefined,
+        },
+      }
+
+      console.log(
+        "Registration Payload:",
+        JSON.stringify(
+          payload,
+          null,
+          2,
+        ),
+      )
+
+      // try {
+      //   setFieldErrors({})
+
+      //   await onSubmit(payload)
+      // } catch (error) {
+      //   console.error(
+      //     "Organization registration failed:",
+      //     error,
+      //   )
+      // }
+
+      try {
+  setFieldErrors({})
+
+  await onSubmit(payload)
+} catch (error: any) {
+  console.error(
+    "Organization registration failed:",
+    error,
+  )
+
+  const message =
+    error?.response?.data?.message ||
+    error?.message ||
+    "Organization registration failed."
+
+  const normalizedMessage =
+    message.toLowerCase()
+
+  const errors: FieldErrors = {}
+
+  if (
+    normalizedMessage.includes("email") &&
+    (
+      normalizedMessage.includes("exist") ||
+      normalizedMessage.includes("already")
+    )
+  ) {
+    errors.email =
+      "This email is already registered."
+  }
+
+  if (
+    normalizedMessage.includes("phone") &&
+    (
+      normalizedMessage.includes("exist") ||
+      normalizedMessage.includes("already")
+    )
+  ) {
+    errors.phone =
+      "This phone number is already registered."
+  }
+
+  if (
+    Object.keys(errors).length > 0
+  ) {
+    setFieldErrors(errors)
+
+    // Email/phone are Step 1
+    setCurrentStep(1)
+
+    return
+  }
+
+  // General backend error
+  setFieldErrors({
+    submit: message,
+  })
+}
     },
   })
 
-  /* =========================================================
-     FORM VALUES
-  ========================================================= */
+  /* =======================================================
+     CURRENT FORM VALUES
+  ======================================================= */
 
   const values =
-    form.state.values as RegistrationFormValues
+    form.state.values as RegistrationFormSchema
 
-  /* =========================================================
-     SELECTED PLAN
-  ========================================================= */
+  /*
+   * IMPORTANT:
+   * Always call this function when validation happens.
+   * Do not use an old values closure for validation.
+   */
+  const getCurrentValues =
+    (): RegistrationFormSchema =>
+      form.state.values as RegistrationFormSchema
 
-  const selectedPlan =
-    useMemo(
-      () =>
-        plans.find(
-          (plan) =>
-            String(plan.id) ===
-            values.plan_id,
-        ) ?? null,
-      [values.plan_id],
-    )
+  /* =======================================================
+     SELECTED PLANS
+  ======================================================= */
 
-  /* =========================================================
+  const selectedPlans =
+    useMemo(() => {
+      const selectedIds =
+        values.plan_ids ?? []
+
+      return plans.filter(
+        (plan) =>
+          selectedIds.includes(
+            Number(plan.id),
+          ),
+      )
+    }, [
+      plans,
+      values.plan_ids,
+    ])
+
+  /* =======================================================
      SELECTED BUNDLE
-  ========================================================= */
+  ======================================================= */
 
   const selectedBundle =
-    useMemo(
-      () =>
-        bundles.find(
-          (bundle) =>
-            String(bundle.id) ===
+    useMemo(() => {
+      if (
+        values.bundle_id === null
+      ) {
+        return undefined
+      }
+
+      return bundles.find(
+        (bundle) =>
+          Number(bundle.id) ===
+          Number(
             values.bundle_id,
-        ) ?? null,
-      [values.bundle_id],
-    )
+          ),
+      )
+    }, [
+      bundles,
+      values.bundle_id,
+    ])
 
-  /* =========================================================
-     REGISTRATION PRICING
-  ========================================================= */
+  /* =======================================================
+     PRICING ITEMS
+  ======================================================= */
 
-  const pricingItem =
-    values.selection_type === "plan"
-      ? selectedPlan
+  const pricingItems =
+    values.selection_type ===
+    "plan"
+      ? selectedPlans
       : selectedBundle
+        ? [selectedBundle]
+        : []
+
+  /* =======================================================
+     GET ITEM PRICE
+  ======================================================= */
+
+  const getItemPrice = (
+    item:
+      | (typeof plans)[number]
+      | (typeof bundles)[number],
+  ) => {
+    if (
+      "plan_name" in item
+    ) {
+      return Number(
+        item.plan_price ?? 0,
+      )
+    }
+
+    return Number(
+      item.bundle_price ?? 0,
+    )
+  }
+
+  /* =======================================================
+     GET ITEM GST
+  ======================================================= */
+
+  const getItemGst = (
+    item:
+      | (typeof plans)[number]
+      | (typeof bundles)[number],
+  ) => {
+    if (
+      "plan_name" in item
+    ) {
+      return Number(
+        item.plan_gst_percentage ??
+          0,
+      )
+    }
+
+    return Number(
+      item.bundle_gst_percentage ??
+        0,
+    )
+  }
+
+  /* =======================================================
+     REGISTRATION PRICE
+  ======================================================= */
 
   const registrationPrice =
-    pricingItem?.price ?? 0
+    useMemo(() => {
+      return pricingItems.reduce(
+        (
+          total,
+          item,
+        ) =>
+          total +
+          getItemPrice(item),
+        0,
+      )
+    }, [
+      pricingItems,
+    ])
 
-  const registrationGstPercentage =
-    pricingItem?.gst_percentage ?? 0
+  /* =======================================================
+     GST
+  ======================================================= */
 
   const gstAmount =
     useMemo(() => {
       return Number(
-        (
-          (registrationPrice *
-            registrationGstPercentage) /
-          100
-        ).toFixed(2),
+        pricingItems
+          .reduce(
+            (
+              total,
+              item,
+            ) =>
+              total +
+              (
+                getItemPrice(item) *
+                getItemGst(item)
+              ) /
+                100,
+            0,
+          )
+          .toFixed(2),
       )
     }, [
-      registrationPrice,
-      registrationGstPercentage,
+      pricingItems,
     ])
+
+  /* =======================================================
+     TOTAL
+  ======================================================= */
 
   const registrationTotal =
     useMemo(() => {
@@ -2707,15 +812,18 @@ export default function OrganizationForm() {
       gstAmount,
     ])
 
-  /* =========================================================
-     ERROR HELPER
-  ========================================================= */
+  /* =======================================================
+     ERROR
+  ======================================================= */
 
   const getError = (
     name: string,
-  ) => {
-    return fieldErrors[name]
-  }
+  ) =>
+    fieldErrors[name]
+
+  /* =======================================================
+     CLEAR ERROR
+  ======================================================= */
 
   const clearFieldError = (
     name: string,
@@ -2737,120 +845,190 @@ export default function OrganizationForm() {
     )
   }
 
-  /* =========================================================
+  /* =======================================================
      SET VALIDATION ERRORS
-  ========================================================= */
+  ======================================================= */
 
   const setValidationErrors = (
     issues: Array<{
-      path: PropertyKey[]
+      path: readonly (
+        | string
+        | number
+      )[]
       message: string
     }>,
   ) => {
-    const errors: FieldErrors = {}
+    const errors:
+      FieldErrors = {}
 
-    for (const issue of issues) {
+    for (
+      const issue of issues
+    ) {
       const path =
         issue.path
           .map(String)
           .join(".")
 
-      if (!errors[path]) {
+      if (
+        !errors[path]
+      ) {
         errors[path] =
           issue.message
       }
     }
 
-    setFieldErrors(errors)
+    setFieldErrors(
+      errors,
+    )
   }
 
-  /* =========================================================
-     VALIDATION STEP MAPPING
-  ========================================================= */
+  /* =======================================================
+     TOGGLE PLAN
+  ======================================================= */
 
-  const getValidationStep = (
-    step: WizardStep,
-  ): 1 | 2 | 4 => {
-    if (step === 3) {
-      return 4
-    }
-
-    return step
-  }
-
-  /* =========================================================
-     VALIDATE ALL STEPS
-  ========================================================= */
-
-  const validateAllSteps = (
-    formValues: RegistrationFormValues,
+  const handleTogglePlan = (
+    planId: number,
   ) => {
-    const allErrors: FieldErrors =
-      {}
+    const currentIds =
+      form.state.values.plan_ids ??
+      []
 
-    const steps: WizardStep[] = [
-      1,
-      2,
-      3,
-    ]
+    const exists =
+      currentIds.includes(
+        planId,
+      )
 
-    for (const step of steps) {
-      const validationStep =
-        getValidationStep(step)
+    const nextIds =
+      exists
+        ? currentIds.filter(
+            (id) =>
+              id !== planId,
+          )
+        : [
+            ...currentIds,
+            planId,
+          ]
 
-      const result =
-        validateRegistrationStep(
-          validationStep,
-          formValues,
-        )
+    form.setFieldValue(
+      "plan_ids",
+      nextIds,
+    )
 
-      if (!result.success) {
-        for (
-          const issue of
-            result.error.issues
-        ) {
-          const path =
-            issue.path
-              .map(String)
-              .join(".")
-
-          if (!allErrors[path]) {
-            allErrors[path] =
-              issue.message
-          }
-        }
-
-        setCurrentStep(step)
-        setFieldErrors(
-          allErrors,
-        )
-
-        return false
-      }
-    }
-
-    setFieldErrors({})
-
-    return true
+    clearFieldError(
+      "plan_ids",
+    )
   }
 
-  /* =========================================================
+  /* =======================================================
+     SELECT ALL PLANS
+  ======================================================= */
+
+  const handleSelectAllPlans =
+    () => {
+      const allPlanIds =
+        plans.map(
+          (plan) =>
+            Number(plan.id),
+        )
+
+      form.setFieldValue(
+        "plan_ids",
+        allPlanIds,
+      )
+
+      clearFieldError(
+        "plan_ids",
+      )
+    }
+
+  /* =======================================================
+     CLEAR ALL PLANS
+  ======================================================= */
+
+  const handleClearAllPlans =
+    () => {
+      form.setFieldValue(
+        "plan_ids",
+        [],
+      )
+
+      clearFieldError(
+        "plan_ids",
+      )
+    }
+
+  /* =======================================================
+     VALIDATE ALL STEPS
+  ======================================================= */
+
+  const validateAllSteps =
+    () => {
+      /*
+       * IMPORTANT:
+       * Get the latest values here.
+       * Do not pass the render-time `values`.
+       */
+      const currentValues =
+        getCurrentValues()
+
+      const steps:
+        WizardStep[] = [
+          1,
+          2,
+          3,
+        ]
+
+      for (
+        const step of steps
+      ) {
+        const result =
+          validateRegistrationStep(
+            step,
+            currentValues,
+          )
+
+        if (
+          !result.success
+        ) {
+          setValidationErrors(
+            result.error.issues,
+          )
+
+          setCurrentStep(
+            step,
+          )
+
+          return false
+        }
+      }
+
+      setFieldErrors({})
+
+      return true
+    }
+
+  /* =======================================================
      VALIDATE CURRENT STEP
-  ========================================================= */
+  ======================================================= */
 
   const validateStep = (
     step: WizardStep,
   ) => {
-    const validationStep =
-      getValidationStep(step)
+    /*
+     * Always get fresh values.
+     */
+    const currentValues =
+      getCurrentValues()
 
     const result =
       validateRegistrationStep(
-        validationStep,
-        values,
+        step,
+        currentValues,
       )
 
-    if (result.success) {
+    if (
+      result.success
+    ) {
       setFieldErrors({})
 
       return true
@@ -2863,45 +1041,48 @@ export default function OrganizationForm() {
     return false
   }
 
-  /* =========================================================
+  /* =======================================================
      NEXT
-  ========================================================= */
+  ======================================================= */
 
   const handleNext = () => {
-    if (
-      !validateStep(
+    const valid =
+      validateStep(
         currentStep,
       )
-    ) {
+
+    if (!valid) {
       return
     }
 
-    if (currentStep < 3) {
-      /*
-       * Moving from Subscription
-       * to Payment.
-       */
-      if (
-        currentStep === 2
-      ) {
-        form.setFieldValue(
-          "payment_amount",
-          registrationTotal,
-        )
-      }
+    if (
+      currentStep === 2
+    ) {
+      form.setFieldValue(
+        "payment_amount",
+        registrationTotal,
+      )
+    }
 
+    if (
+      currentStep < 3
+    ) {
       setCurrentStep(
         (currentStep + 1) as WizardStep,
       )
+
+      setFieldErrors({})
     }
   }
 
-  /* =========================================================
+  /* =======================================================
      PREVIOUS
-  ========================================================= */
+  ======================================================= */
 
   const handlePrevious = () => {
-    if (currentStep > 1) {
+    if (
+      currentStep > 1
+    ) {
       setCurrentStep(
         (currentStep - 1) as WizardStep,
       )
@@ -2910,133 +1091,33 @@ export default function OrganizationForm() {
     }
   }
 
-  /* =========================================================
-     SELECTION TYPE CHANGE
-  ========================================================= */
+  /* =======================================================
+     SELECTION TYPE
+  ======================================================= */
 
-  const handleSelectionTypeChange = (
-    type: "plan" | "bundle",
-  ) => {
-    form.setFieldValue(
-      "selection_type",
-      type,
-    )
-
-    form.setFieldValue(
-      "plan_id",
-      "",
-    )
-
-    form.setFieldValue(
-      "bundle_id",
-      "",
-    )
-
-    form.setFieldValue(
-      "bundle_type",
-      null,
-    )
-
-    form.setFieldValue(
-      "price",
-      null,
-    )
-
-    form.setFieldValue(
-      "gst_percentage",
-      null,
-    )
-
-    form.setFieldValue(
-      "total_price",
-      null,
-    )
-
-    form.setFieldValue(
-      "duration_months",
-      null,
-    )
-
-    form.setFieldValue(
-      "amc_price",
-      null,
-    )
-
-    form.setFieldValue(
-      "amc_duration_months",
-      null,
-    )
-
-    form.setFieldValue(
-      "amc_gst_percentage",
-      null,
-    )
-
-    form.setFieldValue(
-      "amc_start_date",
-      "",
-    )
-
-    form.setFieldValue(
-      "amc_end_date",
-      "",
-    )
-
-    form.setFieldValue(
-      "payment_amount",
-      null,
-    )
-
-    setFieldErrors({})
-  }
-
-  /* =========================================================
-     PLAN CHANGE
-  ========================================================= */
-
-  const handlePlanChange = (
-    value: string,
-  ) => {
-    const plan =
-      plans.find(
-        (item) =>
-          String(item.id) ===
-          value,
+  const handleSelectionTypeChange =
+    (
+      type:
+        | "plan"
+        | "bundle",
+    ) => {
+      form.setFieldValue(
+        "selection_type",
+        type,
       )
 
-    form.setFieldValue(
-      "plan_id",
-      value,
-    )
-
-    form.setFieldValue(
-      "bundle_id",
-      "",
-    )
-
-    form.setFieldValue(
-      "bundle_type",
-      null,
-    )
-
-    if (!plan) {
       form.setFieldValue(
-        "price",
+        "plan_ids",
+        [],
+      )
+
+      form.setFieldValue(
+        "bundle_id",
         null,
       )
 
       form.setFieldValue(
-        "gst_percentage",
-        null,
-      )
-
-      form.setFieldValue(
-        "total_price",
-        null,
-      )
-
-      form.setFieldValue(
-        "duration_months",
+        "bundle_type",
         null,
       )
 
@@ -3045,128 +1126,82 @@ export default function OrganizationForm() {
         null,
       )
 
-      clearFieldError(
-        "plan_id",
+      setPlanSearch("")
+      setBundleSearch("")
+
+      setPlanDropdownOpen(
+        false,
       )
 
-      return
+      setBundleDropdownOpen(
+        false,
+      )
+
+      setFieldErrors({})
     }
 
-    const total =
-      Number(
-        (
-          plan.price +
-          (plan.price *
-            plan.gst_percentage) /
-            100
-        ).toFixed(2),
-      )
+  /* =======================================================
+     SELECT BUNDLE
+  ======================================================= */
 
-    form.setFieldValue(
-      "price",
-      plan.price,
-    )
-
-    form.setFieldValue(
-      "gst_percentage",
-      plan.gst_percentage,
-    )
-
-    form.setFieldValue(
-      "total_price",
-      total,
-    )
-
-    form.setFieldValue(
-      "duration_months",
-      plan.duration_months,
-    )
-
-    form.setFieldValue(
-      "payment_amount",
-      total,
-    )
-
-    /*
-     * Plan does not use AMC.
-     */
-    form.setFieldValue(
-      "amc_price",
-      null,
-    )
-
-    form.setFieldValue(
-      "amc_duration_months",
-      null,
-    )
-
-    form.setFieldValue(
-      "amc_gst_percentage",
-      null,
-    )
-
-    form.setFieldValue(
-      "amc_start_date",
-      "",
-    )
-
-    form.setFieldValue(
-      "amc_end_date",
-      "",
-    )
-
-    clearFieldError(
-      "plan_id",
-    )
-  }
-
-  /* =========================================================
-     BUNDLE CHANGE
-  ========================================================= */
-
-  const handleBundleChange = (
-    value: string,
+  const handleSelectBundle = (
+    bundleId: number,
   ) => {
     const bundle =
       bundles.find(
         (item) =>
-          String(item.id) ===
-          value,
+          Number(item.id) ===
+          bundleId,
       )
+
+    if (!bundle) {
+      return
+    }
 
     form.setFieldValue(
       "bundle_id",
-      value,
+      bundleId,
     )
 
     form.setFieldValue(
-      "plan_id",
-      "",
+      "bundle_type",
+      bundle.bundle_type ??
+        null,
     )
 
-    if (!bundle) {
+    form.setFieldValue(
+      "payment_amount",
+      null,
+    )
+
+    clearFieldError(
+      "bundle_id",
+    )
+
+    clearFieldError(
+      "bundle_type",
+    )
+
+    setBundleDropdownOpen(
+      false,
+    )
+
+    setBundleSearch("")
+  }
+
+  /* =======================================================
+     REMOVE BUNDLE
+  ======================================================= */
+
+  const handleRemoveBundle =
+    () => {
+      form.setFieldValue(
+        "bundle_id",
+        null,
+      )
+
       form.setFieldValue(
         "bundle_type",
-        null,
-      )
-
-      form.setFieldValue(
-        "price",
-        null,
-      )
-
-      form.setFieldValue(
-        "gst_percentage",
-        null,
-      )
-
-      form.setFieldValue(
-        "total_price",
-        null,
-      )
-
-      form.setFieldValue(
-        "duration_months",
         null,
       )
 
@@ -3179,126 +1214,14 @@ export default function OrganizationForm() {
         "bundle_id",
       )
 
-      return
-    }
-
-    const total =
-      Number(
-        (
-          bundle.price +
-          (bundle.price *
-            bundle.gst_percentage) /
-            100
-        ).toFixed(2),
-      )
-
-    form.setFieldValue(
-      "bundle_type",
-      bundle.bundle_type,
-    )
-
-    form.setFieldValue(
-      "price",
-      bundle.price,
-    )
-
-    form.setFieldValue(
-      "gst_percentage",
-      bundle.gst_percentage,
-    )
-
-    form.setFieldValue(
-      "total_price",
-      total,
-    )
-
-    form.setFieldValue(
-      "payment_amount",
-      total,
-    )
-
-    if (
-      bundle.bundle_type ===
-      "subscription"
-    ) {
-      form.setFieldValue(
-        "duration_months",
-        bundle.duration_months,
-      )
-
-      form.setFieldValue(
-        "amc_price",
-        null,
-      )
-
-      form.setFieldValue(
-        "amc_duration_months",
-        null,
-      )
-
-      form.setFieldValue(
-        "amc_gst_percentage",
-        null,
-      )
-
-      form.setFieldValue(
-        "amc_start_date",
-        "",
-      )
-
-      form.setFieldValue(
-        "amc_end_date",
-        "",
-      )
-    } else {
-      /*
-       * Perpetual bundle:
-       * no subscription duration.
-       */
-
-      form.setFieldValue(
-        "duration_months",
-        null,
-      )
-
-      /*
-       * Default AMC values.
-       */
-
-      form.setFieldValue(
-        "amc_price",
-        0,
-      )
-
-      form.setFieldValue(
-        "amc_duration_months",
-        null,
-      )
-
-      form.setFieldValue(
-        "amc_gst_percentage",
-        18,
-      )
-
-      form.setFieldValue(
-        "amc_start_date",
-        "",
-      )
-
-      form.setFieldValue(
-        "amc_end_date",
-        "",
+      clearFieldError(
+        "bundle_type",
       )
     }
 
-    clearFieldError(
-      "bundle_id",
-    )
-  }
-
-  /* =========================================================
-     ERROR MESSAGE
-  ========================================================= */
+  /* =======================================================
+     ERROR COMPONENT
+  ======================================================= */
 
   const ErrorMessage = ({
     name,
@@ -3319,20 +1242,105 @@ export default function OrganizationForm() {
     )
   }
 
-  /* =========================================================
+  /* =======================================================
+     FILTERED PLANS
+  ======================================================= */
+
+  const filteredPlans =
+    useMemo(() => {
+      const search =
+        planSearch
+          .toLowerCase()
+          .trim()
+
+      if (!search) {
+        return plans
+      }
+
+      return plans.filter(
+        (plan) =>
+          plan.plan_name
+            .toLowerCase()
+            .includes(search) ||
+          plan.plan_code
+            .toLowerCase()
+            .includes(search),
+      )
+    }, [
+      plans,
+      planSearch,
+    ])
+
+  /* =======================================================
+     FILTERED BUNDLES
+  ======================================================= */
+
+  const filteredBundles =
+    useMemo(() => {
+      const search =
+        bundleSearch
+          .toLowerCase()
+          .trim()
+
+      if (!search) {
+        return bundles
+      }
+
+      return bundles.filter(
+        (bundle) =>
+          bundle.bundle_name
+            .toLowerCase()
+            .includes(search) ||
+          bundle.bundle_code
+            .toLowerCase()
+            .includes(search) ||
+          bundle.bundle_type
+            .toLowerCase()
+            .includes(search),
+      )
+    }, [
+      bundles,
+      bundleSearch,
+    ])
+
+  /* =======================================================
+     ALL PLAN IDS
+  ======================================================= */
+
+  const allPlanIds =
+    useMemo(
+      () =>
+        plans.map(
+          (plan) =>
+            Number(plan.id),
+        ),
+      [plans],
+    )
+
+  const allPlansSelected =
+    allPlanIds.length > 0 &&
+    allPlanIds.every(
+      (id) =>
+        values.plan_ids.includes(
+          id,
+        ),
+    )
+
+  /* =======================================================
      RENDER
-  ========================================================= */
+  ======================================================= */
 
   return (
     <Card className="w-full">
+
+      {/* =================================================
+          HEADER
+      ================================================= */}
+
       <CardHeader>
         <CardTitle>
           Organization Registration
         </CardTitle>
-
-        {/* =====================================================
-            STEP INDICATOR
-        ====================================================== */}
 
         <div className="flex items-center justify-between pt-4">
           {[
@@ -3388,252 +1396,224 @@ export default function OrganizationForm() {
         </div>
       </CardHeader>
 
+      {/* =================================================
+          CONTENT
+      ================================================= */}
+{getError("submit") && (
+  <div className="mb-4 rounded-md border border-destructive/50 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+    {getError("submit")}
+  </div>
+)}
       <CardContent>
-        {/* =====================================================
-            STEP 1 - ORGANIZATION
-        ====================================================== */}
+
+        {/* =================================================
+            STEP 1
+        ================================================= */}
 
         {currentStep === 1 && (
           <FieldGroup>
-            {/* ORGANIZATION NAME */}
+            <div className="grid gap-4 md:grid-cols-3">
 
-            <form.Field
-              name="organization_name"
-              children={(field) => (
-                <Field>
-                  <FieldLabel>
-                    Organization Name{" "}
-                    <span className="text-destructive">
-                      *
-                    </span>
-                  </FieldLabel>
+              {/* ORGANIZATION NAME */}
 
-                  <Input
-                    value={
-                      field.state.value
-                    }
-                    onChange={(event) => {
-                      field.handleChange(
-                        event.target.value,
-                      )
+              <form.Field
+                name="organization_name"
+                children={(
+                  field,
+                ) => (
+                  <Field>
+                    <FieldLabel>
+                      Organization Name
+                      <span className="text-destructive">
+                        *
+                      </span>
+                    </FieldLabel>
 
-                      clearFieldError(
-                        "organization_name",
-                      )
-                    }}
-                    placeholder="Enter organization name"
-                  />
+                    <Input
+                      value={
+                        field.state.value
+                      }
+                      onChange={(
+                        event,
+                      ) => {
+                        field.handleChange(
+                          event.target.value,
+                        )
 
-                  <ErrorMessage
-                    name="organization_name"
-                  />
-                </Field>
-              )}
-            />
+                        clearFieldError(
+                          "organization_name",
+                        )
+                      }}
+                      placeholder="Enter organization name"
+                    />
 
-            {/* CONTACT PERSON */}
+                    <ErrorMessage
+                      name="organization_name"
+                    />
+                  </Field>
+                )}
+              />
 
-            <form.Field
-              name="contact_person_name"
-              children={(field) => (
-                <Field>
-                  <FieldLabel>
-                    Contact Person Name{" "}
-                    <span className="text-destructive">
-                      *
-                    </span>
-                  </FieldLabel>
+              {/* CONTACT PERSON */}
 
-                  <Input
-                    value={
-                      field.state.value
-                    }
-                    onChange={(event) => {
-                      field.handleChange(
-                        event.target.value,
-                      )
+              <form.Field
+                name="contact_person_name"
+                children={(
+                  field,
+                ) => (
+                  <Field>
+                    <FieldLabel>
+                      Contact Person Name
+                      <span className="text-destructive">
+                        *
+                      </span>
+                    </FieldLabel>
 
-                      clearFieldError(
-                        "contact_person_name",
-                      )
-                    }}
-                    placeholder="Enter contact person name"
-                  />
+                    <Input
+                      value={
+                        field.state.value
+                      }
+                      onChange={(
+                        event,
+                      ) => {
+                        field.handleChange(
+                          event.target.value,
+                        )
 
-                  <ErrorMessage
-                    name="contact_person_name"
-                  />
-                </Field>
-              )}
-            />
+                        clearFieldError(
+                          "contact_person_name",
+                        )
+                      }}
+                      placeholder="Enter contact person name"
+                    />
 
-            {/* EMAIL */}
+                    <ErrorMessage
+                      name="contact_person_name"
+                    />
+                  </Field>
+                )}
+              />
 
-            <form.Field
-              name="email"
-              children={(field) => (
-                <Field>
-                  <FieldLabel>
-                    Email{" "}
-                    <span className="text-destructive">
-                      *
-                    </span>
-                  </FieldLabel>
+              {/* EMAIL */}
 
-                  <Input
-                    type="email"
-                    value={
-                      field.state.value
-                    }
-                    onChange={(event) => {
-                      field.handleChange(
-                        event.target.value,
-                      )
+              <form.Field
+                name="email"
+                children={(
+                  field,
+                ) => (
+                  <Field>
+                    <FieldLabel>
+                      Organization Admin Email
+                      <span className="text-destructive">
+                        *
+                      </span>
+                    </FieldLabel>
 
-                      clearFieldError(
-                        "email",
-                      )
-                    }}
-                    placeholder="organization@example.com"
-                  />
+                    <Input
+                      type="email"
+                      value={
+                        field.state.value
+                      }
+                      onChange={(
+                        event,
+                      ) => {
+                        field.handleChange(
+                          event.target.value,
+                        )
 
-                  <FieldDescription>
-                    This email will be used
-                    for the organization admin.
-                  </FieldDescription>
+                        clearFieldError(
+                          "email",
+                        )
+                      }}
+                      placeholder="organization@example.com"
+                    />
 
-                  <ErrorMessage
-                    name="email"
-                  />
-                </Field>
-              )}
-            />
+                    <FieldDescription>
+                      Email address for the organization administrator.
+                    </FieldDescription>
 
-            {/* PHONE */}
+                    <ErrorMessage
+                      name="email"
+                    />
+                  </Field>
+                )}
+              />
 
-            <form.Field
-              name="phone"
-              children={(field) => (
-                <Field>
-                  <FieldLabel>
-                    Phone{" "}
-                    <span className="text-destructive">
-                      *
-                    </span>
-                  </FieldLabel>
+              {/* PHONE */}
 
-                  <Input
-                    type="tel"
-                    value={
-                      field.state.value
-                    }
-                    onChange={(event) => {
-                      field.handleChange(
-                        event.target.value,
-                      )
+              <form.Field
+                name="phone"
+                children={(
+                  field,
+                ) => (
+                  <Field>
+                    <FieldLabel>
+                      Phone
+                      <span className="text-destructive">
+                        *
+                      </span>
+                    </FieldLabel>
 
-                      clearFieldError(
-                        "phone",
-                      )
-                    }}
-                    placeholder="9876543210"
-                  />
+                    <Input
+                      type="tel"
+                      value={
+                        field.state.value
+                      }
+                      onChange={(
+                        event,
+                      ) => {
+                        field.handleChange(
+                          event.target.value,
+                        )
 
-                  <FieldDescription>
-                    Enter a valid phone number.
-                  </FieldDescription>
+                        clearFieldError(
+                          "phone",
+                        )
+                      }}
+                      placeholder="9876543210"
+                    />
 
-                  <ErrorMessage
-                    name="phone"
-                  />
-                </Field>
-              )}
-            />
+                    <ErrorMessage
+                      name="phone"
+                    />
+                  </Field>
+                )}
+              />
 
-            {/* ADMIN INFO */}
+              {/* ADMIN INFO */}
 
-            <div className="rounded-lg border bg-muted/30 p-4">
-              <p className="font-medium">
-                Organization Admin
-              </p>
+              <div className="rounded-lg border bg-muted/30 p-4 md:col-span-2">
+                <p className="font-medium">
+                  Admin Account
+                </p>
 
-              <p className="mt-1 text-sm text-muted-foreground">
-                The contact person will be
-                created as the Organization
-                Admin after registration.
-              </p>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  The contact person and organization admin email will be used to create the organization administrator account.
+                </p>
+              </div>
+
             </div>
           </FieldGroup>
         )}
 
-        {/* =====================================================
-            STEP 2 - SUBSCRIPTION
-        ====================================================== */}
+        {/* =================================================
+            STEP 2
+        ================================================= */}
 
         {currentStep === 2 && (
           <FieldGroup>
-            {/* SELECTION TYPE */}
+            <div className="grid gap-4 md:grid-cols-3">
 
-            <form.Field
-              name="selection_type"
-              children={(field) => (
-                <Field>
-                  <FieldLabel>
-                    Selection Type{" "}
-                    <span className="text-destructive">
-                      *
-                    </span>
-                  </FieldLabel>
+              {/* SELECTION TYPE */}
 
-                  <Select
-                    value={
-                      field.state.value
-                    }
-                    onValueChange={(value) => {
-                      if (
-                        value === "plan" ||
-                        value === "bundle"
-                      ) {
-                        handleSelectionTypeChange(
-                          value,
-                        )
-                      }
-                    }}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select type" />
-                    </SelectTrigger>
-
-                    <SelectContent>
-                      <SelectItem value="plan">
-                        Subscription Plan
-                      </SelectItem>
-
-                      <SelectItem value="bundle">
-                        Subscription Bundle
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
-
-                  <ErrorMessage
-                    name="selection_type"
-                  />
-                </Field>
-              )}
-            />
-
-            {/* =================================================
-                PLAN
-            ================================================== */}
-
-            {values.selection_type ===
-              "plan" && (
               <form.Field
-                name="plan_id"
-                children={(field) => (
+                name="selection_type"
+                children={(
+                  field,
+                ) => (
                   <Field>
                     <FieldLabel>
-                      Subscription Plan{" "}
+                      Selection Type
                       <span className="text-destructive">
                         *
                       </span>
@@ -3643,448 +1623,1304 @@ export default function OrganizationForm() {
                       value={
                         field.state.value
                       }
-                      onValueChange={(value) => {
+                      onValueChange={(
+                        value,
+                      ) => {
                         if (
-                          value !== null
+                          value === "plan" ||
+                          value === "bundle"
                         ) {
-                          handlePlanChange(
+                          handleSelectionTypeChange(
                             value,
                           )
                         }
                       }}
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="Select plan" />
+                        <SelectValue placeholder="Select type" />
                       </SelectTrigger>
 
                       <SelectContent>
-                        {plans.map(
-                          (plan) => (
-                            <SelectItem
-                              key={
-                                plan.id
-                              }
-                              value={String(
-                                plan.id,
-                              )}
-                            >
-                              {
-                                plan.plan_name
-                              }{" "}
-                              — ₹
-                              {plan.price.toLocaleString(
-                                "en-IN",
-                              )}
-                            </SelectItem>
-                          ),
-                        )}
+                        <SelectItem value="plan">
+                          Subscription Plans
+                        </SelectItem>
+
+                        <SelectItem value="bundle">
+                          Subscription Bundle
+                        </SelectItem>
                       </SelectContent>
                     </Select>
 
                     <ErrorMessage
-                      name="plan_id"
+                      name="selection_type"
                     />
                   </Field>
                 )}
               />
-            )}
 
-            {/* =================================================
-                BUNDLE
-            ================================================== */}
+              {/* PLANS */}
 
-            {values.selection_type ===
-              "bundle" && (
-              <>
-                <form.Field
-                  name="bundle_id"
-                  children={(field) => (
-                    <Field>
-                      <FieldLabel>
-                        Subscription Bundle{" "}
-                        <span className="text-destructive">
-                          *
-                        </span>
-                      </FieldLabel>
+              {values.selection_type ===
+                "plan" && (
+                <div className="md:col-span-2">
+                  <form.Field
+                    name="plan_ids"
+                    children={(
+                      field,
+                    ) => {
+                      const selectedPlanIds =
+                        field.state.value ?? []
 
-                      <Select
-                        value={
-                          field.state.value
-                        }
-                        onValueChange={(value) => {
-                          if (
-                            value !==
-                            null
-                          ) {
-                            handleBundleChange(
-                              value,
-                            )
-                          }
-                        }}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select bundle" />
-                        </SelectTrigger>
+                      return (
+                        <Field>
 
-                        <SelectContent>
-                          {bundles.map(
-                            (
-                              bundle,
-                            ) => (
-                              <SelectItem
-                                key={
-                                  bundle.id
+                          <FieldLabel>
+                            Subscription Plans
+                            <span className="text-destructive">
+                              *
+                            </span>
+                          </FieldLabel>
+
+                          <FieldDescription>
+                            Select one, multiple, or all plans.
+                          </FieldDescription>
+
+                          <Popover
+                            open={
+                              planDropdownOpen
+                            }
+                            onOpenChange={
+                              setPlanDropdownOpen
+                            }
+                          >
+                            <PopoverTrigger >
+                              <Button
+                                type="button"
+                                variant="outline"
+                                role="combobox"
+                                aria-expanded={
+                                  planDropdownOpen
                                 }
-                                value={String(
-                                  bundle.id,
-                                )}
+                                className="w-full justify-between font-normal"
                               >
-                                {
-                                  bundle.bundle_name
-                                }{" "}
-                                — ₹
-                                {bundle.price.toLocaleString(
-                                  "en-IN",
-                                )}{" "}
+                                <span className="truncate">
+                                  {selectedPlanIds.length ===
+                                  0
+                                    ? "Select subscription plans"
+                                    : `${selectedPlanIds.length} plan${
+                                        selectedPlanIds.length !==
+                                        1
+                                          ? "s"
+                                          : ""
+                                      } selected`}
+                                </span>
+
+                                <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                              </Button>
+                            </PopoverTrigger>
+
+                            <PopoverContent
+                              className="w-[var(--radix-popover-trigger-width)] p-0"
+                              align="start"
+                              onOpenAutoFocus={(
+                                event,
+                              ) => {
+                                event.preventDefault()
+                              }}
+                            >
+                              <div className="flex flex-col">
+
+                                {/* SEARCH */}
+
+                                <div className="flex items-center border-b px-3">
+                                  <Search className="mr-2 h-4 w-4 shrink-0 opacity-50" />
+
+                                  <Input
+                                    value={
+                                      planSearch
+                                    }
+                                    onChange={(
+                                      event,
+                                    ) => {
+                                      setPlanSearch(
+                                        event.target.value,
+                                      )
+                                    }}
+                                    placeholder="Search plans..."
+                                    className="border-0 px-0 focus-visible:ring-0"
+                                  />
+                                </div>
+
+                                {/* SELECT ALL */}
+
+                                <div className="flex items-center justify-between border-b p-2">
+                                  <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="sm"
+                                    disabled={
+                                      allPlansSelected ||
+                                      allPlanIds.length ===
+                                        0
+                                    }
+                                    onClick={(
+                                      event,
+                                    ) => {
+                                      event.preventDefault()
+                                      event.stopPropagation()
+
+                                      handleSelectAllPlans()
+                                    }}
+                                  >
+                                    Select All
+                                  </Button>
+
+                                  <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="sm"
+                                    disabled={
+                                      selectedPlanIds.length ===
+                                      0
+                                    }
+                                    onClick={(
+                                      event,
+                                    ) => {
+                                      event.preventDefault()
+                                      event.stopPropagation()
+
+                                      handleClearAllPlans()
+                                    }}
+                                  >
+                                    Clear All
+                                  </Button>
+                                </div>
+
+                                {/* PLAN LIST */}
+
+                                <div className="max-h-64 overflow-y-auto p-1">
+                                  {filteredPlans.length ===
+                                  0 ? (
+                                    <p className="px-3 py-6 text-center text-sm text-muted-foreground">
+                                      No plans found.
+                                    </p>
+                                  ) : (
+                                    filteredPlans.map(
+                                      (
+                                        plan,
+                                      ) => {
+                                        const planId =
+                                          Number(
+                                            plan.id,
+                                          )
+
+                                        const checked =
+                                          selectedPlanIds.includes(
+                                            planId,
+                                          )
+
+                                        const price =
+                                          Number(
+                                            plan.plan_price ??
+                                              0,
+                                          )
+
+                                        return (
+                                          <div
+                                            key={
+                                              planId
+                                            }
+                                            className="flex w-full items-center gap-3 rounded-md px-3 py-2 hover:bg-muted"
+                                          >
+                                            <Checkbox
+                                              checked={
+                                                checked
+                                              }
+                                              onCheckedChange={() =>
+                                                handleTogglePlan(
+                                                  planId,
+                                                )
+                                              }
+                                            />
+
+                                            <button
+                                              type="button"
+                                              className="min-w-0 flex-1 text-left"
+                                              onClick={() =>
+                                                handleTogglePlan(
+                                                  planId,
+                                                )
+                                              }
+                                            >
+                                              <p className="truncate text-sm font-medium">
+                                                {
+                                                  plan.plan_name
+                                                }
+                                              </p>
+
+                                              <p className="truncate text-xs text-muted-foreground">
+                                                {
+                                                  plan.plan_code
+                                                }
+
+                                                {" · ₹"}
+
+                                                {price.toLocaleString(
+                                                  "en-IN",
+                                                )}
+                                              </p>
+                                            </button>
+
+                                            {checked && (
+                                              <Check className="h-4 w-4 shrink-0" />
+                                            )}
+                                          </div>
+                                        )
+                                      },
+                                    )
+                                  )}
+                                </div>
+                              </div>
+                            </PopoverContent>
+                          </Popover>
+
+                          {selectedPlanIds.length >
+                            0 && (
+                            <div className="mt-3 flex flex-wrap gap-2">
+                              {selectedPlans.map(
                                 (
-                                {
-                                  bundle.bundle_type
-                                }
-                                )
-                              </SelectItem>
-                            ),
+                                  plan,
+                                ) => (
+                                  <div
+                                    key={
+                                      plan.id
+                                    }
+                                    className="flex items-center gap-1 rounded-md bg-muted px-2 py-1 text-xs"
+                                  >
+                                    <span className="max-w-[200px] truncate">
+                                      {
+                                        plan.plan_name
+                                      }
+                                    </span>
+
+                                    <button
+                                      type="button"
+                                      onClick={() =>
+                                        handleTogglePlan(
+                                          Number(
+                                            plan.id,
+                                          ),
+                                        )
+                                      }
+                                      className="ml-1 rounded-sm opacity-60 hover:opacity-100"
+                                      aria-label={`Remove ${plan.plan_name}`}
+                                    >
+                                      <X className="h-3 w-3" />
+                                    </button>
+                                  </div>
+                                ),
+                              )}
+                            </div>
                           )}
-                        </SelectContent>
-                      </Select>
 
-                      <ErrorMessage
-                        name="bundle_id"
-                      />
-                    </Field>
-                  )}
-                />
+                          <ErrorMessage
+                            name="plan_ids"
+                          />
+                        </Field>
+                      )
+                    }}
+                  />
+                </div>
+              )}
 
-                {/* BUNDLE DETAILS */}
+              {/* BUNDLE */}
 
-                {selectedBundle && (
-                  <div className="rounded-lg border bg-muted/30 p-4">
-                    <div className="grid gap-4 sm:grid-cols-4">
-                      <div>
-                        <p className="text-sm text-muted-foreground">
-                          Bundle
-                        </p>
+              {values.selection_type ===
+                "bundle" && (
+                <div className="md:col-span-2">
+                  <form.Field
+                    name="bundle_id"
+                    children={(
+                      field,
+                    ) => (
+                      <Field>
 
-                        <p className="font-medium">
-                          {
-                            selectedBundle.bundle_name
+                        <FieldLabel>
+                          Subscription Bundle
+                          <span className="text-destructive">
+                            *
+                          </span>
+                        </FieldLabel>
+
+                        <FieldDescription>
+                          Select exactly one bundle.
+                        </FieldDescription>
+
+                        <Popover
+                          open={
+                            bundleDropdownOpen
                           }
-                        </p>
-                      </div>
-
-                      <div>
-                        <p className="text-sm text-muted-foreground">
-                          Type
-                        </p>
-
-                        <p className="font-medium capitalize">
-                          {
-                            selectedBundle.bundle_type
+                          onOpenChange={
+                            setBundleDropdownOpen
                           }
-                        </p>
-                      </div>
+                        >
+                          <PopoverTrigger >
+                            <Button
+                              type="button"
+                              variant="outline"
+                              role="combobox"
+                              aria-expanded={
+                                bundleDropdownOpen
+                              }
+                              className="w-full justify-between font-normal"
+                            >
+                              <span className="truncate">
+                                {selectedBundle
+                                  ? selectedBundle.bundle_name
+                                  : "Select subscription bundle"}
+                              </span>
 
-                      <div>
-                        <p className="text-sm text-muted-foreground">
-                          Price
-                        </p>
+                              <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                            </Button>
+                          </PopoverTrigger>
 
-                        <p className="font-medium">
-                          ₹
-                          {selectedBundle.price.toLocaleString(
-                            "en-IN",
-                            {
-                              minimumFractionDigits: 2,
-                            },
-                          )}
-                        </p>
-                      </div>
+                          <PopoverContent
+                            className="w-[var(--radix-popover-trigger-width)] p-0"
+                            align="start"
+                          >
+                            <div className="flex flex-col">
 
-                      <div>
-                        <p className="text-sm text-muted-foreground">
-                          Duration
-                        </p>
+                              {/* SEARCH */}
 
-                        <p className="font-medium">
-                          {selectedBundle.duration_months
-                            ? `${selectedBundle.duration_months} months`
-                            : "Perpetual"}
-                        </p>
-                      </div>
+                              <div className="flex items-center border-b px-3">
+                                <Search className="mr-2 h-4 w-4 shrink-0 opacity-50" />
+
+                                <Input
+                                  value={
+                                    bundleSearch
+                                  }
+                                  onChange={(
+                                    event,
+                                  ) =>
+                                    setBundleSearch(
+                                      event.target.value,
+                                    )
+                                  }
+                                  placeholder="Search bundles..."
+                                  className="border-0 px-0 focus-visible:ring-0"
+                                />
+                              </div>
+
+                              {/* BUNDLE LIST */}
+
+                              <div className="max-h-64 overflow-y-auto p-1">
+                                {filteredBundles.length ===
+                                0 ? (
+                                  <p className="px-3 py-6 text-center text-sm text-muted-foreground">
+                                    No bundles found.
+                                  </p>
+                                ) : (
+                                  filteredBundles.map(
+                                    (
+                                      bundle,
+                                    ) => {
+                                      const bundleId =
+                                        Number(
+                                          bundle.id,
+                                        )
+
+                                      const checked =
+                                        Number(
+                                          field.state.value,
+                                        ) ===
+                                        bundleId
+
+                                      const price =
+                                        Number(
+                                          bundle.bundle_price ??
+                                            0,
+                                        )
+
+                                      return (
+                                        <button
+                                          key={
+                                            bundleId
+                                          }
+                                          type="button"
+                                          onClick={() =>
+                                            handleSelectBundle(
+                                              bundleId,
+                                            )
+                                          }
+                                          className="flex w-full items-center gap-3 rounded-md px-3 py-2 text-left hover:bg-muted"
+                                        >
+                                          <div className="flex h-4 w-4 items-center justify-center">
+                                            {checked && (
+                                              <Check className="h-4 w-4" />
+                                            )}
+                                          </div>
+
+                                          <div className="min-w-0 flex-1">
+                                            <p className="truncate text-sm font-medium">
+                                              {
+                                                bundle.bundle_name
+                                              }
+                                            </p>
+
+                                            <p className="truncate text-xs text-muted-foreground">
+                                              {
+                                                bundle.bundle_code
+                                              }
+
+                                              {" · "}
+
+                                              {
+                                                bundle.bundle_type
+                                              }
+
+                                              {" · ₹"}
+
+                                              {price.toLocaleString(
+                                                "en-IN",
+                                              )}
+                                            </p>
+                                          </div>
+                                        </button>
+                                      )
+                                    },
+                                  )
+                                )}
+                              </div>
+                            </div>
+                          </PopoverContent>
+                        </Popover>
+
+                        {selectedBundle && (
+                          <div className="mt-2 flex w-fit items-center gap-1 rounded-md bg-muted px-2 py-1 text-xs">
+                            <span className="max-w-[250px] truncate">
+                              {
+                                selectedBundle.bundle_name
+                              }
+                            </span>
+
+                            <button
+                              type="button"
+                              onClick={
+                                handleRemoveBundle
+                              }
+                              className="ml-1 rounded-sm opacity-60 hover:opacity-100"
+                              aria-label="Remove bundle"
+                            >
+                              <X className="h-3 w-3" />
+                            </button>
+                          </div>
+                        )}
+
+                        <ErrorMessage
+                          name="bundle_id"
+                        />
+
+                        <ErrorMessage
+                          name="bundle_type"
+                        />
+
+                      </Field>
+                    )}
+                  />
+                </div>
+              )}
+
+              {/* BUNDLE INFORMATION */}
+
+              {selectedBundle && (
+                <div className="space-y-3 rounded-lg border bg-muted/30 p-4 md:col-span-3">
+
+                  <h3 className="font-semibold">
+                    Selected Bundle
+                  </h3>
+
+                  <div className="grid gap-4 rounded-md border bg-background p-3 md:grid-cols-4">
+
+                    <div>
+                      <p className="text-xs text-muted-foreground">
+                        Bundle
+                      </p>
+
+                      <p className="font-medium">
+                        {
+                          selectedBundle.bundle_name
+                        }
+                      </p>
                     </div>
-                  </div>
-                )}
 
-                {/* PERPETUAL BUNDLE AMC NOTICE */}
+                    <div>
+                      <p className="text-xs text-muted-foreground">
+                        Type
+                      </p>
 
-                {values.bundle_type ===
-                  "perpetual" && (
-                  <div className="rounded-lg border bg-muted/30 p-4">
-                    <p className="font-medium">
-                      AMC Required
-                    </p>
-
-                    <p className="mt-1 text-sm text-muted-foreground">
-                      This is a perpetual bundle.
-                      AMC details will be handled
-                      automatically according to
-                      the selected bundle configuration.
-                    </p>
-                  </div>
-                )}
-              </>
-            )}
-
-            {/* =================================================
-                AUTOMATIC PRICING SUMMARY
-            ================================================== */}
-
-            {pricingItem && (
-              <div className="mt-4 rounded-lg border bg-muted/30 p-4">
-                <h3 className="mb-4 font-semibold">
-                  Subscription Summary
-                </h3>
-
-                <div className="space-y-2 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">
-                      Price
-                    </span>
-
-                    <span>
-                      ₹
-                      {registrationPrice.toLocaleString(
-                        "en-IN",
+                      <p className="font-medium capitalize">
                         {
-                          minimumFractionDigits: 2,
-                        },
-                      )}
-                    </span>
-                  </div>
+                          selectedBundle.bundle_type
+                        }
+                      </p>
+                    </div>
 
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">
-                      GST (
-                      {
-                        registrationGstPercentage
-                      }
-                      %)
-                    </span>
+                    <div>
+                      <p className="text-xs text-muted-foreground">
+                        Price
+                      </p>
 
-                    <span>
-                      ₹
-                      {gstAmount.toLocaleString(
-                        "en-IN",
-                        {
-                          minimumFractionDigits: 2,
-                        },
-                      )}
-                    </span>
-                  </div>
+                      <p className="font-medium">
+                        ₹
+                        {getItemPrice(
+                          selectedBundle,
+                        ).toLocaleString(
+                          "en-IN",
+                          {
+                            minimumFractionDigits: 2,
+                          },
+                        )}
+                      </p>
+                    </div>
 
-                  <div className="flex justify-between border-t pt-2 text-base font-semibold">
-                    <span>
-                      Registration Total
-                    </span>
+                    <div>
+                      <p className="text-xs text-muted-foreground">
+                        Duration
+                      </p>
 
-                    <span>
-                      ₹
-                      {registrationTotal.toLocaleString(
-                        "en-IN",
-                        {
-                          minimumFractionDigits: 2,
-                        },
-                      )}
-                    </span>
+                      <p className="font-medium">
+                        {selectedBundle.bundle_duration_months
+                          ? `${selectedBundle.bundle_duration_months} months`
+                          : "Perpetual"}
+                      </p>
+                    </div>
+
                   </div>
                 </div>
-              </div>
-            )}
-          </FieldGroup>
-        )}
+              )}
 
-        {/* =====================================================
-            STEP 3 - PAYMENT
-        ====================================================== */}
+              {/* PRICING */}
 
-        {currentStep === 3 && (
-          <FieldGroup>
-            {/* PAYMENT METHOD */}
+              {pricingItems.length >
+                0 && (
+                <div className="rounded-lg border bg-muted/30 p-4 md:col-span-3">
 
-            <form.Field
-              name="payment_method"
-              children={(field) => (
-                <Field>
-                  <FieldLabel>
-                    Payment Method
-                  </FieldLabel>
+                  <h3 className="mb-4 font-semibold">
+                    Subscription Summary
+                  </h3>
 
-                  <Select
-                    value={
-                      field.state.value
-                    }
-                    onValueChange={(value) => {
-                      if (
-                        value ===
-                        "manual"
-                      ) {
-                        field.handleChange(
-                          "manual",
+                  <div className="space-y-2 text-sm">
+
+                    {pricingItems.map(
+                      (
+                        item,
+                      ) => {
+                        const isPlan =
+                          "plan_name" in
+                          item
+
+                        const name =
+                          isPlan
+                            ? item.plan_name
+                            : item.bundle_name
+
+                        const price =
+                          getItemPrice(
+                            item,
+                          )
+
+                        return (
+                          <div
+                            key={
+                              item.id
+                            }
+                            className="flex justify-between"
+                          >
+                            <span className="text-muted-foreground">
+                              {name}
+                            </span>
+
+                            <span>
+                              ₹
+                              {price.toLocaleString(
+                                "en-IN",
+                                {
+                                  minimumFractionDigits: 2,
+                                },
+                              )}
+                            </span>
+                          </div>
                         )
-                      }
-                    }}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
+                      },
+                    )}
 
-                    <SelectContent>
-                      <SelectItem value="manual">
-                        Manual Payment
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
-                </Field>
+                    <div className="flex justify-between border-t pt-2">
+                      <span className="text-muted-foreground">
+                        Subtotal
+                      </span>
+
+                      <span>
+                        ₹
+                        {registrationPrice.toLocaleString(
+                          "en-IN",
+                          {
+                            minimumFractionDigits: 2,
+                          },
+                        )}
+                      </span>
+                    </div>
+
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">
+                        GST
+                      </span>
+
+                      <span>
+                        ₹
+                        {gstAmount.toLocaleString(
+                          "en-IN",
+                          {
+                            minimumFractionDigits: 2,
+                          },
+                        )}
+                      </span>
+                    </div>
+
+                    <div className="flex justify-between border-t pt-2 text-base font-semibold">
+                      <span>
+                        Registration Total
+                      </span>
+
+                      <span>
+                        ₹
+                        {registrationTotal.toLocaleString(
+                          "en-IN",
+                          {
+                            minimumFractionDigits: 2,
+                          },
+                        )}
+                      </span>
+                    </div>
+
+                  </div>
+                </div>
               )}
-            />
 
-            {/* PAYMENT REFERENCE */}
-
-            <form.Field
-              name="payment_reference"
-              children={(field) => (
-                <Field>
-                  <FieldLabel>
-                    Payment Reference{" "}
-                    <span className="text-destructive">
-                      *
-                    </span>
-                  </FieldLabel>
-
-                  <Input
-                    value={
-                      field.state.value
-                    }
-                    onChange={(event) => {
-                      field.handleChange(
-                        event.target.value,
-                      )
-
-                      clearFieldError(
-                        "payment_reference",
-                      )
-                    }}
-                    placeholder="Transaction / receipt number"
-                  />
-
-                  <ErrorMessage
-                    name="payment_reference"
-                  />
-                </Field>
-              )}
-            />
-
-            {/* PAYMENT DATE */}
-
-            <form.Field
-              name="payment_date"
-              children={(field) => (
-                <Field>
-                  <FieldLabel>
-                    Payment Date{" "}
-                    <span className="text-destructive">
-                      *
-                    </span>
-                  </FieldLabel>
-
-                  <Input
-                    type="date"
-                    value={
-                      field.state.value
-                    }
-                    onChange={(event) => {
-                      field.handleChange(
-                        event.target.value,
-                      )
-
-                      clearFieldError(
-                        "payment_date",
-                      )
-                    }}
-                  />
-
-                  <ErrorMessage
-                    name="payment_date"
-                  />
-                </Field>
-              )}
-            />
-
-            {/* =================================================
-                PAYMENT AMOUNT
-                Automatically set from registration total.
-            ================================================== */}
-
-            <div className="rounded-lg border bg-muted/30 p-4">
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">
-                  Payment Amount
-                </span>
-
-                <span className="text-lg font-semibold">
-                  ₹
-                  {registrationTotal.toLocaleString(
-                    "en-IN",
-                    {
-                      minimumFractionDigits: 2,
-                    },
-                  )}
-                </span>
-              </div>
-
-              <p className="mt-1 text-xs text-muted-foreground">
-                Payment amount is automatically
-                calculated from the selected
-                plan or bundle.
-              </p>
             </div>
           </FieldGroup>
         )}
+
+        {/* =================================================
+            STEP 3
+        ================================================= */}
+
+        {currentStep === 3 && (
+          <FieldGroup>
+            <div className="grid gap-4 md:grid-cols-3">
+
+              {/* PAYMENT METHOD */}
+
+              <form.Field
+                name="payment_method"
+                children={(
+                  field,
+                ) => (
+                  <Field>
+                    <FieldLabel>
+                      Payment Method
+                      <span className="text-destructive">
+                        *
+                      </span>
+                    </FieldLabel>
+
+                    <Select
+                      value={
+                        field.state.value
+                      }
+                      onValueChange={(
+                        value,
+                      ) => {
+                        if (
+                          value ===
+                          "manual"
+                        ) {
+                          field.handleChange(
+                            "manual",
+                          )
+
+                          clearFieldError(
+                            "payment_method",
+                          )
+                        }
+                      }}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+
+                      <SelectContent>
+                        <SelectItem value="manual">
+                          Manual Payment
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+
+                    <ErrorMessage
+                      name="payment_method"
+                    />
+                  </Field>
+                )}
+              />
+
+              {/* BILLING NAME */}
+
+              <form.Field
+                name="billing_name"
+                children={(
+                  field,
+                ) => (
+                  <Field>
+                    <FieldLabel>
+                      Billing Name
+                      <span className="text-destructive">
+                        *
+                      </span>
+                    </FieldLabel>
+
+                    <Input
+                      value={
+                        field.state.value
+                      }
+                      onChange={(
+                        event,
+                      ) => {
+                        field.handleChange(
+                          event.target.value,
+                        )
+
+                        clearFieldError(
+                          "billing_name",
+                        )
+                      }}
+                      placeholder="Enter billing name"
+                    />
+
+                    <ErrorMessage
+                      name="billing_name"
+                    />
+                  </Field>
+                )}
+              />
+
+              {/* BILLING EMAIL */}
+
+              <form.Field
+                name="billing_email"
+                children={(
+                  field,
+                ) => (
+                  <Field>
+                    <FieldLabel>
+                      Billing Email
+                      <span className="text-destructive">
+                        *
+                      </span>
+                    </FieldLabel>
+
+                    <Input
+                      type="email"
+                      value={
+                        field.state.value
+                      }
+                      onChange={(
+                        event,
+                      ) => {
+                        field.handleChange(
+                          event.target.value,
+                        )
+
+                        clearFieldError(
+                          "billing_email",
+                        )
+                      }}
+                      placeholder="billing@example.com"
+                    />
+
+                    <ErrorMessage
+                      name="billing_email"
+                    />
+                  </Field>
+                )}
+              />
+
+              {/* BILLING ADDRESS */}
+
+              <form.Field
+                name="billing_address"
+                children={(
+                  field,
+                ) => (
+                  <Field className="md:col-span-2">
+                    <FieldLabel>
+                      Billing Address 1
+                      <span className="text-destructive">
+                        *
+                      </span>
+                    </FieldLabel>
+
+                    <Input
+                      value={
+                        field.state.value
+                      }
+                      onChange={(
+                        event,
+                      ) => {
+                        field.handleChange(
+                          event.target.value,
+                        )
+
+                        clearFieldError(
+                          "billing_address",
+                        )
+                      }}
+                      placeholder="Enter complete billing address"
+                    />
+
+                    <ErrorMessage
+                      name="billing_address"
+                    />
+                  </Field>
+                )}
+              />
+              <form.Field
+                name="billing_address2"
+                children={(
+                  field,
+                ) => (
+                  <Field className="md:col-span-2">
+                    <FieldLabel>
+                      Billing Address 2
+                      <span className="text-destructive">
+                        *
+                      </span>
+                    </FieldLabel>
+
+                    <Input
+                      value={
+                        field.state.value
+                      }
+                      onChange={(
+                        event,
+                      ) => {
+                        field.handleChange(
+                          event.target.value,
+                        )
+
+                        clearFieldError(
+                          "billing_address2",
+                        )
+                      }}
+                      placeholder="Enter complete billing address"
+                    />
+
+                    <ErrorMessage
+                      name="billing_address2"
+                    />
+                  </Field>
+                )}
+              />
+              {/* BILLING CITY */}
+
+              <form.Field
+                name="billing_city"
+                children={(
+                  field,
+                ) => (
+                  <Field>
+                    <FieldLabel>
+                      City
+                      <span className="text-destructive">
+                        *
+                      </span>
+                    </FieldLabel>
+
+                    <Input
+                      value={
+                        field.state.value
+                      }
+                      onChange={(
+                        event,
+                      ) => {
+                        field.handleChange(
+                          event.target.value,
+                        )
+
+                        clearFieldError(
+                          "billing_city",
+                        )
+                      }}
+                      placeholder="Enter city"
+                    />
+
+                    <ErrorMessage
+                      name="billing_city"
+                    />
+                  </Field>
+                )}
+              />
+
+              {/* BILLING STATE */}
+
+              <form.Field
+                name="billing_state"
+                children={(
+                  field,
+                ) => (
+                  <Field>
+                    <FieldLabel>
+                      State
+                      <span className="text-destructive">
+                        *
+                      </span>
+                    </FieldLabel>
+
+                    <Input
+                      value={
+                        field.state.value
+                      }
+                      onChange={(
+                        event,
+                      ) => {
+                        field.handleChange(
+                          event.target.value,
+                        )
+
+                        clearFieldError(
+                          "billing_state",
+                        )
+                      }}
+                      placeholder="Enter state"
+                    />
+
+                    <ErrorMessage
+                      name="billing_state"
+                    />
+                  </Field>
+                )}
+              />
+
+              {/* COUNTRY */}
+
+              <form.Field
+                name="billing_country"
+                children={(
+                  field,
+                ) => (
+                  <Field>
+                    <FieldLabel>
+                      Country
+                      <span className="text-destructive">
+                        *
+                      </span>
+                    </FieldLabel>
+
+                    <Input
+                      value={
+                        field.state.value
+                      }
+                      onChange={(
+                        event,
+                      ) => {
+                        field.handleChange(
+                          event.target.value,
+                        )
+
+                        clearFieldError(
+                          "billing_country",
+                        )
+                      }}
+                      placeholder="Enter country"
+                    />
+
+                    <ErrorMessage
+                      name="billing_country"
+                    />
+                  </Field>
+                )}
+              />
+
+              {/* PINCODE */}
+
+              <form.Field
+                name="billing_pincode"
+                children={(
+                  field,
+                ) => (
+                  <Field>
+                    <FieldLabel>
+                      Pincode
+                      <span className="text-destructive">
+                        *
+                      </span>
+                    </FieldLabel>
+
+                    <Input
+                      type="text"
+                      inputMode="numeric"
+                      maxLength={6}
+                      value={
+                        field.state.value
+                      }
+                      onChange={(
+                        event,
+                      ) => {
+                        const value =
+                          event.target.value.replace(
+                            /\D/g,
+                            "",
+                          )
+
+                        field.handleChange(
+                          value,
+                        )
+
+                        clearFieldError(
+                          "billing_pincode",
+                        )
+                      }}
+                      placeholder="Enter 6-digit pincode"
+                    />
+
+                    <ErrorMessage
+                      name="billing_pincode"
+                    />
+                  </Field>
+                )}
+              />
+
+              {/* PAYMENT REFERENCE */}
+
+              <form.Field
+                name="payment_reference"
+                children={(
+                  field,
+                ) => (
+                  <Field>
+                    <FieldLabel>
+                      Payment Reference
+                      <span className="text-destructive">
+                        *
+                      </span>
+                    </FieldLabel>
+
+                    <Input
+                      value={
+                        field.state.value
+                      }
+                      onChange={(
+                        event,
+                      ) => {
+                        field.handleChange(
+                          event.target.value,
+                        )
+
+                        clearFieldError(
+                          "payment_reference",
+                        )
+                      }}
+                      placeholder="Transaction / receipt number"
+                    />
+
+                    <ErrorMessage
+                      name="payment_reference"
+                    />
+                  </Field>
+                )}
+              />
+
+              {/* PAYMENT DATE */}
+
+              <form.Field
+                name="payment_date"
+                children={(
+                  field,
+                ) => (
+                  <Field>
+                    <FieldLabel>
+                      Payment Date
+                      <span className="text-destructive">
+                        *
+                      </span>
+                    </FieldLabel>
+
+                    <Input
+                      type="date"
+                      value={
+                        field.state.value
+                      }
+                      onChange={(
+                        event,
+                      ) => {
+                        field.handleChange(
+                          event.target.value,
+                        )
+
+                        clearFieldError(
+                          "payment_date",
+                        )
+                      }}
+                    />
+
+                    <ErrorMessage
+                      name="payment_date"
+                    />
+                  </Field>
+                )}
+              />
+
+              {/* START DATE */}
+
+              <form.Field
+                name="start_date"
+                children={(
+                  field,
+                ) => (
+                  <Field>
+                    <FieldLabel>
+                      Start Date
+                      <span className="text-destructive">
+                        *
+                      </span>
+                    </FieldLabel>
+
+                    <Input
+                      type="date"
+                      value={
+                        field.state.value
+                      }
+                      onChange={(
+                        event,
+                      ) => {
+                        field.handleChange(
+                          event.target.value,
+                        )
+
+                        clearFieldError(
+                          "start_date",
+                        )
+                      }}
+                    />
+
+                    <FieldDescription>
+                      Subscription/license start date.
+                    </FieldDescription>
+
+                    <ErrorMessage
+                      name="start_date"
+                    />
+                  </Field>
+                )}
+              />
+
+              {/* PAYMENT AMOUNT */}
+
+              <div className="rounded-lg border bg-muted/30 p-4 md:col-span-3">
+
+                <div className="flex items-center justify-between">
+
+                  <span className="text-sm text-muted-foreground">
+                    Payment Amount
+                  </span>
+
+                  <span className="text-lg font-semibold">
+                    ₹
+                    {registrationTotal.toLocaleString(
+                      "en-IN",
+                      {
+                        minimumFractionDigits: 2,
+                      },
+                    )}
+                  </span>
+
+                </div>
+
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Payment amount is automatically calculated from the selected plans or bundle.
+                </p>
+
+                <ErrorMessage
+                  name="payment_amount"
+                />
+
+              </div>
+
+              {/* PAYMENT NOTES */}
+
+              <form.Field
+                name="payment_notes"
+                children={(
+                  field,
+                ) => (
+                  <Field className="md:col-span-3">
+                    <FieldLabel>
+                      Payment Notes
+                    </FieldLabel>
+
+                    <Input
+                      value={
+                        field.state.value
+                      }
+                      onChange={(
+                        event,
+                      ) => {
+                        field.handleChange(
+                          event.target.value,
+                        )
+
+                        clearFieldError(
+                          "payment_notes",
+                        )
+                      }}
+                      placeholder="Optional payment notes"
+                    />
+
+                    <ErrorMessage
+                      name="payment_notes"
+                    />
+                  </Field>
+                )}
+              />
+
+            </div>
+          </FieldGroup>
+        )}
+
       </CardContent>
 
-      {/* =====================================================
+      {/* ===================================================
           FOOTER
-      ====================================================== */}
+      =================================================== */}
 
       <CardFooter className="flex justify-between">
-        {/* PREVIOUS */}
 
         <Button
           type="button"
           variant="outline"
           onClick={
-            handlePrevious
+            currentStep === 1
+              ? onCancel
+              : handlePrevious
           }
           disabled={
-            currentStep === 1 ||
-            submitting
+            loading
           }
         >
           <ChevronLeft className="mr-2 h-4 w-4" />
 
-          Previous
+          {currentStep === 1
+            ? "Cancel"
+            : "Previous"}
         </Button>
-
-        {/* NEXT / COMPLETE */}
 
         {currentStep < 3 ? (
           <Button
@@ -4093,7 +2929,7 @@ export default function OrganizationForm() {
               handleNext
             }
             disabled={
-              submitting
+              loading
             }
           >
             Next
@@ -4104,13 +2940,16 @@ export default function OrganizationForm() {
           <Button
             type="button"
             disabled={
-              submitting
+              loading
             }
             onClick={() => {
+              /*
+               * IMPORTANT:
+               * validateAllSteps() now gets the
+               * latest TanStack Form values itself.
+               */
               const valid =
-                validateAllSteps(
-                  values,
-                )
+                validateAllSteps()
 
               if (!valid) {
                 return
@@ -4119,15 +2958,16 @@ export default function OrganizationForm() {
               form.handleSubmit()
             }}
           >
-            {submitting
+            {loading
               ? "Submitting..."
               : "Complete Registration"}
 
-            {!submitting && (
+            {!loading && (
               <Check className="ml-2 h-4 w-4" />
             )}
           </Button>
         )}
+
       </CardFooter>
     </Card>
   )

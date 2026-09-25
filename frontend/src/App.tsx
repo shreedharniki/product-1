@@ -127,13 +127,13 @@ function App() {
 
             {/* /organizations/details */}
             <Route
-              path="details"
+              path="/organizations/view/:id"
               element={<ViewOrganizations />}
             />
 
             {/* /organizations/edit */}
             <Route
-              path="edit"
+              path="/organizations/edit/:id"
               element={<EditOrganizations />}
             />
 

@@ -1,6 +1,6 @@
 import { configureStore } from "@reduxjs/toolkit"
 
-// import organizationReducer from "@/features/organizations/organizationSlice"
+import organizationReducer from "@/features/organizations/organizationSlice"
 import moduleReducer from "../features/modules/moduleSlice"
 import submoduleReducer from "../features/sub_modules/submoduleSlice"
 
@@ -8,7 +8,7 @@ import subscriptionPlansReducer from "../features/subscription/subscriptionPlanS
 import subscriptionBundlesReducer from "@/features/subscription_bundles/subscriptionBundleSlice"
 export const store = configureStore({
   reducer: {
-    // organizations: organizationReducer,
+    organizations: organizationReducer,
     modules: moduleReducer,
     submodules: submoduleReducer,
    subscriptionPlans: subscriptionPlansReducer,

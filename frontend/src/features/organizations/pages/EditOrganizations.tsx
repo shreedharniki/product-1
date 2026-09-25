@@ -1,28 +1,40 @@
 
-import { useMemo, useState } from "react"
-import { NavLink } from "react-router-dom"
-// import type { ChangeEvent, ReactNode } from "react"
-import type {  ReactNode } from "react"
-import {
-  Building2,
-  MapPin,
-  Mail,
-  Phone,
-  Eye,
-  Pencil,
-  MoreHorizontal,
-  UserRound,
-  Save,
-  X,
-  ArrowLeft 
-} from "lucide-react"
+
+"use client"
 
 import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/components/ui/tabs"
+  useEffect,
+  useState,
+} from "react"
+
+import {
+  NavLink,
+  useNavigate,
+  useParams,
+} from "react-router-dom"
+
+import {
+  useDispatch,
+  useSelector,
+} from "react-redux"
+
+import {
+  ArrowLeft,
+  Building2,
+  Calendar,
+  Clock,
+  FileText,
+  Globe,
+  // Mail,
+  MapPin,
+  // Pencil,
+  Phone,
+  Save,
+  ShieldCheck,
+  X,
+} from "lucide-react"
+
+import type { AppDispatch } from "@/app/store"
 
 import {
   Card,
@@ -31,27 +43,17 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-
-import cmtlogo from "@/assets/cmtlogo.webp"
+// import {
+//   Badge,
+// } from "@/components/ui/badge"
 
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
+  Button,
+} from "@/components/ui/button"
 
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+  Input,
+} from "@/components/ui/input"
 
 import {
   Select,
@@ -61,367 +63,114 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 
-/* =========================================================
-   TYPES
-========================================================= */
+import {
+  fetchOrganizationById,
+  updateOrganization,
+} from "../organizationThunks"
 
-type Status = "Active" | "Inactive"
+import {
+  selectSelectedOrganization,
+  selectOrganizationDetailsLoading,
+  selectOrganizationSubmitting,
+  selectOrganizationError,
+} from "../organizationSelectors"
 
-interface OrganizationUser {
-  id: number
-  name: string
-  email: string
-  phone: string
-  role: string
-  status: Status
-}
-
-interface Temple {
-  id: string
-  name: string
-  code: string
-  city: string
-  status: Status
-  users: OrganizationUser[]
-}
-
-interface Organization {
-  id: string
-  name: string
-  code: string
-  email: string
-  phone: string
-  city: string
-  status: Status
-  adminName: string
-  image?: string
-  temples: Temple[]
-}
-
-/* =========================================================
-   DUMMY DATA
-========================================================= */
-
-const initialOrganization: Organization = {
-  id: "ORG001",
-  name: "Shree Ganesh Temple Trust",
-  code: "SGT001",
-  email: "admin@ganeshtemple.com",
-  phone: "+91 9876543210",
-  city: "Pune",
-  status: "Active",
-  adminName: "Rahul Patil",
-  image: cmtlogo,
-
-  temples: [
-    {
-      id: "TEM001",
-      name: "Shree Ganesh Temple",
-      code: "TEM001",
-      city: "Pune",
-      status: "Active",
-
-      users: [
-        {
-          id: 1,
-          name: "Rahul Patil",
-          email: "rahul@ganeshtemple.com",
-          phone: "+91 9876543211",
-          role: "Temple Admin",
-          status: "Active",
-        },
-        {
-          id: 2,
-          name: "Amit Sharma",
-          email: "amit@ganeshtemple.com",
-          phone: "+91 9876543212",
-          role: "Treasurer",
-          status: "Active",
-        },
-        {
-          id: 3,
-          name: "Priya Joshi",
-          email: "priya@ganeshtemple.com",
-          phone: "+91 9876543213",
-          role: "Devotee",
-          status: "Active",
-        },
-      ],
-    },
-
-    {
-      id: "TEM002",
-      name: "Shree Mahadev Temple",
-      code: "TEM002",
-      city: "Pune",
-      status: "Active",
-
-      users: [
-        {
-          id: 4,
-          name: "Suresh Patil",
-          email: "suresh@ganeshtemple.com",
-          phone: "+91 9876543214",
-          role: "Temple Admin",
-          status: "Active",
-        },
-        {
-          id: 5,
-          name: "Neha Kulkarni",
-          email: "neha@ganeshtemple.com",
-          phone: "+91 9876543215",
-          role: "User",
-          status: "Active",
-        },
-      ],
-    },
-
-    {
-      id: "TEM003",
-      name: "Shree Hanuman Temple",
-      code: "TEM003",
-      city: "Pune",
-      status: "Inactive",
-
-      users: [
-        {
-          id: 6,
-          name: "Vikas Shinde",
-          email: "vikas@ganeshtemple.com",
-          phone: "+91 9876543216",
-          role: "Temple Admin",
-          status: "Active",
-        },
-        {
-          id: 7,
-          name: "Sneha More",
-          email: "sneha@ganeshtemple.com",
-          phone: "+91 9876543217",
-          role: "User",
-          status: "Inactive",
-        },
-      ],
-    },
-  ],
-}
+import type {
+  OrganizationDetails,
+  OrganizationStatus,
+} from "../organizationsTypes"
 
 /* =========================================================
    COMPONENT
 ========================================================= */
 
 export default function EditOrganizations() {
-  /* ---------------------------------------------------------
-     ORGANIZATION DATA
-  --------------------------------------------------------- */
+  const { id } = useParams<{
+    id: string
+  }>()
 
-  const [organizationData, setOrganizationData] =
-    useState<Organization>(initialOrganization)
+  const navigate = useNavigate()
 
-  const [isEditingOrganization, setIsEditingOrganization] =
-    useState(false)
+  const dispatch =
+    useDispatch<AppDispatch>()
 
-  /* ---------------------------------------------------------
-     TEMPLE DATA
-  --------------------------------------------------------- */
+  /* =========================================================
+     REDUX
+  ========================================================= */
 
-  const [editingTempleId, setEditingTempleId] =
+  const organization =
+    useSelector(
+      selectSelectedOrganization,
+    )
+
+  const loading =
+    useSelector(
+      selectOrganizationDetailsLoading,
+    )
+
+  const submitting =
+    useSelector(
+      selectOrganizationSubmitting,
+    )
+
+  const error =
+    useSelector(
+      selectOrganizationError,
+    )
+
+  /* =========================================================
+     LOCAL FORM
+  ========================================================= */
+
+  const [formData, setFormData] =
+    useState<OrganizationDetails | null>(
+      null,
+    )
+
+  const [formError, setFormError] =
     useState<string | null>(null)
 
-  const [templeEditData, setTempleEditData] =
-    useState<Temple | null>(null)
-
-  /* ---------------------------------------------------------
-     SELECTED TEMPLE
-  --------------------------------------------------------- */
-
-  const [selectedTemple, setSelectedTemple] = useState<string>(
-    initialOrganization.temples[0]?.id ?? "",
-  )
-
-  /* ---------------------------------------------------------
-     SEARCH
-  --------------------------------------------------------- */
-
-  const [search, setSearch] = useState("")
-
   /* =========================================================
-     ORGANIZATION STATISTICS
+     FETCH ORGANIZATION
   ========================================================= */
 
-  const totalUsers = useMemo(() => {
-    return organizationData.temples.reduce(
-      (total, temple) => total + temple.users.length,
-      0,
-    )
-  }, [organizationData.temples])
-
-  const activeUsers = useMemo(() => {
-    return organizationData.temples.reduce(
-      (total, temple) =>
-        total +
-        temple.users.filter(
-          (user) => user.status === "Active",
-        ).length,
-      0,
-    )
-  }, [organizationData.temples])
-
-  /* =========================================================
-     SELECTED TEMPLE
-  ========================================================= */
-
-  const selectedTempleData = useMemo(() => {
-    return organizationData.temples.find(
-      (item) => item.id === selectedTemple,
-    )
-  }, [organizationData.temples, selectedTemple])
-
-  /* =========================================================
-     FILTER USERS
-  ========================================================= */
-
-  const filteredUsers = useMemo(() => {
-    if (!selectedTempleData) {
-      return []
-    }
-
-    const value = search.trim().toLowerCase()
-
-    if (!value) {
-      return selectedTempleData.users
-    }
-
-    return selectedTempleData.users.filter((user) => {
-      return (
-        user.name.toLowerCase().includes(value) ||
-        user.email.toLowerCase().includes(value) ||
-        user.phone.toLowerCase().includes(value) ||
-        user.role.toLowerCase().includes(value)
-      )
-    })
-  }, [selectedTempleData, search])
-
-  /* =========================================================
-     ORGANIZATION EDIT
-  ========================================================= */
-
-  const handleOrganizationEdit = () => {
-    setIsEditingOrganization(true)
-  }
-
-  const handleOrganizationCancel = () => {
-    setOrganizationData(initialOrganization)
-    setIsEditingOrganization(false)
-  }
-
-  const handleOrganizationSave = () => {
-    /*
-      Replace this section with your API call.
-
-      Example:
-
-      await api.put(
-        `/v1/organizations/${organizationData.id}`,
-        organizationData
-      )
-    */
-
-    console.log(
-      "Organization updated:",
-      organizationData,
-    )
-
-    setIsEditingOrganization(false)
-  }
-
-  /* =========================================================
-     ORGANIZATION FIELD UPDATE
-  ========================================================= */
-
-  const updateOrganizationField = <
-    K extends keyof Organization,
-  >(
-    field: K,
-    value: Organization[K],
-  ) => {
-    setOrganizationData((previous) => ({
-      ...previous,
-      [field]: value,
-    }))
-  }
-
-  /* =========================================================
-     TEMPLE EDIT
-  ========================================================= */
-
-  const handleTempleEdit = (temple: Temple) => {
-    setEditingTempleId(temple.id)
-
-    setTempleEditData({
-      ...temple,
-      users: [...temple.users],
-    })
-  }
-
-  /* =========================================================
-     TEMPLE CANCEL
-  ========================================================= */
-
-  const handleTempleCancel = () => {
-    setEditingTempleId(null)
-    setTempleEditData(null)
-  }
-
-  /* =========================================================
-     TEMPLE SAVE
-  ========================================================= */
-
-  const handleTempleSave = () => {
-    if (!templeEditData) {
+  useEffect(() => {
+    if (!id) {
       return
     }
 
-    /*
-      Replace this section with your API call.
-
-      Example:
-
-      await api.put(
-        `/v1/temples/${templeEditData.id}`,
-        templeEditData
-      )
-    */
-
-    setOrganizationData((previous) => ({
-      ...previous,
-
-      temples: previous.temples.map((temple) =>
-        temple.id === templeEditData.id
-          ? templeEditData
-          : temple,
-      ),
-    }))
-
-    console.log(
-      "Temple updated:",
-      templeEditData,
+    dispatch(
+      fetchOrganizationById(id),
     )
-
-    setEditingTempleId(null)
-    setTempleEditData(null)
-  }
+  }, [dispatch, id])
 
   /* =========================================================
-     TEMPLE FIELD UPDATE
+     SET FORM DATA
   ========================================================= */
 
-  const updateTempleField = <
-    K extends keyof Temple,
+  useEffect(() => {
+    if (!organization) {
+      return
+    }
+
+    setFormData({
+      ...organization,
+    })
+
+    setFormError(null)
+  }, [organization])
+
+  /* =========================================================
+     UPDATE FIELD
+  ========================================================= */
+
+  const updateField = <
+    K extends keyof OrganizationDetails,
   >(
     field: K,
-    value: Temple[K],
+    value: OrganizationDetails[K],
   ) => {
-    setTempleEditData((previous) => {
+    setFormData((previous) => {
       if (!previous) {
         return previous
       }
@@ -432,6 +181,216 @@ export default function EditOrganizations() {
       }
     })
   }
+
+  /* =========================================================
+     SAVE
+  ========================================================= */
+
+  const handleSave = async () => {
+    if (!formData) {
+      return
+    }
+
+    setFormError(null)
+
+    /* -------------------------------------------------------
+       BASIC VALIDATION
+    ------------------------------------------------------- */
+
+    if (!formData.org_name.trim()) {
+      setFormError(
+        "Organization name is required.",
+      )
+
+      return
+    }
+
+    if (!formData.org_email.trim()) {
+      setFormError(
+        "Organization email is required.",
+      )
+
+      return
+    }
+
+    if (!formData.org_phone.trim()) {
+      setFormError(
+        "Organization phone is required.",
+      )
+
+      return
+    }
+
+    if (!formData.org_city.trim()) {
+      setFormError(
+        "City is required.",
+      )
+
+      return
+    }
+
+    try {
+      /* -----------------------------------------------------
+         CURRENT UPDATE THUNK PAYLOAD
+         
+         Your current UpdateOrganizationPayload
+         uses:
+         
+         name
+         code
+         email
+         phone
+         city
+         status
+         
+         Therefore we map the detail object to
+         that existing payload.
+      ----------------------------------------------------- */
+
+      await dispatch(
+        updateOrganization({
+          id: formData.id,
+
+          name: formData.org_name,
+
+          code: formData.org_slug,
+
+          email: formData.org_email,
+
+          org_phone: formData.org_phone,
+
+          org_city: formData.org_city,
+
+          org_status:
+            formData.org_status,
+        }),
+      ).unwrap()
+
+      /* -----------------------------------------------------
+         Reload latest organization data
+      ----------------------------------------------------- */
+
+      await dispatch(
+        fetchOrganizationById(
+          formData.id,
+        ),
+      ).unwrap()
+
+      /* -----------------------------------------------------
+         Go back to view page
+      ----------------------------------------------------- */
+
+      navigate(
+        `/organizations/view/${formData.id}`,
+      )
+    } catch (error) {
+      setFormError(
+        typeof error === "string"
+          ? error
+          : "Failed to update organization.",
+      )
+    }
+  }
+
+  /* =========================================================
+     CANCEL
+  ========================================================= */
+
+  const handleCancel = () => {
+    if (!formData) {
+      navigate("/organizations")
+      return
+    }
+
+    navigate(
+      `/organizations/view/${formData.id}`,
+    )
+  }
+
+  /* =========================================================
+     LOADING
+  ========================================================= */
+
+  if (loading) {
+    return (
+      <div className="flex min-h-[400px] items-center justify-center">
+        <div className="text-sm text-muted-foreground">
+          Loading organization...
+        </div>
+      </div>
+    )
+  }
+
+  /* =========================================================
+     ERROR
+  ========================================================= */
+
+  if (error && !organization) {
+    return (
+      <div className="flex min-h-[400px] flex-col items-center justify-center gap-4">
+
+        <div className="flex size-12 items-center justify-center rounded-full bg-destructive/10">
+          <Building2 className="size-6 text-destructive" />
+        </div>
+
+        <div className="text-center">
+
+          <h2 className="text-lg font-semibold">
+            Failed to load organization
+          </h2>
+
+          <p className="mt-1 text-sm text-muted-foreground">
+            {error}
+          </p>
+
+        </div>
+
+        <Button
+          variant="outline"
+       
+        >
+          <NavLink to="/organizations">
+            Back to Organizations
+          </NavLink>
+        </Button>
+
+      </div>
+    )
+  }
+
+  /* =========================================================
+     NOT FOUND
+  ========================================================= */
+
+  if (!formData) {
+    return (
+      <div className="flex min-h-[400px] flex-col items-center justify-center gap-4">
+
+        <Building2 className="size-10 text-muted-foreground" />
+
+        <h2 className="text-lg font-semibold">
+          Organization not found
+        </h2>
+
+        <Button
+          variant="outline"
+         
+        >
+          <NavLink to="/organizations">
+            Back to Organizations
+          </NavLink>
+        </Button>
+
+      </div>
+    )
+  }
+
+  /* =========================================================
+     STATUS
+  ========================================================= */
+
+  const isActive =
+    formData.org_status === "active"
 
   /* =========================================================
      RENDER
@@ -447,74 +406,48 @@ export default function EditOrganizations() {
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
 
         <div>
+
           <p className="text-sm text-muted-foreground">
             Organizations
           </p>
 
           <h1 className="text-2xl font-semibold tracking-tight">
-            Organization Edit
+            Edit Organization
           </h1>
 
           <p className="mt-1 text-sm text-muted-foreground">
-            Manage organization information, temples and users.
+            Update organization information
           </p>
+
         </div>
 
         <div className="flex gap-2">
 
-          {/* <Button variant="outline" asChild>
-              
-              <ArrowLeft className="mr-2 size-4" />
-            <NavLink to="/organizations/details">
-            
-            Back
-            </NavLink>
-          </Button> */}
-          <NavLink
-            to="/organizations/details"
-            className="inline-flex h-9 items-center justify-center rounded-md border px-3 text-sm font-medium"
+          <Button
+            variant="outline"
+          
           >
-            <ArrowLeft className="mr-2 size-4" />
-            Back
-          </NavLink>
-
-          <DropdownMenu>
-
-            {/* <DropdownMenuTrigger asChild>
-              <Button
-                variant="outline"
-                size="icon"
-              >
-                <MoreHorizontal className="size-4" />
-              </Button>
-            </DropdownMenuTrigger> */}
-            <DropdownMenuTrigger>
-              <Button
-                variant="outline"
-                size="icon"
-              >
-                <MoreHorizontal className="size-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-
-              <DropdownMenuItem>
-                View Organization
-              </DropdownMenuItem>
-
-              <DropdownMenuItem
-                onClick={handleOrganizationEdit}
-              >
-                Edit Organization
-              </DropdownMenuItem>
-
-            </DropdownMenuContent>
-
-          </DropdownMenu>
+            <NavLink
+              to={`/organizations`}
+            >
+              <ArrowLeft className="mr-2 size-4" />
+              Back
+            </NavLink>
+          </Button>
 
         </div>
 
       </div>
+
+      {/* =====================================================
+          FORM ERROR
+      ===================================================== */}
+
+      {(formError || error) && (
+        <div className="rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+          {formError || error}
+        </div>
+      )}
 
       {/* =====================================================
           ORGANIZATION PROFILE
@@ -522,82 +455,39 @@ export default function EditOrganizations() {
 
       <Card>
 
-        <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <CardHeader>
 
-          <div>
-            <CardTitle>
-              Organization Profile
-            </CardTitle>
+          <CardTitle className="flex items-center gap-2">
+            <Building2 className="size-5" />
+            Organization Profile
+          </CardTitle>
 
-            <p className="mt-1 text-sm text-muted-foreground">
-              Organization basic information
-            </p>
-          </div>
-
-          {/* ORGANIZATION ACTIONS */}
-
-          {!isEditingOrganization ? (
-
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleOrganizationEdit}
-            >
-              <Pencil className="mr-2 size-4" />
-              Edit
-            </Button>
-
-          ) : (
-
-            <div className="flex gap-2">
-
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleOrganizationCancel}
-              >
-                <X className="mr-2 size-4" />
-                Cancel
-              </Button>
-
-              <Button
-                size="sm"
-                onClick={handleOrganizationSave}
-              >
-                <Save className="mr-2 size-4" />
-                Save
-              </Button>
-
-            </div>
-
-          )}
+          <p className="text-sm text-muted-foreground">
+            Update basic organization information.
+          </p>
 
         </CardHeader>
 
-        <CardContent className="p-6">
+        <CardContent>
 
-          <div className="flex flex-col gap-6 lg:flex-row">
+          <div className="grid gap-6 lg:grid-cols-[120px_1fr]">
 
             {/* =================================================
                 LOGO
             ================================================= */}
 
-            <div className="flex shrink-0 items-start">
+            <div className="flex">
 
-              <div className="flex size-24 items-center justify-center overflow-hidden rounded-xl border bg-muted">
+              <div className="flex size-28 items-center justify-center overflow-hidden rounded-xl border bg-muted">
 
-                {organizationData.image ? (
-
+                {formData.org_img_name ? (
                   <img
-                    src={organizationData.image}
-                    alt={organizationData.name}
+                    src={formData.org_img_name}
+                    alt={formData.org_name}
                     className="size-full object-cover"
                   />
-
                 ) : (
-
-                  <Building2 className="size-10 text-muted-foreground" />
-
+                  <Building2 className="size-12 text-muted-foreground" />
                 )}
 
               </div>
@@ -605,220 +495,137 @@ export default function EditOrganizations() {
             </div>
 
             {/* =================================================
-                ORGANIZATION INFORMATION
+                BASIC FIELDS
             ================================================= */}
 
-            <div className="min-w-0 flex-1">
+            <div className="grid gap-5 sm:grid-cols-2">
 
-              {!isEditingOrganization ? (
+              <FormField
+                label="Organization Name"
+                required
+              >
+                <Input
+                  value={
+                    formData.org_name
+                  }
+                  onChange={(event) =>
+                    updateField(
+                      "org_name",
+                      event.target.value,
+                    )
+                  }
+                  placeholder="Organization name"
+                />
+              </FormField>
 
-                /* =================================================
-                   VIEW MODE
-                ================================================= */
+              <FormField
+                label="Organization Slug"
+              >
+                <Input
+                  value={
+                    formData.org_slug
+                  }
+                  onChange={(event) =>
+                    updateField(
+                      "org_slug",
+                      event.target.value,
+                    )
+                  }
+                  placeholder="Organization slug"
+                />
+              </FormField>
 
-                <>
+              <FormField
+                label="Email"
+                required
+              >
+                <Input
+                  type="email"
+                  value={
+                    formData.org_email
+                  }
+                  onChange={(event) =>
+                    updateField(
+                      "org_email",
+                      event.target.value,
+                    )
+                  }
+                  placeholder="Email"
+                />
+              </FormField>
 
-                  <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+              <FormField
+                label="Phone"
+                required
+              >
+                <Input
+                  value={
+                    formData.org_phone
+                  }
+                  onChange={(event) =>
+                    updateField(
+                      "org_phone",
+                      event.target.value,
+                    )
+                  }
+                  placeholder="Phone"
+                />
+              </FormField>
 
-                    <div>
+              <FormField
+                label="Status"
+                required
+              >
+                <Select
+                  value={
+                    formData.org_status
+                  }
+                  onValueChange={(value) => {
+                    if (
+                      value === "active" ||
+                      value === "inactive"
+                    ) {
+                      updateField(
+                        "org_status",
+                        value as OrganizationStatus,
+                      )
+                    }
+                  }}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select status" />
+                  </SelectTrigger>
 
-                      <div className="flex flex-wrap items-center gap-3">
+                  <SelectContent>
 
-                        <h2 className="text-xl font-semibold">
-                          {organizationData.name}
-                        </h2>
+                    <SelectItem value="active">
+                      Active
+                    </SelectItem>
 
-                        <Badge
-                          variant={
-                            organizationData.status === "Active"
-                              ? "default"
-                              : "destructive"
-                          }
-                        >
-                          {organizationData.status}
-                        </Badge>
+                    <SelectItem value="inactive">
+                      Inactive
+                    </SelectItem>
 
-                      </div>
+                  </SelectContent>
+                </Select>
+              </FormField>
 
-                      <p className="mt-1 text-sm text-muted-foreground">
-                        Organization Code:{" "}
-                        {organizationData.code}
-                      </p>
-
-                    </div>
-
-                  </div>
-
-                  <div className="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-
-                    <InfoItem
-                      icon={<UserRound />}
-                      label="Administrator"
-                      value={organizationData.adminName}
-                    />
-
-                    <InfoItem
-                      icon={<Mail />}
-                      label="Email"
-                      value={organizationData.email}
-                    />
-
-                    <InfoItem
-                      icon={<Phone />}
-                      label="Phone"
-                      value={organizationData.phone}
-                    />
-
-                    <InfoItem
-                      icon={<MapPin />}
-                      label="City"
-                      value={organizationData.city}
-                    />
-
-                  </div>
-
-                </>
-
-              ) : (
-
-                /* =================================================
-                   EDIT MODE
-                ================================================= */
-
-                <div className="grid gap-5 sm:grid-cols-2">
-
-                  {/* NAME */}
-
-                  <FormField
-                    label="Organization Name"
-                  >
-                    <Input
-                      value={organizationData.name}
-                      onChange={(event) =>
-                        updateOrganizationField(
-                          "name",
-                          event.target.value,
-                        )
-                      }
-                    />
-                  </FormField>
-
-                  {/* CODE */}
-
-                  <FormField
-                    label="Organization Code"
-                  >
-                    <Input
-                      value={organizationData.code}
-                      onChange={(event) =>
-                        updateOrganizationField(
-                          "code",
-                          event.target.value,
-                        )
-                      }
-                    />
-                  </FormField>
-
-                  {/* ADMIN */}
-
-                  <FormField
-                    label="Administrator"
-                  >
-                    <Input
-                      value={organizationData.adminName}
-                      onChange={(event) =>
-                        updateOrganizationField(
-                          "adminName",
-                          event.target.value,
-                        )
-                      }
-                    />
-                  </FormField>
-
-                  {/* EMAIL */}
-
-                  <FormField
-                    label="Email"
-                  >
-                    <Input
-                      type="email"
-                      value={organizationData.email}
-                      onChange={(event) =>
-                        updateOrganizationField(
-                          "email",
-                          event.target.value,
-                        )
-                      }
-                    />
-                  </FormField>
-
-                  {/* PHONE */}
-
-                  <FormField
-                    label="Phone"
-                  >
-                    <Input
-                      value={organizationData.phone}
-                      onChange={(event) =>
-                        updateOrganizationField(
-                          "phone",
-                          event.target.value,
-                        )
-                      }
-                    />
-                  </FormField>
-
-                  {/* CITY */}
-
-                  <FormField
-                    label="City"
-                  >
-                    <Input
-                      value={organizationData.city}
-                      onChange={(event) =>
-                        updateOrganizationField(
-                          "city",
-                          event.target.value,
-                        )
-                      }
-                    />
-                  </FormField>
-
-                  {/* STATUS */}
-
-                  <FormField
-                    label="Status"
-                  >
-                    <Select
-                      value={organizationData.status}
-                      onValueChange={(value) =>{
-                         if (value !== null) {
-                        updateOrganizationField(
-                          "status",
-                          value,
-                        )
-                      }
-                      }}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select status" />
-                      </SelectTrigger>
-
-                      <SelectContent>
-                        <SelectItem value="Active">
-                          Active
-                        </SelectItem>
-
-                        <SelectItem value="Inactive">
-                          Inactive
-                        </SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </FormField>
-
-                </div>
-
-              )}
+              <FormField
+                label="Timezone"
+              >
+                <Input
+                  value={
+                    formData.org_timezone
+                  }
+                  onChange={(event) =>
+                    updateField(
+                      "org_timezone",
+                      event.target.value,
+                    )
+                  }
+                  placeholder="Timezone"
+                />
+              </FormField>
 
             </div>
 
@@ -829,482 +636,375 @@ export default function EditOrganizations() {
       </Card>
 
       {/* =====================================================
-          STATISTICS
-      ===================================================== */}
-
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-
-        <StatCard
-          title="Total Temples"
-          value={organizationData.temples.length}
-          icon={<Building2 />}
-        />
-
-        <StatCard
-          title="Total Users"
-          value={totalUsers}
-          icon={<UserRound />}
-        />
-
-        <StatCard
-          title="Active Users"
-          value={activeUsers}
-          icon={<UserRound />}
-        />
-
-      </div>
-
-      {/* =====================================================
-          TEMPLES
+          LEGAL INFORMATION
       ===================================================== */}
 
       <Card>
 
         <CardHeader>
 
-          <CardTitle>
-            Temples
+          <CardTitle className="flex items-center gap-2">
+            <FileText className="size-5" />
+            Legal Information
           </CardTitle>
-
-          <p className="text-sm text-muted-foreground">
-            Select a temple to view its details and users.
-          </p>
 
         </CardHeader>
 
         <CardContent>
 
-          <Tabs
-            value={selectedTemple}
-            onValueChange={(value) => {
-              setSelectedTemple(value)
-              setSearch("")
-            }}
-          >
-
-            {/* =================================================
-                TEMPLE TABS
-            ================================================= */}
-
-            <TabsList className="mb-6 h-auto w-full justify-start overflow-x-auto">
-
-              {organizationData.temples.map((item) => (
-
-                <TabsTrigger
-                  key={item.id}
-                  value={item.id}
-                  className="shrink-0"
-                >
-                  {item.name}
-                </TabsTrigger>
-
-              ))}
-
-            </TabsList>
-
-            {/* =================================================
-                TEMPLE CONTENT
-            ================================================= */}
-
-            {organizationData.temples.map((item) => (
-
-              <TabsContent
-                key={item.id}
-                value={item.id}
-                className="space-y-6"
-              >
-
-                {/* =================================================
-                    TEMPLE HEADER
-                ================================================= */}
-
-                <div className="rounded-lg border bg-muted/20 p-5">
-
-                  {!editingTempleId ||
-                  editingTempleId !== item.id ? (
-
-                    /* =================================================
-                       TEMPLE VIEW MODE
-                    ================================================= */
-
-                    <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
-
-                      <div className="min-w-0">
-
-                        <div className="flex flex-wrap items-center gap-3">
-
-                          <h3 className="text-lg font-semibold">
-                            {item.name}
-                          </h3>
-
-                          <Badge
-                            variant={
-                              item.status === "Active"
-                                ? "default"
-                                : "destructive"
-                            }
-                          >
-                            {item.status}
-                          </Badge>
-
-                        </div>
-
-                        <p className="mt-1 text-sm text-muted-foreground">
-                          Code: {item.code}
-                        </p>
-
-                        <div className="mt-3 flex items-center gap-2 text-sm text-muted-foreground">
-                          <MapPin className="size-4" />
-                          {item.city}
-                        </div>
-
-                      </div>
-
-                      <div className="flex items-center justify-between gap-6">
-
-                        <div>
-                          <p className="text-xs text-muted-foreground">
-                            Users
-                          </p>
-
-                          <p className="text-xl font-semibold">
-                            {item.users.length}
-                          </p>
-                        </div>
-
-                        {/* TEMPLE EDIT BUTTON */}
-
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() =>
-                            handleTempleEdit(item)
-                          }
-                        >
-                          <Pencil className="mr-2 size-4" />
-                          Edit
-                        </Button>
-
-                      </div>
-
-                    </div>
-
-                  ) : (
-
-                    /* =================================================
-                       TEMPLE EDIT MODE
-                    ================================================= */
-
-                    <div className="space-y-5">
-
-                      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-
-                        <div>
-
-                          <h3 className="font-semibold">
-                            Edit Temple
-                          </h3>
-
-                          <p className="text-sm text-muted-foreground">
-                            Update temple information
-                          </p>
-
-                        </div>
-
-                        <div className="flex gap-2">
-
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={handleTempleCancel}
-                          >
-                            <X className="mr-2 size-4" />
-                            Cancel
-                          </Button>
-
-                          <Button
-                            size="sm"
-                            onClick={handleTempleSave}
-                          >
-                            <Save className="mr-2 size-4" />
-                            Save
-                          </Button>
-
-                        </div>
-
-                      </div>
-
-                      {templeEditData && (
-                        <div className="grid gap-5 sm:grid-cols-2">
-
-                          {/* TEMPLE NAME */}
-
-                          <FormField
-                            label="Temple Name"
-                          >
-                            <Input
-                              value={templeEditData.name}
-                              onChange={(event) =>
-                                updateTempleField(
-                                  "name",
-                                  event.target.value,
-                                )
-                              }
-                            />
-                          </FormField>
-
-                          {/* TEMPLE CODE */}
-
-                          <FormField
-                            label="Temple Code"
-                          >
-                            <Input
-                              value={templeEditData.code}
-                              onChange={(event) =>
-                                updateTempleField(
-                                  "code",
-                                  event.target.value,
-                                )
-                              }
-                            />
-                          </FormField>
-
-                          {/* CITY */}
-
-                          <FormField
-                            label="City"
-                          >
-                            <Input
-                              value={templeEditData.city}
-                              onChange={(event) =>
-                                updateTempleField(
-                                  "city",
-                                  event.target.value,
-                                )
-                              }
-                            />
-                          </FormField>
-
-                          {/* STATUS */}
-
-                          <FormField
-                            label="Status"
-                          >
-                            <Select
-                              value={templeEditData.status}
-                              onValueChange={(value) =>{
-                                 if (value !== null) {
-                                updateTempleField(
-                                  "status",
-                                  value,
-                                )
-                              }
-                              }}
-                            >
-                              <SelectTrigger>
-                                <SelectValue placeholder="Select status" />
-                              </SelectTrigger>
-
-                              <SelectContent>
-
-                                <SelectItem value="Active">
-                                  Active
-                                </SelectItem>
-
-                                <SelectItem value="Inactive">
-                                  Inactive
-                                </SelectItem>
-
-                              </SelectContent>
-                            </Select>
-                          </FormField>
-
-                        </div>
-                      )}
-
-                    </div>
-
-                  )}
-
-                </div>
-
-                {/* =================================================
-                    TEMPLE USERS
-                ================================================= */}
-
-                <div className="space-y-4">
-
-                  <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-
-                    <div>
-
-                      <h3 className="font-semibold">
-                        Temple Users
-                      </h3>
-
-                      <p className="text-sm text-muted-foreground">
-                        Users assigned to {item.name}
-                      </p>
-
-                    </div>
-
-                    <Input
-                      placeholder="Search users..."
-                      value={
-                        selectedTemple === item.id
-                          ? search
-                          : ""
-                      }
-                      onChange={(event) =>
-                        setSearch(event.target.value)
-                      }
-                      className="w-full md:w-64"
-                    />
-
-                  </div>
-
-                  {/* =================================================
-                      USER TABLE
-                  ================================================= */}
-
-                  <div className="overflow-hidden rounded-lg border">
-
-                    <Table>
-
-                      <TableHeader>
-
-                        <TableRow>
-
-                          <TableHead>
-                            Sl. No
-                          </TableHead>
-
-                          <TableHead>
-                            User
-                          </TableHead>
-
-                          <TableHead>
-                            Email
-                          </TableHead>
-
-                          <TableHead>
-                            Phone
-                          </TableHead>
-
-                          <TableHead>
-                            Role
-                          </TableHead>
-
-                          <TableHead>
-                            Status
-                          </TableHead>
-
-                          <TableHead className="text-right">
-                            Action
-                          </TableHead>
-
-                        </TableRow>
-
-                      </TableHeader>
-
-                      <TableBody>
-
-                        {selectedTemple === item.id &&
-                        filteredUsers.length > 0 ? (
-
-                          filteredUsers.map(
-                            (user, index) => (
-
-                              <TableRow
-                                key={user.id}
-                              >
-
-                                <TableCell>
-                                  {index + 1}
-                                </TableCell>
-
-                                <TableCell className="font-medium">
-                                  {user.name}
-                                </TableCell>
-
-                                <TableCell>
-                                  {user.email}
-                                </TableCell>
-
-                                <TableCell>
-                                  {user.phone}
-                                </TableCell>
-
-                                <TableCell>
-
-                                  <Badge variant="outline">
-                                    {user.role}
-                                  </Badge>
-
-                                </TableCell>
-
-                                <TableCell>
-
-                                  <Badge
-                                    variant={
-                                      user.status === "Active"
-                                        ? "default"
-                                        : "destructive"
-                                    }
-                                  >
-                                    {user.status}
-                                  </Badge>
-
-                                </TableCell>
-
-                                <TableCell className="text-right">
-
-                                  <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    title="View User"
-                                  >
-                                    <Eye className="size-4" />
-                                  </Button>
-
-                                </TableCell>
-
-                              </TableRow>
-
-                            ),
-                          )
-
-                        ) : (
-
-                          <TableRow>
-
-                            <TableCell
-                              colSpan={7}
-                              className="h-24 text-center"
-                            >
-                              No users found.
-                            </TableCell>
-
-                          </TableRow>
-
-                        )}
-
-                      </TableBody>
-
-                    </Table>
-
-                  </div>
-
-                </div>
-
-              </TabsContent>
-
-            ))}
-
-          </Tabs>
+          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+
+            <FormField
+              label="Legal Name"
+            >
+              <Input
+                value={
+                  formData.org_legal_name
+                }
+                onChange={(event) =>
+                  updateField(
+                    "org_legal_name",
+                    event.target.value,
+                  )
+                }
+                placeholder="Legal name"
+              />
+            </FormField>
+
+            <FormField
+              label="Registration Number"
+            >
+              <Input
+                value={
+                  formData.org_registration_number
+                }
+                onChange={(event) =>
+                  updateField(
+                    "org_registration_number",
+                    event.target.value,
+                  )
+                }
+                placeholder="Registration number"
+              />
+            </FormField>
+
+            <FormField
+              label="GST Number"
+            >
+              <Input
+                value={
+                  formData.org_gst_number ?? ""
+                }
+                onChange={(event) =>
+                  updateField(
+                    "org_gst_number",
+                    event.target.value ||
+                      null,
+                  )
+                }
+                placeholder="GST number"
+              />
+            </FormField>
+
+          </div>
 
         </CardContent>
 
+      </Card>
+
+      {/* =====================================================
+          CONTACT
+      ===================================================== */}
+
+      <Card>
+
+        <CardHeader>
+
+          <CardTitle className="flex items-center gap-2">
+            <Phone className="size-5" />
+            Contact Information
+          </CardTitle>
+
+        </CardHeader>
+
+        <CardContent>
+
+          <div className="grid gap-5 sm:grid-cols-2">
+
+            <FormField
+              label="Email"
+              required
+            >
+              <Input
+                type="email"
+                value={
+                  formData.org_email
+                }
+                onChange={(event) =>
+                  updateField(
+                    "org_email",
+                    event.target.value,
+                  )
+                }
+              />
+            </FormField>
+
+            <FormField
+              label="Phone"
+              required
+            >
+              <Input
+                value={
+                  formData.org_phone
+                }
+                onChange={(event) =>
+                  updateField(
+                    "org_phone",
+                    event.target.value,
+                  )
+                }
+              />
+            </FormField>
+
+          </div>
+
+        </CardContent>
+
+      </Card>
+
+      {/* =====================================================
+          ADDRESS
+      ===================================================== */}
+
+      <Card>
+
+        <CardHeader>
+
+          <CardTitle className="flex items-center gap-2">
+            <MapPin className="size-5" />
+            Address Information
+          </CardTitle>
+
+        </CardHeader>
+
+        <CardContent>
+
+          <div className="grid gap-5 sm:grid-cols-2">
+
+            <FormField
+              label="Address Line 1"
+            >
+              <Input
+                value={
+                  formData.org_address_line1
+                }
+                onChange={(event) =>
+                  updateField(
+                    "org_address_line1",
+                    event.target.value,
+                  )
+                }
+                placeholder="Address line 1"
+              />
+            </FormField>
+
+            <FormField
+              label="Address Line 2"
+            >
+              <Input
+                value={
+                  formData.org_address_line2
+                }
+                onChange={(event) =>
+                  updateField(
+                    "org_address_line2",
+                    event.target.value,
+                  )
+                }
+                placeholder="Address line 2"
+              />
+            </FormField>
+
+            <FormField
+              label="City"
+              required
+            >
+              <Input
+                value={
+                  formData.org_city
+                }
+                onChange={(event) =>
+                  updateField(
+                    "org_city",
+                    event.target.value,
+                  )
+                }
+                placeholder="City"
+              />
+            </FormField>
+
+            <FormField
+              label="State"
+            >
+              <Input
+                value={
+                  formData.org_state
+                }
+                onChange={(event) =>
+                  updateField(
+                    "org_state",
+                    event.target.value,
+                  )
+                }
+                placeholder="State"
+              />
+            </FormField>
+
+            <FormField
+              label="Country"
+            >
+              <Input
+                value={
+                  formData.org_country
+                }
+                onChange={(event) =>
+                  updateField(
+                    "org_country",
+                    event.target.value,
+                  )
+                }
+                placeholder="Country"
+              />
+            </FormField>
+
+            <FormField
+              label="Pincode"
+            >
+              <Input
+                value={
+                  formData.org_pincode
+                }
+                onChange={(event) =>
+                  updateField(
+                    "org_pincode",
+                    event.target.value,
+                  )
+                }
+                placeholder="Pincode"
+              />
+            </FormField>
+
+          </div>
+
+        </CardContent>
+
+      </Card>
+
+      {/* =====================================================
+          SYSTEM INFORMATION
+      ===================================================== */}
+
+      <Card>
+
+        <CardHeader>
+
+          <CardTitle className="flex items-center gap-2">
+            <ShieldCheck className="size-5" />
+            System Information
+          </CardTitle>
+
+        </CardHeader>
+
+        <CardContent>
+
+          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+
+            <InfoItem
+              icon={<FileText />}
+              label="Organization ID"
+              value={String(formData.id)}
+            />
+
+            <InfoItem
+              icon={<Globe />}
+              label="Slug"
+              value={formData.org_slug}
+            />
+
+            <InfoItem
+              icon={<Calendar />}
+              label="Created At"
+              value={formatDate(
+                formData.created_at,
+              )}
+            />
+
+            <InfoItem
+              icon={<Calendar />}
+              label="Updated At"
+              value={formatDate(
+                formData.updated_at,
+              )}
+            />
+
+            <InfoItem
+              icon={<Clock />}
+              label="Timezone"
+              value={
+                formData.org_timezone
+              }
+            />
+
+            <InfoItem
+              icon={<ShieldCheck />}
+              label="Current Status"
+              value={
+                formData.org_status
+              }
+            />
+
+          </div>
+
+        </CardContent>
+
+      </Card>
+
+      {/* =====================================================
+          ACTIONS
+      ===================================================== */}
+
+      <Card>
+
+        <CardContent className="flex flex-col gap-3 p-6 sm:flex-row sm:justify-end">
+
+          <Button
+            variant="outline"
+            onClick={handleCancel}
+            disabled={submitting}
+          >
+            <X className="mr-2 size-4" />
+            Cancel
+          </Button>
+
+          <Button
+            onClick={handleSave}
+            disabled={submitting}
+          >
+
+            {submitting ? (
+              <>
+                Saving...
+              </>
+            ) : (
+              <>
+                <Save className="mr-2 size-4" />
+                Save Changes
+              </>
+            )}
+
+          </Button>
+
+        </CardContent>
       </Card>
 
     </div>
@@ -1317,17 +1017,26 @@ export default function EditOrganizations() {
 
 function FormField({
   label,
+  required = false,
   children,
 }: {
   label: string
-  // children: React.ReactNode
-    children: ReactNode
+  required?: boolean
+  children: React.ReactNode
 }) {
   return (
     <div className="space-y-2">
 
       <label className="text-sm font-medium">
+
         {label}
+
+        {required && (
+          <span className="ml-1 text-destructive">
+            *
+          </span>
+        )}
+
       </label>
 
       {children}
@@ -1347,7 +1056,7 @@ function InfoItem({
 }: {
   icon: React.ReactNode
   label: string
-  value: string
+  value?: string | null
 }) {
   return (
     <div className="flex gap-3">
@@ -1362,8 +1071,8 @@ function InfoItem({
           {label}
         </p>
 
-        <p className="truncate text-sm font-medium">
-          {value}
+        <p className="mt-1 break-words text-sm font-medium">
+          {value || "Not Available"}
         </p>
 
       </div>
@@ -1373,101 +1082,27 @@ function InfoItem({
 }
 
 /* =========================================================
-   STAT CARD
+   DATE
 ========================================================= */
 
-function StatCard({
-  title,
-  value,
-  icon,
-}: {
-  title: string
-  value: number
-  icon: React.ReactNode
-}) {
-  return (
-    <Card>
+function formatDate(
+  value?: string | null,
+) {
+  if (!value) {
+    return "Not Available"
+  }
 
-      <CardContent className="flex items-center justify-between p-6">
+  const date = new Date(value)
 
-        <div>
+  if (Number.isNaN(date.getTime())) {
+    return "Not Available"
+  }
 
-          <p className="text-sm text-muted-foreground">
-            {title}
-          </p>
-
-          <p className="mt-1 text-2xl font-bold">
-            {value}
-          </p>
-
-        </div>
-
-        <div className="flex size-11 items-center justify-center rounded-lg bg-muted text-muted-foreground [&_svg]:size-5">
-          {icon}
-        </div>
-
-      </CardContent>
-
-    </Card>
+  return date.toLocaleString(
+    "en-IN",
+    {
+      dateStyle: "medium",
+      timeStyle: "short",
+    },
   )
 }
-
-
-
-// ### Important correction
-
-// Your original code had this problem:
-
-// ```tsx
-// organization.temples.map(...)
-// ```
-
-// even though you created:
-
-// ```tsx
-// const [organizationData, setOrganizationData] =
-//   useState<Organization>(organization)
-// ```
-
-// So when you edited a temple, you were changing temporary state, but the displayed temple list was still coming from the original `organization`.
-
-// The corrected version consistently uses:
-
-// ```tsx
-// organizationData.temples
-// ```
-
-// and on a temple save only that specific temple is replaced:
-
-
-// setOrganizationData((previous) => ({
-//   ...previous,
-//   temples: previous.temples.map((temple) =>
-//     temple.id === templeEditData.id
-//       ? templeEditData
-//       : temple,
-//   ),
-// }))
-
-
-// So the behavior is now:
-
-// **Organization**
-
-// `Edit → change fields → Save`
-
-// **Temple 1**
-
-// `Edit → change fields → Save`
-
-// **Temple 2**
-
-// `Edit → change fields → Save`
-
-// **Temple 3**
-
-// `Edit → change fields → Save`
-
-// Each one is completely independent.
-
-// When you are ready to connect the backend, replace the `console.log()` sections with your `api.put()`/`api.patch()` calls without changing the UI/state structure.

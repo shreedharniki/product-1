@@ -5,7 +5,7 @@ import moduleRoutes from "../features/modules/routes/moduleRoutes"
 import subModuleRoutes from "../features/submodule/routes/subModuleRoutes"
 import subscriptionPlanRoutes from "../features/subscription_plans/routes/subscriptionPlanRoutes";
 import subscriptionBundleRoutes from "../features/subscription_bundles/routes/subscriptionBundleRoutes";
-
+import organizationRoutes from "../features/organizations/routes/organizationRoutes"
 const router = Router()
 
 // router.use(organizationRoutes)
@@ -19,4 +19,9 @@ router.use(
   "/subscription-bundles",
   subscriptionBundleRoutes,
 );
+
+router.use(
+  "/organizations",
+  organizationRoutes,
+)
 export default router
