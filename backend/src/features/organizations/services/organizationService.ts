@@ -26,8 +26,8 @@ import { orgSubscriptionRepository } from "../repositories/orgsubscriptionReposi
 import { defaultRepository } from "../repositories/defaultRepository"
 import type {
   PoolConnection,
+  RowDataPacket,
 } from "mysql2/promise"
-
 
 import {
   templeRepository,
@@ -59,7 +59,7 @@ function slugify(
 // ============================================================
 
 async function generateUniqueSlug(
-  conn: any,
+  conn: PoolConnection,
   name: string,
   excludeId?: number,
 ) {
@@ -85,7 +85,6 @@ async function generateUniqueSlug(
 
   return slug
 }
-
 // ============================================================
 // ORGANIZATION SERVICE
 // ============================================================
@@ -200,965 +199,6 @@ export const organizationService = {
 
  
 
-// async create(
-//   data: CreateOrganizationInput,
-// ) {
-//   const conn =
-//     await db.getConnection()
-
-//   try {
-//     await conn.beginTransaction()
-
-//     // ==========================================================
-//     // CHECK ORGANIZATION EMAIL
-//     // ==========================================================
-
-//     if (data.org_email) {
-//       const existingEmail =
-//         await organizationRepository.findByEmail(
-//           conn,
-//           data.org_email,
-//         )
-
-//       if (existingEmail) {
-//         throw new Error(
-//           "Organization email already exists",
-//         )
-//       }
-//     }
-
-//     // ==========================================================
-//     // CHECK ORGANIZATION PHONE
-//     // ==========================================================
-
-//     if (data.org_phone) {
-//       const existingPhone =
-//         await organizationRepository.findByPhone(
-//           conn,
-//           data.org_phone,
-//         )
-
-//       if (existingPhone) {
-//         throw new Error(
-//           "Organization phone already exists",
-//         )
-//       }
-//     }
-
-//     // ==========================================================
-//     // CHECK USER EMAIL
-//     // ==========================================================
-
-//     if (data.org_email) {
-//       const [rows] =
-//         await conn.execute<any[]>(
-//           `
-//           SELECT id
-//           FROM users
-//           WHERE user_email = ?
-//             AND deleted_at IS NULL
-//           LIMIT 1
-//           `,
-//           [data.org_email],
-//         )
-
-//       if (rows.length > 0) {
-//         throw new Error(
-//           "User email already exists",
-//         )
-//       }
-//     }
-
-//     // ==========================================================
-//     // CHECK USER PHONE
-//     // ==========================================================
-
-//     if (data.org_phone) {
-//       const [rows] =
-//         await conn.execute<any[]>(
-//           `
-//           SELECT id
-//           FROM users
-//           WHERE user_phone = ?
-//             AND deleted_at IS NULL
-//           LIMIT 1
-//           `,
-//           [data.org_phone],
-//         )
-
-//       if (rows.length > 0) {
-//         throw new Error(
-//           "User phone already exists",
-//         )
-//       }
-//     }
-
-//     // ==========================================================
-//     // GENERATE SLUG
-//     // ==========================================================
-
-//     const slug =
-//       await generateUniqueSlug(
-//         conn,
-//         data.org_name,
-//       )
-
-//     // ==========================================================
-//     // CREATE ORGANIZATION
-//     // ==========================================================
-
-//     const organizationId =
-//       await organizationRepository.create(
-//         conn,
-//         data,
-//         slug,
-//       )
-
-//     // ==========================================================
-//     // CREATE ORGANIZATION ADMIN
-//     // ==========================================================
-
-//     const defaultPassword =
-//       "ChangeMe@123"
-
-//     const passwordHash =
-//       await argon2.hash(
-//         defaultPassword,
-//       )
-
-//     const userId =
-//       await userRepository.createOrganizationAdmin(
-//         conn,
-//         {
-//           organization_id:
-//             organizationId,
-
-//           user_name:
-//             data.org_name ??
-//             data.user_name,
-
-//           user_email:
-//             data.org_email ?? null,
-
-//           user_phone:
-//             data.org_phone ?? null,
-
-//           user_password_hash:
-//             passwordHash,
-
-//           role_id: 2,
-//         },
-//       )
-
-//     // ==========================================================
-//     // ORDER CALCULATION
-//     // ==========================================================
-
-//     const order =
-//       data.order
-
-//     const subtotal =
-//       Number(order.unit_price) *
-//       Number(order.quantity)
-
-//     const gstAmount =
-//       subtotal *
-//       (Number(order.gst_percentage) / 100)
-
-//     const grandTotal =
-//       subtotal +
-//       gstAmount
-
-//     // ==========================================================
-//     // GENERATE ORDER NUMBER
-//     // ==========================================================
-
-//     const year =
-//       new Date()
-//         .getFullYear()
-
-//     const orderNumber =
-//       `ORD-${year}-${Date.now()}`
-
-//     // ==========================================================
-//     // CREATE ORDER
-//     // ==========================================================
-
-//     const orderId =
-//       await orderRepository.create(
-//         conn,
-//         {
-//           organization_id:
-//             organizationId,
-
-//           organization_name:
-//             data.org_name,
-
-//           placed_by_name:
-//             data.org_legal_name ??
-//             data.org_name,
-
-//           order_number:
-//             orderNumber,
-
-//           order_status:
-//             "placed",
-
-//           payment_status:
-//             order.payment_method ===
-//             "manual"
-//               ? "pending"
-//               : "pending",
-
-//           payment_method:
-//             order.payment_method,
-
-//           manual_payment_mode:
-//             order.manual_payment_mode ??
-//             null,
-
-//           manual_payment_reference:
-//             order.manual_payment_reference ??
-//             null,
-
-//           manual_payment_date:
-//             order.manual_payment_date ??
-//             null,
-
-//           manual_payment_recorded_by_name:
-//             data.org_legal_name ??
-//             data.org_name,
-//             // null,
-
-//           subtotal,
-
-//           total_gst_amount:
-//             gstAmount,
-
-//           grand_total:
-//             grandTotal,
-
-//           currency:
-//             "INR",
-
-//           billing_name:
-//             data.org_legal_name ??
-//             data.org_name,
-
-//           billing_gst_number:
-//             data.org_gst_number ??
-//             null,
-
-//           billing_email:
-//             data.org_email ??
-//             null,
-
-//           billing_phone:
-//             data.org_phone ??
-//             null,
-
-//           billing_address_line1:
-//             data.org_address_line1 ??
-//             null,
-
-//           billing_address_line2:
-//             data.org_address_line2 ??
-//             null,
-
-//           billing_city:
-//             data.org_city ??
-//             null,
-
-//           billing_state:
-//             data.org_state ??
-//             null,
-
-//           billing_country:
-//             data.org_country ??
-//             null,
-
-//           billing_pincode:
-//             data.org_pincode ??
-//             null,
-
-//           note:
-//             order.note ??
-//             null,
-//         },
-//       )
-
-//     // ==========================================================
-//     // CREATE ORDER ITEM
-//     // ==========================================================
-
-//     const orderItemId =
-//       await orderItemRepository.create(
-//         conn,
-//         {
-//           order_id:
-//             orderId,
-
-//           item_type:
-//             order.item_type,
-
-//           plan_id:
-//             order.plan_id ??
-//             null,
-
-//           bundle_id:
-//             order.bundle_id ??
-//             null,
-
-//           item_name:
-//             order.item_name,
-
-//           item_code:
-//             order.item_code,
-
-//           module_data:
-//             null,
-
-//           license_type:
-//             order.license_type,
-
-//           quantity:
-//             order.quantity,
-
-//           start_date:
-//             order.start_date ??
-//             null,
-
-//           end_date:
-//             order.end_date ??
-//             null,
-
-//           unit_price:
-//             order.unit_price,
-
-//           gst_percentage:
-//             order.gst_percentage,
-
-//           gst_amount:
-//             gstAmount,
-
-//           line_total:
-//             grandTotal,
-
-//           org_subscription_id:
-//             null,
-//         },
-//       )
-
-//     // ==========================================================
-//     // COMMIT
-//     // ==========================================================
-
-//     await conn.commit()
-
-//     return {
-//       organization_id:
-//         organizationId,
-
-//       user_id:
-//         userId,
-
-//       order_id:
-//         orderId,
-
-//       order_item_id:
-//         orderItemId,
-
-//       order_number:
-//         orderNumber,
-
-//       org_slug:
-//         slug,
-
-//       subtotal,
-
-//       gst_amount:
-//         gstAmount,
-
-//       grand_total:
-//         grandTotal,
-//     }
-//   } catch (error) {
-//     await conn.rollback()
-
-//     throw error
-//   } finally {
-//     conn.release()
-//   }
-// },
-
-// async create(
-//   data: CreateOrganizationInput,
-// ) {
-//   const conn =
-//     await db.getConnection()
-
-//   try {
-//     await conn.beginTransaction()
-
-//     // ==========================================================
-//     // CHECK ORGANIZATION EMAIL
-//     // ==========================================================
-
-//     if (data.org_email) {
-//       const existingEmail =
-//         await organizationRepository.findByEmail(
-//           conn,
-//           data.org_email,
-//         )
-
-//       if (existingEmail) {
-//         throw new Error(
-//           "Organization email already exists",
-//         )
-//       }
-//     }
-
-//     // ==========================================================
-//     // CHECK ORGANIZATION PHONE
-//     // ==========================================================
-
-//     if (data.org_phone) {
-//       const existingPhone =
-//         await organizationRepository.findByPhone(
-//           conn,
-//           data.org_phone,
-//         )
-
-//       if (existingPhone) {
-//         throw new Error(
-//           "Organization phone already exists",
-//         )
-//       }
-//     }
-
-//     // ==========================================================
-//     // CHECK USER EMAIL
-//     // ==========================================================
-
-//     if (data.org_email) {
-//       const [rows] =
-//         await conn.execute<any[]>(
-//           `
-//           SELECT id
-//           FROM users
-//           WHERE user_email = ?
-//             AND deleted_at IS NULL
-//           LIMIT 1
-//           `,
-//           [data.org_email],
-//         )
-
-//       if (rows.length > 0) {
-//         throw new Error(
-//           "User email already exists",
-//         )
-//       }
-//     }
-
-//     // ==========================================================
-//     // CHECK USER PHONE
-//     // ==========================================================
-
-//     if (data.org_phone) {
-//       const [rows] =
-//         await conn.execute<any[]>(
-//           `
-//           SELECT id
-//           FROM users
-//           WHERE user_phone = ?
-//             AND deleted_at IS NULL
-//           LIMIT 1
-//           `,
-//           [data.org_phone],
-//         )
-
-//       if (rows.length > 0) {
-//         throw new Error(
-//           "User phone already exists",
-//         )
-//       }
-//     }
-
-//     // ==========================================================
-//     // GENERATE ORGANIZATION SLUG
-//     // ==========================================================
-
-//     const slug =
-//       await generateUniqueSlug(
-//         conn,
-//         data.org_name,
-//       )
-
-//     // ==========================================================
-//     // CREATE ORGANIZATION
-//     // ==========================================================
-
-//     // const organizationId =
-//     //   await organizationRepository.create(
-//     //     conn,
-//     //     data,
-//     //     slug,
-//     //   )
-
-//     // ==========================================================
-// // GET SYSTEM DEFAULTS
-// // ==========================================================
-
-// const maxUsersDefault =
-//   await defaultRepository.findByKey(
-//     conn,
-//     "default_max_users",
-//   )
-
-// const maxTemplesDefault =
-//   await defaultRepository.findByKey(
-//     conn,
-//     "default_max_temples",
-//   )
-
-// if (!maxUsersDefault) {
-//   throw new Error(
-//     "Default maximum users configuration not found",
-//   )
-// }
-
-// if (!maxTemplesDefault) {
-//   throw new Error(
-//     "Default maximum temples configuration not found",
-//   )
-// }
-
-// const maxUsers =
-//   Number(maxUsersDefault.value_int)
-
-// const maxTemples =
-//   Number(maxTemplesDefault.value_int)
-
-// // ==========================================================
-// // CREATE ORGANIZATION
-// // ==========================================================
-
-// const organizationId =
-//   await organizationRepository.create(
-//     conn,
-//     data,
-//     slug,
-//     maxUsers,
-//     maxTemples,
-//   )
-
-//     // ==========================================================
-//     // CREATE ORGANIZATION ADMIN
-//     // ==========================================================
-
-//     const defaultPassword =
-//       "ChangeMe@123"
-
-//     const passwordHash =
-//       await argon2.hash(
-//         defaultPassword,
-//       )
-
-//     const userId =
-//       await userRepository.createOrganizationAdmin(
-//         conn,
-//         {
-//           organization_id:
-//             organizationId,
-
-//           user_name:
-//             data.user_name,
-
-//           user_email:
-//             data.org_email ??
-//             null,
-
-//           user_phone:
-//             data.org_phone ??
-//             null,
-
-//           user_password_hash:
-//             passwordHash,
-
-//           role_id: 2,
-//         },
-//       )
-
-//     // ==========================================================
-//     // ORDER
-//     // ==========================================================
-
-//     const order =
-//       data.order
-
-//     // ==========================================================
-//     // VALIDATE PLAN
-//     // ==========================================================
-
-//       if (
-//         order.item_type === "plan" &&
-//         !order.plan_id
-//       ) {
-//         throw new Error(
-//           "Plan ID is required",
-//         )
-//       }
-
-//     // ==========================================================
-//     // CALCULATE ORDER
-//     // ==========================================================
-
-//     const quantity =
-//       Number(order.quantity)
-
-//     const unitPrice =
-//       Number(order.unit_price)
-
-//     const gstPercentage =
-//       Number(order.gst_percentage)
-
-//     const subtotal =
-//       Number(
-//         (
-//           unitPrice *
-//           quantity
-//         ).toFixed(2),
-//       )
-
-//     const gstAmount =
-//       Number(
-//         (
-//           subtotal *
-//           gstPercentage /
-//           100
-//         ).toFixed(2),
-//       )
-
-//     const grandTotal =
-//       Number(
-//         (
-//           subtotal +
-//           gstAmount
-//         ).toFixed(2),
-//       )
-
-//     // ==========================================================
-//     // GENERATE ORDER NUMBER
-//     // ==========================================================
-
-//     const year =
-//       new Date().getFullYear()
-
-//     const orderNumber =
-//       `ORD-${year}-${Date.now()}`
-
-//     // ==========================================================
-//     // CREATE ORDER
-//     // ==========================================================
-
-//     const orderId =
-//       await orderRepository.create(
-//         conn,
-//         {
-//           organization_id:
-//             organizationId,
-
-//           organization_name:
-//             data.org_name,
-
-//           placed_by_name:
-//             data.user_name,
-
-//           order_number:
-//             orderNumber,
-
-//           order_status:
-//             "placed",
-
-//           payment_status:
-//             "pending",
-
-//           payment_method:
-//             order.payment_method,
-
-//           manual_payment_mode:
-//             order.manual_payment_mode ??
-//             null,
-
-//           manual_payment_reference:
-//             order.manual_payment_reference ??
-//             null,
-
-//           manual_payment_date:
-//             order.manual_payment_date ??
-//             null,
-
-//           manual_payment_recorded_by_name:
-//             data.user_name,
-
-//           subtotal,
-
-//           total_gst_amount:
-//             gstAmount,
-
-//           grand_total:
-//             grandTotal,
-
-//           currency:
-//             "INR",
-
-//           billing_name:
-//             data.org_name,
-
-//           billing_gst_number:
-//             data.org_gst_number ??
-//             null,
-
-//           billing_email:
-//             data.org_email ??
-//             null,
-
-//           billing_phone:
-//             data.org_phone ??
-//             null,
-
-//           billing_address_line1:
-//             data.org_address_line1 ??
-//             null,
-
-//           billing_address_line2:
-//             data.org_address_line2 ??
-//             null,
-
-//           billing_city:
-//             data.org_city ??
-//             null,
-
-//           billing_state:
-//             data.org_state ??
-//             null,
-
-//           billing_country:
-//             data.org_country ??
-//             null,
-
-//           billing_pincode:
-//             data.org_pincode ??
-//             null,
-
-//           note:
-//             order.note ??
-//             null,
-//         },
-//       )
-
-//     // ==========================================================
-//     // CREATE ORDER ITEM
-//     // ==========================================================
-
-//     const orderItemId =
-//       await orderItemRepository.create(
-//         conn,
-//         {
-//           order_id:
-//             orderId,
-
-//           item_type:
-//             order.item_type,
-
-//           plan_id:
-//             order.plan_id ??
-//             null,
-
-//           bundle_id:
-//             order.bundle_id ??
-//             null,
-
-//           item_name:
-//             order.item_name,
-
-//           item_code:
-//             order.item_code,
-
-//           module_data:
-//             null,
-
-//           license_type:
-//             order.license_type,
-
-//           quantity,
-
-//           start_date:
-//             order.start_date ??
-//             null,
-
-//           end_date:
-//             order.end_date ??
-//             null,
-
-//           unit_price:
-//             unitPrice,
-
-//           gst_percentage:
-//             gstPercentage,
-
-//           gst_amount:
-//             gstAmount,
-
-//           line_total:
-//             grandTotal,
-
-//           org_subscription_id:
-//             null,
-//         },
-//       )
-
-//     // ==========================================================
-//     // CREATE ORGANIZATION SUBSCRIPTION
-//     // ==========================================================
-
-//     let orgSubscriptionId:
-//       number | null = null
-
-//     if (
-//       order.item_type === "plan"
-//     ) {
-//       /*
-//        * For now we use the values received
-//        * from the order.
-//        *
-//        * Later, it is better to fetch
-//        * plan_quantity / plan duration /
-//        * license type directly from
-//        * subscription_plans.
-//        */
-
-//       const grantedQuantity =
-//         quantity
-
-//       const remainingQuantity =
-//         quantity
-
-//       orgSubscriptionId =
-//         await orgSubscriptionRepository.create(
-//           conn,
-//           {
-//             organization_id:
-//               organizationId,
-
-//             subscription_type:
-//               "plan",
-
-//             plan_id:
-//               order.plan_id ??
-//               null,
-
-//             granted_quantity:
-//               grantedQuantity,
-
-//             remaining_quantity:
-//               remainingQuantity,
-
-//             bundle_id:
-//               null,
-
-//             license_type:
-//               order.license_type,
-
-//             is_free_trial:
-//               0,
-
-//             start_date:
-//               order.start_date ??
-//               new Date()
-//                 .toISOString()
-//                 .slice(0, 10),
-
-//             expiry_date:
-//               order.end_date ??
-//               null,
-
-//             subscription_status:
-//               "active",
-//           },
-//         )
-//     }
-
-//     // ==========================================================
-//     // UPDATE ORDER ITEM WITH SUBSCRIPTION ID
-//     // ==========================================================
-
-//     if (
-//       orgSubscriptionId
-//     ) {
-//       await conn.execute(
-//         `
-//         UPDATE order_items
-//         SET
-//           org_subscription_id = ?,
-//           updated_at = NOW()
-//         WHERE id = ?
-//         `,
-//         [
-//           orgSubscriptionId,
-//           orderItemId,
-//         ],
-//       )
-//     }
-
-//     // ==========================================================
-//     // COMMIT TRANSACTION
-//     // ==========================================================
-
-//     await conn.commit()
-
-//     // ==========================================================
-//     // RESPONSE
-//     // ==========================================================
-
-//     return {
-//       organization_id:
-//         organizationId,
-
-//       user_id:
-//         userId,
-
-//       order_id:
-//         orderId,
-
-//       order_item_id:
-//         orderItemId,
-
-//       org_subscription_id:
-//         orgSubscriptionId,
-
-//       order_number:
-//         orderNumber,
-
-//       org_slug:
-//         slug,
-
-//       subtotal,
-
-//       gst_amount:
-//         gstAmount,
-
-//       grand_total:
-//         grandTotal,
-//     }
-//   } catch (error) {
-//     await conn.rollback()
-
-//     throw error
-//   } finally {
-//     conn.release()
-//   }
-// },
 async create(
   data: CreateOrganizationInput,
 ) {
@@ -1208,17 +248,28 @@ async create(
     // ==========================================================
 
     if (data.org_email) {
+      // const [rows] =
+      //   await conn.execute<any[]>(
+      //     `
+      //     SELECT id
+      //     FROM users
+      //     WHERE user_email = ?
+      //       AND deleted_at IS NULL
+      //     LIMIT 1
+      //     `,
+      //     [data.org_email],
+      //   )
       const [rows] =
-        await conn.execute<any[]>(
-          `
-          SELECT id
-          FROM users
-          WHERE user_email = ?
-            AND deleted_at IS NULL
-          LIMIT 1
-          `,
-          [data.org_email],
-        )
+  await conn.execute<RowDataPacket[]>(
+    `
+    SELECT id
+    FROM users
+    WHERE user_email = ?
+      AND deleted_at IS NULL
+    LIMIT 1
+    `,
+    [data.org_email],
+  )
 
       if (rows.length > 0) {
         throw new Error(
@@ -1232,17 +283,28 @@ async create(
     // ==========================================================
 
     if (data.org_phone) {
+      // const [rows] =
+      //   await conn.execute<any[]>(
+      //     `
+      //     SELECT id
+      //     FROM users
+      //     WHERE user_phone = ?
+      //       AND deleted_at IS NULL
+      //     LIMIT 1
+      //     `,
+      //     [data.org_phone],
+      //   )
       const [rows] =
-        await conn.execute<any[]>(
-          `
-          SELECT id
-          FROM users
-          WHERE user_phone = ?
-            AND deleted_at IS NULL
-          LIMIT 1
-          `,
-          [data.org_phone],
-        )
+  await conn.execute<RowDataPacket[]>(
+    `
+    SELECT id
+    FROM users
+    WHERE user_phone = ?
+      AND deleted_at IS NULL
+    LIMIT 1
+    `,
+    [data.org_phone],
+  )
 
       if (rows.length > 0) {
         throw new Error(
@@ -1579,7 +641,7 @@ async create(
             order.billing_email,
 
           billing_phone:
-            data.billing_phone ??
+            data.org_phone ??
             null,
 
           billing_address_line1:
@@ -2010,6 +1072,103 @@ async create(
     }
   },
 
+  async updateSubscription(
+  id: number,
+  data: {
+    granted_quantity?: number
+    remaining_quantity?: number
+    start_date?: string
+    expiry_date?: string | null
+  },
+) {
+  const conn =
+    await db.getConnection()
+
+  try {
+    await conn.beginTransaction()
+
+    // const [rows] =
+    //   await conn.execute<
+    //     {
+    //       id: number
+    //     }[]
+    //   >(
+    //     `
+    //     SELECT id
+    //     FROM org_subscriptions
+    //     WHERE id = ?
+    //     LIMIT 1
+    //     `,
+    //     [id],
+    //   )
+const [rows] =
+  await conn.execute<
+    RowDataPacket[]
+  >(
+    `
+    SELECT id
+    FROM org_subscriptions
+    WHERE id = ?
+    LIMIT 1
+    `,
+    [id],
+  )
+    if (rows.length === 0) {
+      throw new Error(
+        "Organization subscription not found",
+      )
+    }
+
+    const updated =
+      await orgSubscriptionRepository.update(
+        conn,
+        id,
+        data,
+      )
+
+    if (!updated) {
+      throw new Error(
+        "Subscription update failed",
+      )
+    }
+
+    const [updatedRows] =
+      await conn.execute<
+        RowDataPacket[]
+      >(
+        `
+        SELECT
+          id,
+          organization_id,
+          subscription_type,
+          plan_id,
+          bundle_id,
+          granted_quantity,
+          remaining_quantity,
+          license_type,
+          is_free_trial,
+          start_date,
+          expiry_date,
+          subscription_status,
+          created_at,
+          updated_at
+        FROM org_subscriptions
+        WHERE id = ?
+        LIMIT 1
+        `,
+        [id],
+      )
+
+    await conn.commit()
+
+    return updatedRows[0] ?? null
+  } catch (error) {
+    await conn.rollback()
+    throw error
+  } finally {
+    conn.release()
+  }
+},
   // ============================================================
   // DELETE ORGANIZATION
   // ============================================================

@@ -29,11 +29,19 @@ router.post(
 )
 
 // PUT /api/v1/organizations/:id
+// router.put(
+//   "/:id",
+//   organizationController.update,
+// )
+router.put(
+  "/subscriptions/:id",
+  organizationController.updateSubscription,
+)
+
 router.put(
   "/:id",
   organizationController.update,
 )
-
 // DELETE /api/v1/organizations/:id
 router.delete(
   "/:id",

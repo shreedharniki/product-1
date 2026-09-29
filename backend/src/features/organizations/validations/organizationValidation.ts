@@ -243,3 +243,90 @@ billing_address2: z
       .optional(),
   }),
 })
+
+export const updateOrganizationSchema = z.object({
+  org_name: z
+    .string()
+    .trim()
+    .min(2, "Organization name is required")
+    .max(255)
+    .optional(),
+
+  org_img_name: z
+    .string()
+    .nullable()
+    .optional(),
+
+  org_legal_name: z
+    .string()
+    .nullable()
+    .optional(),
+
+  org_registration_number: z
+    .string()
+    .nullable()
+    .optional(),
+
+  org_gst_number: z
+    .string()
+    .nullable()
+    .optional(),
+
+  org_email: z
+    .string()
+    .trim()
+    .email("Invalid email")
+    .nullable()
+    .optional(),
+
+  org_phone: z
+    .string()
+    .trim()
+    .regex(
+      phoneRegex,
+      "Invalid phone number",
+    )
+    .nullable()
+    .optional(),
+
+  org_address_line1: z
+    .string()
+    .nullable()
+    .optional(),
+
+  org_address_line2: z
+    .string()
+    .nullable()
+    .optional(),
+
+  org_city: z
+    .string()
+    .nullable()
+    .optional(),
+
+  org_state: z
+    .string()
+    .nullable()
+    .optional(),
+
+  org_country: z
+    .string()
+    .nullable()
+    .optional(),
+
+  org_pincode: z
+    .string()
+    .nullable()
+    .optional(),
+
+  org_status: z
+    .enum([
+      "active",
+      "inactive",
+    ])
+    .optional(),
+
+  org_timezone: z
+    .string()
+    .optional(),
+})

@@ -133,7 +133,8 @@ function StatusBadge({
           : "inline-flex rounded-full bg-red-100 px-2.5 py-1 text-xs font-medium text-red-700"
       }
     >
-      {status}
+      {/* {status} */}
+        {status.charAt(0).toUpperCase() + status.slice(1)}
     </span>
   )
 }
@@ -483,13 +484,15 @@ console.log(modules)
                         {/* NAME */}
 
                         <TableCell className="font-medium">
-                          {module.sub_module_name}
+                          {/* {module.sub_module_name} */}
+                          {module.sub_module_name.charAt(0).toUpperCase() + module.sub_module_name.slice(1)}
                         </TableCell>
 
                         {/* CODE */}
 
                         <TableCell>
-                          {module.sub_module_code}
+                          {/* {module.sub_module_code} */}
+                           {module.sub_module_code.charAt(0).toUpperCase() + module.sub_module_code.slice(1)}
                         </TableCell>
 
                         {/* MODULE ID */}

@@ -448,137 +448,272 @@ async create(
   // UPDATE ORGANIZATION
   // ============================================================
 
-  async update(
-    conn: PoolConnection,
-    id: number,
-    data: UpdateOrganizationInput,
-    slug?: string,
-  ) {
-    const fields: string[] = []
-    const values: unknown[] = []
+  // async update(
+  //   conn: PoolConnection,
+  //   id: number,
+  //   data: UpdateOrganizationInput,
+  //   slug?: string,
+  // ) {
+  //   const fields: string[] = []
+  //   const values: unknown[] = []
 
-    const add = (
-      field: string,
-      value: unknown,
-    ) => {
-      if (value !== undefined) {
-        fields.push(
-          `${field} = ?`,
-        )
+  //   const add = (
+  //     field: string,
+  //     value: unknown,
+  //   ) => {
+  //     if (value !== undefined) {
+  //       fields.push(
+  //         `${field} = ?`,
+  //       )
 
-        values.push(value)
-      }
+  //       values.push(value)
+  //     }
+  //   }
+
+  //   add(
+  //     "org_name",
+  //     data.org_name,
+  //   )
+
+  //   add(
+  //     "org_img_name",
+  //     data.org_img_name,
+  //   )
+
+  //   add(
+  //     "org_legal_name",
+  //     data.org_legal_name,
+  //   )
+
+  //   add(
+  //     "org_registration_number",
+  //     data.org_registration_number,
+  //   )
+
+  //   add(
+  //     "org_gst_number",
+  //     data.org_gst_number,
+  //   )
+
+  //   add(
+  //     "org_email",
+  //     data.org_email,
+  //   )
+
+  //   add(
+  //     "org_phone",
+  //     data.org_phone,
+  //   )
+
+  //   add(
+  //     "org_address_line1",
+  //     data.org_address_line1,
+  //   )
+
+  //   add(
+  //     "org_address_line2",
+  //     data.org_address_line2,
+  //   )
+
+  //   add(
+  //     "org_city",
+  //     data.org_city,
+  //   )
+
+  //   add(
+  //     "org_state",
+  //     data.org_state,
+  //   )
+
+  //   add(
+  //     "org_country",
+  //     data.org_country,
+  //   )
+
+  //   add(
+  //     "org_pincode",
+  //     data.org_pincode,
+  //   )
+
+  //   add(
+  //     "org_status",
+  //     data.org_status,
+  //   )
+
+  //   add(
+  //     "org_timezone",
+  //     data.org_timezone,
+  //   )
+
+  //   // Update slug only when provided
+  //   if (slug !== undefined) {
+  //     add(
+  //       "org_slug",
+  //       slug,
+  //     )
+  //   }
+
+  //   // Nothing to update
+  //   if (fields.length === 0) {
+  //     return false
+  //   }
+
+  //   values.push(id)
+
+  //   const [result] =
+  //     await conn.execute<
+  //       ResultSetHeader
+  //     >(
+  //       `
+  //       UPDATE organizations
+  //       SET
+  //         ${fields.join(", ")},
+  //         updated_at = NOW()
+  //       WHERE id = ?
+  //         AND deleted_at IS NULL
+  //       `,
+  //       values,
+  //     )
+
+  //   return (
+  //     result.affectedRows > 0
+  //   )
+  // },
+
+
+
+async update(
+  conn: PoolConnection,
+  id: number,
+  data: UpdateOrganizationInput,
+  slug?: string,
+) {
+  const fields: string[] = []
+
+  const values: Array<
+    string | number | boolean | null
+  > = []
+
+  const add = (
+    field: string,
+    value:
+      | string
+      | number
+      | boolean
+      | null
+      | undefined,
+  ) => {
+    if (value !== undefined) {
+      fields.push(`${field} = ?`)
+      values.push(value)
     }
+  }
 
+  add(
+    "org_name",
+    data.org_name,
+  )
+
+  add(
+    "org_img_name",
+    data.org_img_name,
+  )
+
+  add(
+    "org_legal_name",
+    data.org_legal_name,
+  )
+
+  add(
+    "org_registration_number",
+    data.org_registration_number,
+  )
+
+  add(
+    "org_gst_number",
+    data.org_gst_number,
+  )
+
+  add(
+    "org_email",
+    data.org_email,
+  )
+
+  add(
+    "org_phone",
+    data.org_phone,
+  )
+
+  add(
+    "org_address_line1",
+    data.org_address_line1,
+  )
+
+  add(
+    "org_address_line2",
+    data.org_address_line2,
+  )
+
+  add(
+    "org_city",
+    data.org_city,
+  )
+
+  add(
+    "org_state",
+    data.org_state,
+  )
+
+  add(
+    "org_country",
+    data.org_country,
+  )
+
+  add(
+    "org_pincode",
+    data.org_pincode,
+  )
+
+  add(
+    "org_status",
+    data.org_status,
+  )
+
+  add(
+    "org_timezone",
+    data.org_timezone,
+  )
+
+  // Update slug only when provided
+  if (slug !== undefined) {
     add(
-      "org_name",
-      data.org_name,
+      "org_slug",
+      slug,
+    )
+  }
+
+  // Nothing to update
+  if (fields.length === 0) {
+    return false
+  }
+
+  values.push(id)
+
+  const [result] =
+    await conn.execute<ResultSetHeader>(
+      `
+      UPDATE organizations
+      SET
+        ${fields.join(", ")},
+        updated_at = NOW()
+      WHERE id = ?
+        AND deleted_at IS NULL
+      `,
+      values,
     )
 
-    add(
-      "org_img_name",
-      data.org_img_name,
-    )
-
-    add(
-      "org_legal_name",
-      data.org_legal_name,
-    )
-
-    add(
-      "org_registration_number",
-      data.org_registration_number,
-    )
-
-    add(
-      "org_gst_number",
-      data.org_gst_number,
-    )
-
-    add(
-      "org_email",
-      data.org_email,
-    )
-
-    add(
-      "org_phone",
-      data.org_phone,
-    )
-
-    add(
-      "org_address_line1",
-      data.org_address_line1,
-    )
-
-    add(
-      "org_address_line2",
-      data.org_address_line2,
-    )
-
-    add(
-      "org_city",
-      data.org_city,
-    )
-
-    add(
-      "org_state",
-      data.org_state,
-    )
-
-    add(
-      "org_country",
-      data.org_country,
-    )
-
-    add(
-      "org_pincode",
-      data.org_pincode,
-    )
-
-    add(
-      "org_status",
-      data.org_status,
-    )
-
-    add(
-      "org_timezone",
-      data.org_timezone,
-    )
-
-    // Update slug only when provided
-    if (slug !== undefined) {
-      add(
-        "org_slug",
-        slug,
-      )
-    }
-
-    // Nothing to update
-    if (fields.length === 0) {
-      return false
-    }
-
-    values.push(id)
-
-    const [result] =
-      await conn.execute<
-        ResultSetHeader
-      >(
-        `
-        UPDATE organizations
-        SET
-          ${fields.join(", ")},
-          updated_at = NOW()
-        WHERE id = ?
-          AND deleted_at IS NULL
-        `,
-        values,
-      )
-
-    return (
-      result.affectedRows > 0
-    )
-  },
+  return result.affectedRows > 0
+},
 
   // ============================================================
   // SOFT DELETE ORGANIZATION

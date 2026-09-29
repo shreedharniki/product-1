@@ -3,8 +3,8 @@
 import { NavLink } from "react-router-dom"
 
 import {
-  BarChart3,
-  Bell,
+  // BarChart3,
+  // Bell,
   Building2,
   CalendarCheck,
   CreditCard,
@@ -14,8 +14,8 @@ import {
   Settings,
   ShieldCheck,
   Sparkles,
-  Users,
-  FileText,
+  // Users,
+  // FileText,
   Package,
 } from "lucide-react"
 
@@ -102,28 +102,49 @@ const mainMenu: MenuItem[] = [
     
     ],
   },
-  {
-    title: "Temples",
-    url: "/temples",
-    icon: Landmark,
-  },
-
-  {
-    title: "Users",
-    url: "/users",
-    icon: Users,
-  },
-
-  {
+   {
     title: "Roles & Permissions",
     url: "/roles",
     icon: ShieldCheck,
   },
 
+  // {
+  //   title: "Temples",
+  //   url: "/temples",
+  //   icon: Landmark,
+  // },
+
+  // {
+  //   title: "Users",
+  //   url: "/users",
+  //   icon: Users,
+  // },
+
+ 
+
+  // {
+  //   title: "Reports",
+  //   url: "/reports",
+  //   icon: FileText,
+  // },
+]
+const systemMenu: MenuItem[] = [
+  // {
+  //   title: "Reports",
+  //   url: "/reports",
+  //   icon: BarChart3,
+  // },
+
+  // {
+  //   title: "Notifications",
+  //   url: "/notifications",
+  //   icon: Bell,
+  // },
+
   {
-    title: "Reports",
-    url: "/reports",
-    icon: FileText,
+    title: "Settings",
+    url: "/settings",
+    icon: Settings,
   },
 ]
 
@@ -167,25 +188,7 @@ const templeMenu: MenuItem[] = [
    SYSTEM MENU
 ========================================================= */
 
-const systemMenu: MenuItem[] = [
-  {
-    title: "Reports",
-    url: "/reports",
-    icon: BarChart3,
-  },
 
-  {
-    title: "Notifications",
-    url: "/notifications",
-    icon: Bell,
-  },
-
-  {
-    title: "Settings",
-    url: "/settings",
-    icon: Settings,
-  },
-]
 
 /* =========================================================
    MENU ITEMS COMPONENT

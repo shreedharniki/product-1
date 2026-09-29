@@ -6,6 +6,9 @@ import submoduleReducer from "../features/sub_modules/submoduleSlice"
 
 import subscriptionPlansReducer from "../features/subscription/subscriptionPlanSlice"
 import subscriptionBundlesReducer from "@/features/subscription_bundles/subscriptionBundleSlice"
+import systemDefaultsReducer from "@/features/setting/systemDefaultsSlice"
+import rolesReducer
+  from "@/features/roles/roleSlice"
 export const store = configureStore({
   reducer: {
     organizations: organizationReducer,
@@ -13,6 +16,10 @@ export const store = configureStore({
     submodules: submoduleReducer,
    subscriptionPlans: subscriptionPlansReducer,
   subscriptionBundles: subscriptionBundlesReducer,
+    systemDefaults:
+      systemDefaultsReducer,
+         roles:
+        rolesReducer,
    
   },
 })

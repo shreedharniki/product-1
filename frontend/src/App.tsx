@@ -93,6 +93,31 @@ const AddSubscriptionBundle = lazy(
    const ViewSubscriptionBundle = lazy(
     ()=> import ("@/features/subscription_bundles/pages/ViewSubscriptionBundle")
   )
+   const Settings =lazy(
+    ()=> import ("@/pages/Settings")
+  )
+   const View = lazy(
+    ()=> import ("@/features/setting/pages/View")
+  )
+
+
+     const Role =lazy(
+    ()=> import ("@/pages/Role")
+     )
+
+      const RolesTable =lazy(
+    ()=> import ("@/features/roles/components/RolesTable")
+     )
+
+        const AddRole =lazy(
+    ()=> import ("@/features/roles/pages/AddRole")
+     )
+         const ViewRole =lazy(
+    ()=> import ("@/features/roles/pages/ViewRole")
+     )
+        const EditRole =lazy(
+    ()=> import ("@/features/roles/pages/EditRole")
+     )
 function App() {
   return (
     <Suspense fallback={<DashboardSkeleton />}>
@@ -234,6 +259,44 @@ function App() {
               element={<ViewSubscriptionBundle />}
             />
           </Route>
+
+
+
+
+
+
+
+
+         <Route path="/settings" element={<Settings />}>
+            <Route index element={<View />} />
+
+          </Route>
+
+
+
+        <Route
+            path="/roles"
+            element={<Role />}
+          >
+            <Route
+              index
+              element={<RolesTable />}
+            />
+              <Route
+            path="add"
+            element={<AddRole/>}
+           />
+            <Route
+              path="/roles/view/:id"
+              element={<ViewRole />}
+            />
+            <Route
+              path="/roles/edit/:id"
+              element={<EditRole />}
+            />
+          </Route>
+
+
 
         </Route>
       </Routes>

@@ -6,6 +6,8 @@ import subModuleRoutes from "../features/submodule/routes/subModuleRoutes"
 import subscriptionPlanRoutes from "../features/subscription_plans/routes/subscriptionPlanRoutes";
 import subscriptionBundleRoutes from "../features/subscription_bundles/routes/subscriptionBundleRoutes";
 import organizationRoutes from "../features/organizations/routes/organizationRoutes"
+import systemDefaultsRoutes from "../features/settings/routes/systemDefaultsRoutes"
+import roleRoutes from "../features/role/routes/roleRoutes"
 const router = Router()
 
 // router.use(organizationRoutes)
@@ -23,5 +25,13 @@ router.use(
 router.use(
   "/organizations",
   organizationRoutes,
+)
+router.use(
+  "/system-defaults",
+  systemDefaultsRoutes,
+)
+router.use(
+  "/roles",
+  roleRoutes,
 )
 export default router

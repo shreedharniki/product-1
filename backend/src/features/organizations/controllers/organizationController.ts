@@ -320,4 +320,84 @@ export const organizationController = {
       next(error)
     }
   },
+
+  async updateSubscription(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
+  try {
+    const id =
+      Number(req.params.id)
+
+    if (
+      !Number.isInteger(id) ||
+      id <= 0
+    ) {
+      return res.status(400).json({
+        success: false,
+        message:
+          "Invalid subscription ID",
+      })
+    }
+
+    const {
+      granted_quantity,
+      remaining_quantity,
+      start_date,
+      expiry_date,
+    } = req.body
+
+    const data =
+      await organizationService.updateSubscription(
+        id,
+        {
+          granted_quantity:
+            granted_quantity !== undefined
+              ? Number(
+                  granted_quantity,
+                )
+              : undefined,
+
+          remaining_quantity:
+            remaining_quantity !== undefined
+              ? Number(
+                  remaining_quantity,
+                )
+              : undefined,
+
+          start_date:
+            start_date || undefined,
+
+          expiry_date:
+            expiry_date !== undefined
+              ? expiry_date
+              : undefined,
+        },
+      )
+
+    return res.status(200).json({
+      success: true,
+      message:
+        "Subscription updated successfully",
+      data,
+    })
+  } catch (error) {
+    const message =
+      getErrorMessage(error)
+
+    if (
+      message ===
+      "Organization subscription not found"
+    ) {
+      return res.status(404).json({
+        success: false,
+        message,
+      })
+    }
+
+    next(error)
+  }
+},
 }
+

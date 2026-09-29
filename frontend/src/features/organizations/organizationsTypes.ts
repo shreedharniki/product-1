@@ -436,8 +436,11 @@ export interface CreateOrganizationOrder {
 
   billing_address: string
    billing_address2: string
-  billing_pincode: string
 
+   billing_state: string
+   billing_country: string
+   billing_pincode?: string
+billing_city: string
   /* ===============================
      NOTE
   =============================== */
@@ -467,22 +470,59 @@ export interface CreateOrganizationPayload {
    UPDATE ORGANIZATION
 ========================================================= */
 
+// export interface UpdateOrganizationPayload {
+//   id: number | string
+
+//   name: string
+
+//   code?: string
+
+//   email: string
+
+//   phone: string
+
+//   city: string
+
+//   status: OrganizationStatus
+// }
+
 export interface UpdateOrganizationPayload {
   id: number | string
 
-  name: string
+  org_name?: string
+  org_slug?: string
+  org_timezone?: string
+  org_status?: string
+  org_country?: string
 
-  code?: string
+  org_email?: string
+  org_phone?: string
+  org_legal_name?: string
 
-  email: string
+  org_registration_number?: string
+  org_gst_number?: string
 
-  phone: string
-
-  city: string
-
-  status: OrganizationStatus
+  org_address_line1?: string
+  org_address_line2?: string
+  org_city?: string
+  org_state?: string
+  org_pincode?: string
 }
 
+
+/* =========================================================
+   SUBSCRIPTION UPDATE
+========================================================= */
+
+export interface UpdateOrganizationSubscriptionPayload {
+  id: number | string
+
+  granted_quantity?: number
+  remaining_quantity?: number
+
+  start_date?: string
+  expiry_date?: string
+}
 /* =========================================================
    REGISTRATION ITEM TYPE
 ========================================================= */

@@ -113,7 +113,7 @@ export default function OrganizationsTable() {
   // -----------------------------
 
   useEffect(() => {
-    dispatch(fetchOrganizations())
+    dispatch(fetchOrganizations({}))
   }, [dispatch])
 
 
@@ -153,7 +153,7 @@ const handleDelete = async (id: number) => {
   )
 
   // Refresh organizations after successful delete
-  await dispatch(fetchOrganizations())
+  await dispatch(fetchOrganizations({}))
 
   // Fix page if last item was deleted
   if (
@@ -342,7 +342,8 @@ const handleDelete = async (id: number) => {
                       {/* ORGANIZATION */}
 
                       <TableCell className="font-medium">
-                        {organization.org_name}
+                        {/* {organization.org_name} */}
+                          {organization.org_name.charAt(0).toUpperCase() + organization.org_name.slice(1)}
                       </TableCell>
 
 
@@ -382,7 +383,7 @@ const handleDelete = async (id: number) => {
                         {organization.org_address_line1}
                       </TableCell>
 
-                     <TableCell>
+                     {/* <TableCell>
   {new Date(
     organization.created_at,
   ).toLocaleDateString("en-GB", {
@@ -390,6 +391,17 @@ const handleDelete = async (id: number) => {
     month: "short",
     year: "numeric",
   })}
+</TableCell> */}
+<TableCell>
+  {organization.created_at
+    ? new Date(
+        organization.created_at,
+      ).toLocaleDateString("en-GB", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+      })
+    : "-"}
 </TableCell>
                       {/* STATUS */}
 
