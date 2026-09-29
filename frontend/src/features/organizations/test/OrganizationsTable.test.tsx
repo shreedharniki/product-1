@@ -44,7 +44,8 @@ const mockOrganizations = Array.from(
     return {
       id: number,
 
-      org_name: `Organization ${number}`,
+      org_name:
+        `Organization ${number}`,
 
       org_legal_name:
         `Organization ${number} Legal Name`,
@@ -226,10 +227,14 @@ mockOrganizations[12] = {
 
 
 /* =========================================================
-   MOCK SERVICE
+   MOCK ORGANIZATION SERVICE
+
    IMPORTANT:
-   DO NOT MOCK organizationThunks.
-   The Redux slice needs thunk.pending/fulfilled/rejected.
+   Do NOT mock organizationThunks.
+   Redux slice requires:
+   fetchOrganizations.pending
+   fetchOrganizations.fulfilled
+   fetchOrganizations.rejected
 ========================================================= */
 
 vi.mock(
@@ -244,7 +249,8 @@ vi.mock(
             message:
               "Organizations fetched successfully",
 
-            data: mockOrganizations,
+            data:
+              mockOrganizations,
 
             organizations:
               mockOrganizations,
@@ -276,7 +282,7 @@ vi.mock(
 
 
 /* =========================================================
-   HELPERS
+   RENDER HELPER
 ========================================================= */
 
 const renderComponent = () => {
@@ -289,6 +295,10 @@ const renderComponent = () => {
   )
 }
 
+
+/* =========================================================
+   WAIT FOR DATA
+========================================================= */
 
 const waitForOrganizations = async () => {
   await waitFor(
@@ -319,7 +329,7 @@ describe(
 
 
     /* =====================================================
-       BASIC RENDER
+       1. ADD ORGANIZATION
     ===================================================== */
 
     it(
@@ -342,7 +352,7 @@ describe(
 
 
     /* =====================================================
-       LIST VIEW
+       2. TABLE HEADERS
     ===================================================== */
 
     it(
@@ -420,7 +430,7 @@ describe(
 
 
     /* =====================================================
-       PAGINATION COUNT
+       3. FIRST PAGE COUNT
     ===================================================== */
 
     it(
@@ -440,7 +450,7 @@ describe(
 
 
     /* =====================================================
-       FIRST PAGE DATA
+       4. FIRST PAGE DATA
     ===================================================== */
 
     it(
@@ -478,7 +488,7 @@ describe(
 
 
     /* =====================================================
-       ORGANIZATION DETAILS
+       5. ORGANIZATION DETAILS
     ===================================================== */
 
     it(
@@ -528,7 +538,12 @@ describe(
 
 
     /* =====================================================
-       STATUS
+       6. STATUS
+
+       Active appears multiple times because several
+       organizations are active.
+
+       Inactive also appears multiple times.
     ===================================================== */
 
     it(
@@ -539,22 +554,29 @@ describe(
         await waitForOrganizations()
 
         expect(
-          screen.getByText(
+          screen.getAllByText(
             "Active",
-          ),
-        ).toBeInTheDocument()
+          ).length,
+        ).toBeGreaterThan(0)
 
         expect(
-          screen.getByText(
+          screen.getAllByText(
             "Inactive",
-          ),
-        ).toBeInTheDocument()
+          ).length,
+        ).toBeGreaterThan(0)
       },
     )
 
 
     /* =====================================================
-       NEXT PAGE
+       7. NEXT PAGE
+
+       Actual DOM:
+
+       <a
+         aria-label="Go to next page"
+         role="button"
+       />
     ===================================================== */
 
     it(
@@ -569,9 +591,10 @@ describe(
 
         const nextButton =
           screen.getByRole(
-            "link",
+            "button",
             {
-              name: /next/i,
+              name:
+                "Go to next page",
             },
           )
 
@@ -605,7 +628,14 @@ describe(
 
 
     /* =====================================================
-       PREVIOUS PAGE
+       8. PREVIOUS PAGE
+
+       Actual DOM:
+
+       <a
+         aria-label="Go to previous page"
+         role="button"
+       />
     ===================================================== */
 
     it(
@@ -620,9 +650,10 @@ describe(
 
         await user.click(
           screen.getByRole(
-            "link",
+            "button",
             {
-              name: /next/i,
+              name:
+                "Go to next page",
             },
           ),
         )
@@ -639,9 +670,10 @@ describe(
 
         await user.click(
           screen.getByRole(
-            "link",
+            "button",
             {
-              name: /previous/i,
+              name:
+                "Go to previous page",
             },
           ),
         )
@@ -666,10 +698,7 @@ describe(
 
 
     /* =====================================================
-       DIRECT PAGE 2
-       IMPORTANT:
-       Numbered pagination items are queried as <a>
-       instead of assuming role="link".
+       9. DIRECT PAGE 2
     ===================================================== */
 
     it(
@@ -683,10 +712,10 @@ describe(
         await waitForOrganizations()
 
         const pageTwo =
-          screen.getByText(
-            "2",
+          screen.getByRole(
+            "button",
             {
-              selector: "a",
+              name: "2",
             },
           )
 
@@ -714,36 +743,65 @@ describe(
 
 
     /* =====================================================
-       PREVIOUS DISABLED ON FIRST PAGE
+       10. PREVIOUS DISABLED
     ===================================================== */
 
-    it(
-      "disables previous pagination on first page",
-      async () => {
-        renderComponent()
+    // it(
+    //   "disables previous pagination on first page",
+    //   async () => {
+    //     renderComponent()
 
-        await waitForOrganizations()
+    //     await waitForOrganizations()
 
-        const previousButton =
-          screen.getByRole(
-            "link",
-            {
-              name: /previous/i,
-            },
-          )
+    //     const previousButton =
+    //       screen.getByRole(
+    //         "button",
+    //         {
+    //           name:
+    //             "Go to previous page",
+    //         },
+    //       )
 
-        expect(
-          previousButton,
-        ).toHaveAttribute(
-          "aria-disabled",
-          "true",
-        )
-      },
+    //     expect(
+    //       previousButton,
+    //     ).toHaveAttribute(
+    //       "aria-disabled",
+    //       "true",
+    //     )
+    //   },
+    // )
+
+it(
+  "disables previous pagination on first page",
+  async () => {
+    renderComponent()
+
+    await waitForOrganizations()
+
+    const previousButton =
+      screen.getByRole(
+        "button",
+        {
+          name:
+            "Go to previous page",
+        },
+      )
+
+    expect(
+      previousButton,
+    ).toHaveClass(
+      "pointer-events-none",
     )
 
-
+    expect(
+      previousButton,
+    ).toHaveClass(
+      "opacity-50",
+    )
+  },
+)
     /* =====================================================
-       LIST / GRID TOGGLE
+       11. LIST / GRID BUTTONS
     ===================================================== */
 
     it(
@@ -769,7 +827,7 @@ describe(
 
 
     /* =====================================================
-       GRID VIEW
+       12. GRID VIEW
     ===================================================== */
 
     it(
@@ -795,10 +853,10 @@ describe(
         ).toBeInTheDocument()
 
         expect(
-          screen.getByText(
+          screen.getAllByText(
             "Pune",
-          ),
-        ).toBeInTheDocument()
+          ).length,
+        ).toBeGreaterThan(0)
 
         expect(
           screen.getByText(
@@ -816,7 +874,7 @@ describe(
 
 
     /* =====================================================
-       CREATED DATE
+       13. CREATED DATE
     ===================================================== */
 
     it(
@@ -836,7 +894,7 @@ describe(
 
 
     /* =====================================================
-       VIEW BUTTONS
+       14. VIEW BUTTONS
     ===================================================== */
 
     it(
@@ -859,7 +917,7 @@ describe(
 
 
     /* =====================================================
-       DELETE BUTTONS
+       15. DELETE BUTTONS
     ===================================================== */
 
     it(
@@ -882,7 +940,7 @@ describe(
 
 
     /* =====================================================
-       FOUR PAGINATION PAGES
+       16. PAGINATION PAGES
     ===================================================== */
 
     it(
@@ -893,37 +951,37 @@ describe(
         await waitForOrganizations()
 
         expect(
-          screen.getByText(
-            "1",
+          screen.getByRole(
+            "button",
             {
-              selector: "a",
+              name: "1",
             },
           ),
         ).toBeInTheDocument()
 
         expect(
-          screen.getByText(
-            "2",
+          screen.getByRole(
+            "button",
             {
-              selector: "a",
+              name: "2",
             },
           ),
         ).toBeInTheDocument()
 
         expect(
-          screen.getByText(
-            "3",
+          screen.getByRole(
+            "button",
             {
-              selector: "a",
+              name: "3",
             },
           ),
         ).toBeInTheDocument()
 
         expect(
-          screen.getByText(
-            "4",
+          screen.getByRole(
+            "button",
             {
-              selector: "a",
+              name: "4",
             },
           ),
         ).toBeInTheDocument()
@@ -932,7 +990,7 @@ describe(
 
 
     /* =====================================================
-       LAST PAGE
+       17. LAST PAGE
     ===================================================== */
 
     it(
@@ -946,10 +1004,10 @@ describe(
         await waitForOrganizations()
 
         await user.click(
-          screen.getByText(
-            "4",
+          screen.getByRole(
+            "button",
             {
-              selector: "a",
+              name: "4",
             },
           ),
         )
