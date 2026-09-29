@@ -62,7 +62,7 @@ export interface UpdateRoleInput {
   */
 
   user_role_name?: string
-
+ user_role?: string
   permissions?: RolePermissionInput[]
 }
 

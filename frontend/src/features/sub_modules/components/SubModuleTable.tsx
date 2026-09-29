@@ -485,7 +485,7 @@ console.log(modules)
 
                         <TableCell className="font-medium">
                           {/* {module.sub_module_name} */}
-                          {module.sub_module_name.charAt(0).toUpperCase() + module.sub_module_name.slice(1)}
+                          {module.sub_module_name.charAt(0).toUpperCase() + module.sub_module_name.slice(1).charAt(0).toUpperCase() + module.sub_module_name.slice(1)}
                         </TableCell>
 
                         {/* CODE */}
