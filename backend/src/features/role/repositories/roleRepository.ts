@@ -258,8 +258,8 @@ export const updateRole = async (
 ): Promise<void> => {
 
   const fields: string[] = []
-  const values: unknown[] = []
-
+  // const values: unknown[] = []
+const values: Array<string | number> = []
 
   /* =====================================================
      ROLE NAME
@@ -350,6 +350,89 @@ export const updateRole = async (
   )
 }
 
+
+
+// export const updateRole = async (
+//   connection: PoolConnection,
+//   id: number,
+//   data: UpdateRoleInput,
+// ): Promise<void> => {
+
+//   const fields: string[] = []
+
+//   const values: Array<string | number> = []
+
+
+//   /* =====================================================
+//      USER ROLE
+//   ===================================================== */
+
+//   if (
+//     data.user_role !== undefined
+//   ) {
+
+//     fields.push(
+//       "user_role = ?",
+//     )
+
+//     values.push(
+//       data.user_role.trim(),
+//     )
+//   }
+
+
+//   /* =====================================================
+//      USER ROLE NAME
+//   ===================================================== */
+
+//   if (
+//     data.user_role_name !== undefined
+//   ) {
+
+//     fields.push(
+//       "user_role_name = ?",
+//     )
+
+//     values.push(
+//       data.user_role_name.trim(),
+//     )
+//   }
+
+
+//   /* =====================================================
+//      NOTHING TO UPDATE
+//   ===================================================== */
+
+//   if (
+//     fields.length === 0
+//   ) {
+//     return
+//   }
+
+
+//   /* =====================================================
+//      ROLE ID
+//   ===================================================== */
+
+//   values.push(
+//     id,
+//   )
+
+
+//   /* =====================================================
+//      UPDATE ROLE
+//   ===================================================== */
+
+//   await connection.execute(
+//     `
+//       UPDATE default_roles
+//       SET
+//         ${fields.join(", ")}
+//       WHERE id = ?
+//     `,
+//     values,
+//   )
+// }
 
 /* =========================================================
    DELETE ROLE
