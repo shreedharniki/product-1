@@ -251,105 +251,6 @@ export const deleteRolePermissions = async (
    UPDATE ROLE
 ========================================================= */
 
-// export const updateRole = async (
-//   connection: PoolConnection,
-//   id: number,
-//   data: UpdateRoleInput,
-// ): Promise<void> => {
-
-//   const fields: string[] = []
-//   const values: unknown[] = []
-
-
-//   /* =====================================================
-//      ROLE NAME
-//   ===================================================== */
-
-//   if (
-//     data.user_role_name !== undefined
-//   ) {
-
-//     const roleName =
-//       data.user_role_name.trim()
-
-//     /*
-//       Generate:
-
-//       Temple Manager
-//       ↓
-//       temple_manager
-//     */
-
-//     const userRole =
-//       generateRoleCode(
-//         roleName,
-//       )
-
-//     fields.push(
-//       "user_role = ?",
-//     )
-
-//     values.push(
-//       userRole,
-//     )
-
-//     fields.push(
-//       "user_role_name = ?",
-//     )
-
-//     values.push(
-//       roleName,
-//     )
-//   }
-
-
-//   /* =====================================================
-//      ROLE CODE
-
-//      This is kept only for backward compatibility.
-//      Normally frontend should NOT send user_role.
-//   ===================================================== */
-
-//   if (
-//     data.user_role !== undefined &&
-//     data.user_role_name === undefined
-//   ) {
-
-//     fields.push(
-//       "user_role = ?",
-//     )
-
-//     values.push(
-//       data.user_role,
-//     )
-//   }
-
-
-//   /* =====================================================
-//      NOTHING TO UPDATE
-//   ===================================================== */
-
-//   if (
-//     fields.length === 0
-//   ) {
-//     return
-//   }
-
-
-//   values.push(id)
-
-
-//   await connection.execute(
-//     `
-//       UPDATE default_roles
-//       SET
-//         ${fields.join(", ")}
-//       WHERE id = ?
-//     `,
-//     values,
-//   )
-// }
-
 export const updateRole = async (
   connection: PoolConnection,
   id: number,
@@ -357,29 +258,32 @@ export const updateRole = async (
 ): Promise<void> => {
 
   const fields: string[] = []
-
-  /*
-    IMPORTANT:
-
-    Do NOT use unknown[] here.
-
-    mysql2 execute() expects values
-    that are compatible with ExecuteValues.
-  */
-
-  const values: Array<string | number> = []
+  const values: unknown[] = []
 
 
   /* =====================================================
-     USER ROLE
+     ROLE NAME
   ===================================================== */
 
   if (
-    data.user_role !== undefined
+    data.user_role_name !== undefined
   ) {
 
+    const roleName =
+      data.user_role_name.trim()
+
+    /*
+      Generate:
+
+      Temple Manager
+      ↓
+      temple_manager
+    */
+
     const userRole =
-      data.user_role.trim()
+      generateRoleCode(
+        roleName,
+      )
 
     fields.push(
       "user_role = ?",
@@ -388,26 +292,35 @@ export const updateRole = async (
     values.push(
       userRole,
     )
-  }
-
-
-  /* =====================================================
-     USER ROLE NAME
-  ===================================================== */
-
-  if (
-    data.user_role_name !== undefined
-  ) {
-
-    const userRoleName =
-      data.user_role_name.trim()
 
     fields.push(
       "user_role_name = ?",
     )
 
     values.push(
-      userRoleName,
+      roleName,
+    )
+  }
+
+
+  /* =====================================================
+     ROLE CODE
+
+     This is kept only for backward compatibility.
+     Normally frontend should NOT send user_role.
+  ===================================================== */
+
+  if (
+    data.user_role !== undefined &&
+    data.user_role_name === undefined
+  ) {
+
+    fields.push(
+      "user_role = ?",
+    )
+
+    values.push(
+      data.user_role,
     )
   }
 
@@ -423,18 +336,8 @@ export const updateRole = async (
   }
 
 
-  /* =====================================================
-     WHERE ID
-  ===================================================== */
+  values.push(id)
 
-  values.push(
-    id,
-  )
-
-
-  /* =====================================================
-     UPDATE
-  ===================================================== */
 
   await connection.execute(
     `
@@ -446,6 +349,7 @@ export const updateRole = async (
     values,
   )
 }
+
 
 /* =========================================================
    DELETE ROLE
