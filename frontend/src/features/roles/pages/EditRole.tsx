@@ -1,10 +1,355 @@
 
 
 
+// // "use client"
+
+// // import {
+// //   useEffect,
+// // } from "react"
+
+// // import {
+// //   useDispatch,
+// //   useSelector,
+// // } from "react-redux"
+
+// // import {
+// //   useNavigate,
+// //   useParams,
+// // } from "react-router-dom"
+
+// // import type {
+// //   AppDispatch,
+// // } from "@/app/store"
+
+// // import RoleForm from "../components/RoleForm"
+
+// // import type {
+// //   RoleFormData,
+// // } from "../components/RoleForm"
+
+// // import {
+// //   fetchRoleById,
+// //   updateRole,
+// // } from "../roleThunks"
+
+// // import {
+// //   selectSelectedRole,
+// //   selectRolesLoading,
+// //   selectRolesSaving,
+// // } from "../roleSelectors"
+
+// // import {
+// //   fetchSubModules,
+// // } from "../../sub_modules/submoduleThunks"
+
+// // import {
+// //   selectSubModules,
+// //   selectSubModulesLoading,
+// // } from "../../sub_modules/submoduleSelectors"
+
+
+// // export default function EditRole() {
+
+// //   const {
+// //     id,
+// //   } = useParams<{
+// //     id: string
+// //   }>()
+
+// //   const dispatch =
+// //     useDispatch<AppDispatch>()
+
+// //   const navigate =
+// //     useNavigate()
+
+
+// //   /* =========================================================
+// //      ROLE
+// //   ========================================================= */
+
+// //   const role =
+// //     useSelector(
+// //       selectSelectedRole,
+// //     )
+
+// //   const roleLoading =
+// //     useSelector(
+// //       selectRolesLoading,
+// //     )
+
+// //   const saving =
+// //     useSelector(
+// //       selectRolesSaving,
+// //     )
+
+
+// //   /* =========================================================
+// //      SUBMODULES
+// //   ========================================================= */
+
+// //   const subModules =
+// //     useSelector(
+// //       selectSubModules,
+// //     )
+
+// //   const subModulesLoading =
+// //     useSelector(
+// //       selectSubModulesLoading,
+// //     )
+
+
+// //   /* =========================================================
+// //      FETCH ROLE + SUBMODULES
+// //   ========================================================= */
+
+// //   useEffect(() => {
+
+// //     if (!id) {
+// //       return
+// //     }
+
+// //     void dispatch(
+// //       fetchRoleById(
+// //         Number(id),
+// //       ),
+// //     )
+
+// //     void dispatch(
+// //       fetchSubModules({}),
+// //     )
+
+// //   }, [
+// //     dispatch,
+// //     id,
+// //   ])
+
+
+// //   /* =========================================================
+// //      LOADING
+// //   ========================================================= */
+
+// //   if (
+// //     roleLoading ||
+// //     subModulesLoading
+// //   ) {
+
+// //     return (
+// //       <div
+// //         className="
+// //           py-10
+// //           text-center
+// //           text-sm
+// //           text-muted-foreground
+// //         "
+// //       >
+// //         Loading role...
+// //       </div>
+// //     )
+
+// //   }
+
+
+// //   /* =========================================================
+// //      ROLE NOT FOUND
+// //   ========================================================= */
+
+// //   if (!role) {
+
+// //     return (
+// //       <div
+// //         className="
+// //           py-10
+// //           text-center
+// //           text-sm
+// //           text-muted-foreground
+// //         "
+// //       >
+// //         Role not found.
+// //       </div>
+// //     )
+
+// //   }
+
+
+// //   /* =========================================================
+// //      FORM DATA
+// //   ========================================================= */
+
+// //   const initialData: RoleFormData & {
+// //     id: number
+// //   } = {
+
+// //     id:
+// //       role.id,
+
+// //     /*
+// //      * User Role Name
+// //      *
+// //      * Example:
+// //      * Temple Manager
+// //      */
+// //     role_name:
+// //       role.user_role_name ?? "",
+
+// //     /*
+// //      * User Role
+// //      *
+// //      * Example:
+// //      * temple_manager
+// //      */
+// //     user_role:
+// //       role.user_role ?? "",
+
+// //     /*
+// //      * Selected submodules
+// //      */
+// //     submodule_ids:
+// //       role.permissions?.map(
+// //         (permission) =>
+// //           permission.sub_module_id,
+// //       ) ?? [],
+
+// //     /*
+// //      * Existing permissions
+// //      */
+// //     permissions:
+// //       role.permissions?.map(
+// //         (permission) => ({
+// //           sub_module_id:
+// //             permission.sub_module_id,
+
+// //           permission:
+// //             permission.permission,
+// //         }),
+// //       ) ?? [],
+
+// //   }
+
+
+// //   /* =========================================================
+// //      UPDATE ROLE
+// //   ========================================================= */
+
+// //   const handleSubmit = async (
+// //     data: RoleFormData,
+// //   ) => {
+
+// //     if (!id) {
+// //       return
+// //     }
+
+// //     try {
+
+// //       const payload = {
+
+// //         id:
+// //           Number(id),
+
+// //         user_role_name:
+// //           data.role_name.trim(),
+
+// //         user_role:
+// //           data.user_role.trim(),
+
+// //         permissions:
+// //           data.permissions.map(
+// //             (permission) => ({
+
+// //               sub_module_id:
+// //                 permission.sub_module_id,
+
+// //               permission:
+// //                 permission.permission,
+
+// //             }),
+// //           ),
+
+// //       }
+
+
+// //       console.log(
+// //         "ROLE UPDATE PAYLOAD:",
+// //         payload,
+// //       )
+
+
+// //       await dispatch(
+// //         updateRole(payload),
+// //       ).unwrap()
+
+
+// //       navigate(
+// //         "/roles",
+// //       )
+
+// //     } catch (error) {
+
+// //       console.error(
+// //         "Update role failed:",
+// //         error,
+// //       )
+
+// //     }
+
+// //   }
+
+
+// //   /* =========================================================
+// //      CANCEL
+// //   ========================================================= */
+
+// //   const handleCancel = () => {
+
+// //     navigate(
+// //       "/roles",
+// //     )
+
+// //   }
+
+
+// //   /* =========================================================
+// //      PAGE
+// //   ========================================================= */
+
+// //   return (
+
+// //     <div className="w-full">
+
+// //       <RoleForm
+
+// //         initialData={
+// //           initialData
+// //         }
+
+// //         subModules={
+// //           subModules
+// //         }
+
+// //         onSubmit={
+// //           handleSubmit
+// //         }
+
+// //         onCancel={
+// //           handleCancel
+// //         }
+
+// //         loading={
+// //           saving
+// //         }
+
+// //       />
+
+// //     </div>
+
+// //   )
+// // }
+
+
 // "use client"
 
 // import {
 //   useEffect,
+//   useState,
 // } from "react"
 
 // import {
@@ -21,12 +366,6 @@
 //   AppDispatch,
 // } from "@/app/store"
 
-// import RoleForm from "../components/RoleForm"
-
-// import type {
-//   RoleFormData,
-// } from "../components/RoleForm"
-
 // import {
 //   fetchRoleById,
 //   updateRole,
@@ -39,13 +378,24 @@
 // } from "../roleSelectors"
 
 // import {
-//   fetchSubModules,
-// } from "../../sub_modules/submoduleThunks"
+//   Button,
+// } from "@/components/ui/button"
 
 // import {
-//   selectSubModules,
-//   selectSubModulesLoading,
-// } from "../../sub_modules/submoduleSelectors"
+//   Input,
+// } from "@/components/ui/input"
+
+// import {
+//   Card,
+//   CardContent,
+//   CardHeader,
+//   CardTitle,
+// } from "@/components/ui/card"
+
+// import {
+//   Field,
+//   FieldLabel,
+// } from "@/components/ui/field"
 
 
 // export default function EditRole() {
@@ -62,17 +412,12 @@
 //   const navigate =
 //     useNavigate()
 
-
-//   /* =========================================================
-//      ROLE
-//   ========================================================= */
-
 //   const role =
 //     useSelector(
 //       selectSelectedRole,
 //     )
 
-//   const roleLoading =
+//   const loading =
 //     useSelector(
 //       selectRolesLoading,
 //     )
@@ -82,24 +427,19 @@
 //       selectRolesSaving,
 //     )
 
+//   const [
+//     roleName,
+//     setRoleName,
+//   ] = useState("")
 
-//   /* =========================================================
-//      SUBMODULES
-//   ========================================================= */
-
-//   const subModules =
-//     useSelector(
-//       selectSubModules,
-//     )
-
-//   const subModulesLoading =
-//     useSelector(
-//       selectSubModulesLoading,
-//     )
+//   const [
+//     userRole,
+//     setUserRole,
+//   ] = useState("")
 
 
 //   /* =========================================================
-//      FETCH ROLE + SUBMODULES
+//      FETCH ROLE
 //   ========================================================= */
 
 //   useEffect(() => {
@@ -114,10 +454,6 @@
 //       ),
 //     )
 
-//     void dispatch(
-//       fetchSubModules({}),
-//     )
-
 //   }, [
 //     dispatch,
 //     id,
@@ -125,23 +461,36 @@
 
 
 //   /* =========================================================
+//      SET FORM VALUES
+//   ========================================================= */
+
+//   useEffect(() => {
+
+//     if (!role) {
+//       return
+//     }
+
+//     setRoleName(
+//       role.user_role_name ?? "",
+//     )
+
+//     setUserRole(
+//       role.user_role ?? "",
+//     )
+
+//   }, [
+//     role,
+//   ])
+
+
+//   /* =========================================================
 //      LOADING
 //   ========================================================= */
 
-//   if (
-//     roleLoading ||
-//     subModulesLoading
-//   ) {
+//   if (loading) {
 
 //     return (
-//       <div
-//         className="
-//           py-10
-//           text-center
-//           text-sm
-//           text-muted-foreground
-//         "
-//       >
+//       <div className="py-10 text-center text-sm text-muted-foreground">
 //         Loading role...
 //       </div>
 //     )
@@ -156,14 +505,7 @@
 //   if (!role) {
 
 //     return (
-//       <div
-//         className="
-//           py-10
-//           text-center
-//           text-sm
-//           text-muted-foreground
-//         "
-//       >
+//       <div className="py-10 text-center text-sm text-muted-foreground">
 //         Role not found.
 //       </div>
 //     )
@@ -172,115 +514,57 @@
 
 
 //   /* =========================================================
-//      FORM DATA
-//   ========================================================= */
-
-//   const initialData: RoleFormData & {
-//     id: number
-//   } = {
-
-//     id:
-//       role.id,
-
-//     /*
-//      * User Role Name
-//      *
-//      * Example:
-//      * Temple Manager
-//      */
-//     role_name:
-//       role.user_role_name ?? "",
-
-//     /*
-//      * User Role
-//      *
-//      * Example:
-//      * temple_manager
-//      */
-//     user_role:
-//       role.user_role ?? "",
-
-//     /*
-//      * Selected submodules
-//      */
-//     submodule_ids:
-//       role.permissions?.map(
-//         (permission) =>
-//           permission.sub_module_id,
-//       ) ?? [],
-
-//     /*
-//      * Existing permissions
-//      */
-//     permissions:
-//       role.permissions?.map(
-//         (permission) => ({
-//           sub_module_id:
-//             permission.sub_module_id,
-
-//           permission:
-//             permission.permission,
-//         }),
-//       ) ?? [],
-
-//   }
-
-
-//   /* =========================================================
 //      UPDATE ROLE
+     
+//      ONLY:
+//      - user_role_name
+//      - user_role
+
+//      NO:
+//      - permissions
+//      - submodules
 //   ========================================================= */
 
 //   const handleSubmit = async (
-//     data: RoleFormData,
+//     event: React.FormEvent<HTMLFormElement>,
 //   ) => {
+
+//     event.preventDefault()
 
 //     if (!id) {
 //       return
 //     }
 
+//     const trimmedRoleName =
+//       roleName.trim()
+
+//     const trimmedUserRole =
+//       userRole.trim()
+
+//     if (
+//       !trimmedRoleName ||
+//       !trimmedUserRole
+//     ) {
+//       return
+//     }
+
 //     try {
 
-//       const payload = {
-
-//         id:
-//           Number(id),
-
-//         user_role_name:
-//           data.role_name.trim(),
-
-//         user_role:
-//           data.user_role.trim(),
-
-//         permissions:
-//           data.permissions.map(
-//             (permission) => ({
-
-//               sub_module_id:
-//                 permission.sub_module_id,
-
-//               permission:
-//                 permission.permission,
-
-//             }),
-//           ),
-
-//       }
-
-
-//       console.log(
-//         "ROLE UPDATE PAYLOAD:",
-//         payload,
-//       )
-
-
 //       await dispatch(
-//         updateRole(payload),
+//         updateRole({
+//           id: Number(id),
+
+//           data: {
+//             user_role_name:
+//               trimmedRoleName,
+
+//             user_role:
+//               trimmedUserRole,
+//           },
+//         }),
 //       ).unwrap()
 
-
-//       navigate(
-//         "/roles",
-//       )
+//       navigate("/roles")
 
 //     } catch (error) {
 
@@ -300,9 +584,7 @@
 
 //   const handleCancel = () => {
 
-//     navigate(
-//       "/roles",
-//     )
+//     navigate("/roles")
 
 //   }
 
@@ -315,34 +597,121 @@
 
 //     <div className="w-full">
 
-//       <RoleForm
+//       <Card>
 
-//         initialData={
-//           initialData
-//         }
+//         <CardHeader>
 
-//         subModules={
-//           subModules
-//         }
+//           <CardTitle>
+//             Edit Role
+//           </CardTitle>
 
-//         onSubmit={
-//           handleSubmit
-//         }
+//         </CardHeader>
 
-//         onCancel={
-//           handleCancel
-//         }
 
-//         loading={
-//           saving
-//         }
+//         <CardContent>
+//       <div className="w-full">
+//         <form
+//             onSubmit={handleSubmit}
+//             className="space-y-6"
+//           >
 
-//       />
+//             {/* =================================================
+//                 USER ROLE NAME
+//             ================================================= */}
+
+//             <Field>
+
+//               <FieldLabel htmlFor="role_name">
+//                 User Role Name
+//               </FieldLabel>
+
+//               <Input
+//                 id="role_name"
+//                 name="role_name"
+//                 value={roleName}
+//                 onChange={(event) =>
+//                   setRoleName(
+//                     event.target.value,
+//                   )
+//                 }
+//                 placeholder="Enter user role name"
+//                 disabled={saving}
+//               />
+
+//             </Field>
+
+
+//             {/* =================================================
+//                 USER ROLE
+//             ================================================= */}
+
+//             <Field>
+
+//               <FieldLabel htmlFor="user_role">
+//                 User Role
+//               </FieldLabel>
+
+//               <Input
+//               readOnly
+//                 id="user_role"
+//                 name="user_role"
+//                 value={userRole}
+//                 onChange={(event) =>
+//                   setUserRole(
+//                     event.target.value,
+//                   )
+//                 }
+//                 placeholder="Enter user role"
+//                 disabled={saving}
+//               />
+
+//             </Field>
+
+
+//             {/* =================================================
+//                 BUTTONS
+//             ================================================= */}
+
+//             <div className="flex justify-end gap-3">
+
+//               <Button
+//                 type="button"
+//                 variant="outline"
+//                 onClick={handleCancel}
+//                 disabled={saving}
+//               >
+//                 Cancel
+//               </Button>
+
+
+//               <Button
+//                 type="submit"
+//                 disabled={
+//                   saving ||
+//                   !roleName.trim() ||
+//                   !userRole.trim()
+//                 }
+//               >
+//                 {saving
+//                   ? "Updating..."
+//                   : "Update Role"}
+//               </Button>
+
+//             </div>
+
+//           </form>
+// </div>
+         
+
+//         </CardContent>
+
+//       </Card>
 
 //     </div>
 
 //   )
 // }
+
 
 
 "use client"
@@ -406,36 +775,56 @@ export default function EditRole() {
     id: string
   }>()
 
+
   const dispatch =
     useDispatch<AppDispatch>()
 
+
   const navigate =
     useNavigate()
+
 
   const role =
     useSelector(
       selectSelectedRole,
     )
 
+
   const loading =
     useSelector(
       selectRolesLoading,
     )
+
 
   const saving =
     useSelector(
       selectRolesSaving,
     )
 
+
+  /* =========================================================
+     LOCAL FORM STATE
+
+     null means:
+     "user has not changed this field yet"
+
+     Once the user types, the local value is used.
+  ========================================================= */
+
   const [
     roleName,
     setRoleName,
-  ] = useState("")
+  ] = useState<string | null>(
+    null,
+  )
+
 
   const [
     userRole,
     setUserRole,
-  ] = useState("")
+  ] = useState<string | null>(
+    null,
+  )
 
 
   /* =========================================================
@@ -461,26 +850,22 @@ export default function EditRole() {
 
 
   /* =========================================================
-     SET FORM VALUES
+     CURRENT FORM VALUES
+
+     Redux role is used until the user
+     changes the local field.
   ========================================================= */
 
-  useEffect(() => {
+  const currentRoleName =
+    roleName ??
+    role?.user_role_name ??
+    ""
 
-    if (!role) {
-      return
-    }
 
-    setRoleName(
-      role.user_role_name ?? "",
-    )
-
-    setUserRole(
-      role.user_role ?? "",
-    )
-
-  }, [
-    role,
-  ])
+  const currentUserRole =
+    userRole ??
+    role?.user_role ??
+    ""
 
 
   /* =========================================================
@@ -515,7 +900,7 @@ export default function EditRole() {
 
   /* =========================================================
      UPDATE ROLE
-     
+
      ONLY:
      - user_role_name
      - user_role
@@ -531,15 +916,19 @@ export default function EditRole() {
 
     event.preventDefault()
 
+
     if (!id) {
       return
     }
 
+
     const trimmedRoleName =
-      roleName.trim()
+      currentRoleName.trim()
+
 
     const trimmedUserRole =
-      userRole.trim()
+      currentUserRole.trim()
+
 
     if (
       !trimmedRoleName ||
@@ -547,6 +936,7 @@ export default function EditRole() {
     ) {
       return
     }
+
 
     try {
 
@@ -564,7 +954,10 @@ export default function EditRole() {
         }),
       ).unwrap()
 
-      navigate("/roles")
+
+      navigate(
+        "/roles",
+      )
 
     } catch (error) {
 
@@ -584,7 +977,9 @@ export default function EditRole() {
 
   const handleCancel = () => {
 
-    navigate("/roles")
+    navigate(
+      "/roles",
+    )
 
   }
 
@@ -609,99 +1004,106 @@ export default function EditRole() {
 
 
         <CardContent>
-      <div className="w-full">
-        <form
-            onSubmit={handleSubmit}
-            className="space-y-6"
-          >
 
-            {/* =================================================
-                USER ROLE NAME
-            ================================================= */}
+          <div className="w-full">
 
-            <Field>
+            <form
+              onSubmit={handleSubmit}
+              className="space-y-6"
+            >
 
-              <FieldLabel htmlFor="role_name">
-                User Role Name
-              </FieldLabel>
+              {/* =============================================
+                  USER ROLE NAME
+              ============================================== */}
 
-              <Input
-                id="role_name"
-                name="role_name"
-                value={roleName}
-                onChange={(event) =>
-                  setRoleName(
-                    event.target.value,
-                  )
-                }
-                placeholder="Enter user role name"
-                disabled={saving}
-              />
+              <Field>
 
-            </Field>
+                <FieldLabel htmlFor="role_name">
+                  User Role Name
+                </FieldLabel>
 
 
-            {/* =================================================
-                USER ROLE
-            ================================================= */}
+                <Input
+                  id="role_name"
+                  name="role_name"
+                  value={
+                    currentRoleName
+                  }
+                  onChange={(event) =>
+                    setRoleName(
+                      event.target.value,
+                    )
+                  }
+                  placeholder="Enter user role name"
+                  disabled={saving}
+                />
 
-            <Field>
-
-              <FieldLabel htmlFor="user_role">
-                User Role
-              </FieldLabel>
-
-              <Input
-              readOnly
-                id="user_role"
-                name="user_role"
-                value={userRole}
-                onChange={(event) =>
-                  setUserRole(
-                    event.target.value,
-                  )
-                }
-                placeholder="Enter user role"
-                disabled={saving}
-              />
-
-            </Field>
+              </Field>
 
 
-            {/* =================================================
-                BUTTONS
-            ================================================= */}
+              {/* =============================================
+                  USER ROLE
+              ============================================== */}
 
-            <div className="flex justify-end gap-3">
+              <Field>
 
-              <Button
-                type="button"
-                variant="outline"
-                onClick={handleCancel}
-                disabled={saving}
-              >
-                Cancel
-              </Button>
+                <FieldLabel htmlFor="user_role">
+                  User Role
+                </FieldLabel>
 
 
-              <Button
-                type="submit"
-                disabled={
-                  saving ||
-                  !roleName.trim() ||
-                  !userRole.trim()
-                }
-              >
-                {saving
-                  ? "Updating..."
-                  : "Update Role"}
-              </Button>
+                <Input
+                  id="user_role"
+                  name="user_role"
+                  value={
+                    currentUserRole
+                  }
+                  readOnly
+                  placeholder="Enter user role"
+                  disabled={saving}
+                />
 
-            </div>
+              </Field>
 
-          </form>
-</div>
-         
+
+              {/* =============================================
+                  BUTTONS
+              ============================================== */}
+
+              <div className="flex justify-end gap-3">
+
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={
+                    handleCancel
+                  }
+                  disabled={saving}
+                >
+                  Cancel
+                </Button>
+
+
+                <Button
+                  type="submit"
+                  disabled={
+                    saving ||
+                    !currentRoleName.trim() ||
+                    !currentUserRole.trim()
+                  }
+                >
+
+                  {saving
+                    ? "Updating..."
+                    : "Update Role"}
+
+                </Button>
+
+              </div>
+
+            </form>
+
+          </div>
 
         </CardContent>
 
