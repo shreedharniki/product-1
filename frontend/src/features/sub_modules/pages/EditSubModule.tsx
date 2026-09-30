@@ -1,136 +1,718 @@
-// import { useEffect, useState } from "react"
+// // import { useEffect, useState } from "react"
 
-// import { useNavigate, useParams } from "react-router-dom"
+// // import { useNavigate, useParams } from "react-router-dom"
 
-// import { useDispatch, useSelector } from "react-redux"
+// // import { useDispatch, useSelector } from "react-redux"
 
-// import type { AppDispatch } from "@/app/store"
+// // import type { AppDispatch } from "@/app/store"
+
+// // import SubmodulesForm from "../components/SubmoduleForm"
+
+
+// // import {
+// //   fetchSubModuleById,
+// //   editSubModule,
+// // } from "../submoduleThunks"
+// // import {
+// //   selectSubModulesLoading,
+// // } from "../submoduleSelectors"
+
+// // import type { SubModuleFormData } from "../submoduleValidations"
+
+// // import type {SubModule} from "../submoduleTypes"
+
+// // export default function EditSubModule(){
+// //      const { id } = useParams<{
+// //     id: string
+// //      }>()
+     
+// //        const navigate = useNavigate()
+     
+// //        const dispatch = useDispatch<AppDispatch>()
+     
+// //        const loading = useSelector(
+// //          selectSubModulesLoading
+// //        )
+
+// //          const [submodule, setSubModule] =
+// //            useState<SubModule | null>(null)
+
+// //             const [pageLoading, setPageLoading] =
+// //             useState(true)
+// //  useEffect(() => {
+// //     if (!id) return
+
+// //     const loadModule = async () => {
+// //       setPageLoading(true)
+
+// //       const result = await dispatch(
+// //         fetchSubModuleById(id)
+// //       )
+
+// //       if (
+// //         fetchSubModuleById.fulfilled.match(
+// //           result
+// //         )
+// //       ) {
+// //         setSubModule(result.payload)
+// //       }
+
+// //       setPageLoading(false)
+// //     }
+
+// //     void loadModule()
+// //   }, [dispatch, id])
+
+
+// // const handleSubmit = async (
+// //     data: SubModuleFormData
+// //   ) => {
+// //     if (!id) return
+
+// //     const result = await dispatch(
+// //       editSubModule({
+// //         ...data,
+// //         id: Number(id),
+// //       })
+// //     )
+
+// //     if (
+// //       editSubModule.fulfilled.match(result)
+// //     ) {
+// //       navigate("/submodule")
+// //     }
+// //   }
+// //               if (pageLoading) {
+// //                     return (
+// //                     <div className="flex min-h-[300px] items-center justify-center">
+// //                         <p className="text-sm text-muted-foreground">
+// //                         Loading module...
+// //                         </p>
+// //                     </div>
+// //                     )
+// //                 }
+// //    if (!submodule) {
+// //     return (
+// //       <div className="rounded-md border p-6 text-center">
+// //         <p className="text-sm text-destructive">
+// //            Sub Module not found.
+// //         </p>
+
+// //         <button
+// //           type="button"
+// //           className="mt-4 underline"
+// //           onClick={() =>
+// //             navigate("/submodule")
+// //           }
+// //         >
+// //           Back to  Sub Modules
+// //         </button>
+// //       </div>
+// //     )
+// //   }
+// //     return(
+
+// //         <>
+// //         <div className="w-full">
+       
+// //              <SubmodulesForm
+// //             //    initialData={submodule}
+// //             initialData={{
+// //   ...submodule,
+// //   note: submodule.note ?? "",
+// // }}
+// //                loading={loading}
+// //                onSubmit={handleSubmit}
+// //                onCancel={() =>
+// //                  navigate("/submodule")
+// //                }
+// //              />
+       
+// //            </div>
+// //         </>
+// //     )
+// // }
+
+
+// "use client"
+
+// import {
+//   useEffect,
+//   useState,
+// } from "react"
+
+// import {
+//   useNavigate,
+//   useParams,
+// } from "react-router-dom"
+
+// import {
+//   useDispatch,
+//   useSelector,
+// } from "react-redux"
+
+// import type {
+//   AppDispatch,
+// } from "@/app/store"
 
 // import SubmodulesForm from "../components/SubmoduleForm"
-
 
 // import {
 //   fetchSubModuleById,
 //   editSubModule,
 // } from "../submoduleThunks"
+
 // import {
 //   selectSubModulesLoading,
 // } from "../submoduleSelectors"
 
-// import type { SubModuleFormData } from "../submoduleValidations"
+// import type {
+//   SubModuleFormData,
+// } from "../submoduleValidations"
 
-// import type {SubModule} from "../submoduleTypes"
+// import type {
+//   SubModule,
+// } from "../submoduleTypes"
 
-// export default function EditSubModule(){
-//      const { id } = useParams<{
+// import {
+//   fetchModulesList,
+// } from "../../modules/moduleThunks"
+
+// import {
+//   fetchRoles,
+// } from "../../roles/roleThunks"
+
+// import {
+//   selectRoles,
+//   selectRolesLoading,
+//   selectRolesError,
+// } from "../../roles/roleSelectors"
+
+// export default function EditSubModule() {
+//   const {
+//     id,
+//   } = useParams<{
 //     id: string
-//      }>()
-     
-//        const navigate = useNavigate()
-     
-//        const dispatch = useDispatch<AppDispatch>()
-     
-//        const loading = useSelector(
-//          selectSubModulesLoading
-//        )
+//   }>()
 
-//          const [submodule, setSubModule] =
-//            useState<SubModule | null>(null)
+//   const navigate = useNavigate()
 
-//             const [pageLoading, setPageLoading] =
-//             useState(true)
-//  useEffect(() => {
-//     if (!id) return
+//   const dispatch =
+//     useDispatch<AppDispatch>()
 
-//     const loadModule = async () => {
-//       setPageLoading(true)
+//   /* =========================================================
+//      SUB MODULE LOADING
+//   ========================================================= */
 
-//       const result = await dispatch(
-//         fetchSubModuleById(id)
+//   const loading =
+//     useSelector(
+//       selectSubModulesLoading,
+//     )
+
+//   /* =========================================================
+//      ROLES
+//   ========================================================= */
+
+//   const roles =
+//     useSelector(
+//       selectRoles,
+//     )
+
+//   const rolesLoading =
+//     useSelector(
+//       selectRolesLoading,
+//     )
+
+//   const rolesError =
+//     useSelector(
+//       selectRolesError,
+//     )
+
+//   /* =========================================================
+//      LOCAL STATE
+//   ========================================================= */
+
+//   const [
+//     submodule,
+//     setSubModule,
+//   ] =
+//     useState<SubModule | null>(null)
+
+//   const [
+//     pageLoading,
+//     setPageLoading,
+//   ] =
+//     useState(true)
+
+//   const [
+//     submitting,
+//     setSubmitting,
+//   ] =
+//     useState(false)
+
+//   /* =========================================================
+//      LOAD EDIT DATA
+//   ========================================================= */
+
+//   useEffect(() => {
+//     if (!id) {
+//       setPageLoading(false)
+//       return
+//     }
+
+//     let mounted = true
+
+//     const loadData = async () => {
+//       try {
+//         setPageLoading(true)
+
+//         /*
+//          * Load modules first.
+//          */
+//         await dispatch(
+//           fetchModulesList(),
+//         )
+
+//         /*
+//          * Load roles.
+//          *
+//          * This is very important because
+//          * permissions must use valid
+//          * default_roles IDs.
+//          */
+//         await dispatch(
+//           fetchRoles(),
+//         )
+
+//         /*
+//          * Load the existing sub module.
+//          */
+//         const result =
+//           await dispatch(
+//             fetchSubModuleById(id),
+//           )
+
+//         if (!mounted) {
+//           return
+//         }
+
+//         if (
+//           fetchSubModuleById.fulfilled.match(
+//             result,
+//           )
+//         ) {
+//           console.log(
+//             "EDIT SUBMODULE:",
+//             result.payload,
+//           )
+
+//           setSubModule(
+//             result.payload,
+//           )
+//         } else {
+//           console.error(
+//             "Failed to load sub module:",
+//             result,
+//           )
+
+//           setSubModule(null)
+//         }
+//       } catch (error) {
+//         console.error(
+//           "Failed to load edit page:",
+//           error,
+//         )
+
+//         if (mounted) {
+//           setSubModule(null)
+//         }
+//       } finally {
+//         if (mounted) {
+//           setPageLoading(false)
+//         }
+//       }
+//     }
+
+//     void loadData()
+
+//     return () => {
+//       mounted = false
+//     }
+//   }, [
+//     dispatch,
+//     id,
+//   ])
+
+//   /* =========================================================
+//      SUBMIT
+//   ========================================================= */
+
+//   const handleSubmit = async (
+//     data: SubModuleFormData,
+//   ) => {
+//     console.log(
+//       "================================",
+//     )
+
+//     console.log(
+//       "EDIT SUBMODULE SUBMIT",
+//     )
+
+//     console.log(
+//       "ID:",
+//       id,
+//     )
+
+//     console.log(
+//       "FORM DATA:",
+//       data,
+//     )
+
+//     console.log(
+//       "ROLES:",
+//       roles,
+//     )
+
+//     console.log(
+//       "================================",
+//     )
+
+//     if (!id) {
+//       console.error(
+//         "Sub module ID is missing.",
+//       )
+
+//       return
+//     }
+
+//     if (rolesLoading) {
+//       console.error(
+//         "Roles are still loading.",
+//       )
+
+//       return
+//     }
+
+//     if (rolesError) {
+//       console.error(
+//         "Roles loading error:",
+//         rolesError,
+//       )
+
+//       return
+//     }
+
+//     if (roles.length === 0) {
+//       console.error(
+//         "No roles available.",
+//       )
+
+//       return
+//     }
+
+//     /*
+//      * IMPORTANT:
+//      *
+//      * Build permissions ONLY from roles
+//      * returned by the roles API.
+//      *
+//      * Do NOT hard-code:
+//      * role_id: 1, 2, 3, 4
+//      */
+//     const permissions =
+//       roles.map(
+//         (role) => {
+//           const existing =
+//             data.permissions?.find(
+//               (permission) =>
+//                 Number(
+//                   permission.role_id,
+//                 ) ===
+//                 Number(role.id),
+//             )
+
+//           return {
+//             role_id:
+//               Number(role.id),
+
+//             permission:
+//               Number(
+//                 existing?.permission ??
+//                   0,
+//               ),
+//           }
+//         },
+//       )
+
+//     const payload = {
+//       id:
+//         Number(id),
+
+//       module_id:
+//         Number(data.module_id),
+
+//       sub_module_code:
+//         data.sub_module_code.trim(),
+
+//       sub_module_name:
+//         data.sub_module_name.trim(),
+
+//       sub_module_status:
+//         data.sub_module_status,
+
+//       display_order:
+//         Number(
+//           data.display_order,
+//         ),
+
+//       note:
+//         data.note?.trim() ?? "",
+
+//       permissions,
+//     }
+
+//     console.log(
+//       "================================",
+//     )
+
+//     console.log(
+//       "FINAL UPDATE PAYLOAD:",
+//       payload,
+//     )
+
+//     console.log(
+//       "================================",
+//     )
+
+//     try {
+//       setSubmitting(true)
+
+//       const result =
+//         await dispatch(
+//           editSubModule(
+//             payload,
+//           ),
+//         )
+
+//       console.log(
+//         "UPDATE RESULT:",
+//         result,
 //       )
 
 //       if (
-//         fetchSubModuleById.fulfilled.match(
-//           result
+//         editSubModule.fulfilled.match(
+//           result,
 //         )
 //       ) {
-//         setSubModule(result.payload)
+//         console.log(
+//           "SUB MODULE UPDATED SUCCESSFULLY",
+//         )
+
+//         navigate(
+//           "/submodule",
+//         )
+
+//         return
 //       }
 
-//       setPageLoading(false)
-//     }
-
-//     void loadModule()
-//   }, [dispatch, id])
-
-
-// const handleSubmit = async (
-//     data: SubModuleFormData
-//   ) => {
-//     if (!id) return
-
-//     const result = await dispatch(
-//       editSubModule({
-//         ...data,
-//         id: Number(id),
-//       })
-//     )
-
-//     if (
-//       editSubModule.fulfilled.match(result)
-//     ) {
-//       navigate("/submodule")
+//       console.error(
+//         "SUB MODULE UPDATE FAILED:",
+//         result,
+//       )
+//     } catch (error) {
+//       console.error(
+//         "UPDATE EXCEPTION:",
+//         error,
+//       )
+//     } finally {
+//       setSubmitting(false)
 //     }
 //   }
-//               if (pageLoading) {
-//                     return (
-//                     <div className="flex min-h-[300px] items-center justify-center">
-//                         <p className="text-sm text-muted-foreground">
-//                         Loading module...
-//                         </p>
-//                     </div>
-//                     )
-//                 }
-//    if (!submodule) {
+
+//   /* =========================================================
+//      PAGE LOADING
+//   ========================================================= */
+
+//   if (pageLoading) {
+//     return (
+//       <div className="flex min-h-[300px] items-center justify-center">
+//         <p className="text-sm text-muted-foreground">
+//           Loading sub module...
+//         </p>
+//       </div>
+//     )
+//   }
+
+//   /* =========================================================
+//      INVALID ID
+//   ========================================================= */
+
+//   if (!id) {
 //     return (
 //       <div className="rounded-md border p-6 text-center">
 //         <p className="text-sm text-destructive">
-//            Sub Module not found.
+//           Invalid sub module ID.
 //         </p>
 
 //         <button
 //           type="button"
 //           className="mt-4 underline"
 //           onClick={() =>
-//             navigate("/submodule")
+//             navigate(
+//               "/submodule",
+//             )
 //           }
 //         >
-//           Back to  Sub Modules
+//           Back to Sub Modules
 //         </button>
 //       </div>
 //     )
 //   }
-//     return(
 
-//         <>
-//         <div className="w-full">
-       
-//              <SubmodulesForm
-//             //    initialData={submodule}
-//             initialData={{
-//   ...submodule,
-//   note: submodule.note ?? "",
-// }}
-//                loading={loading}
-//                onSubmit={handleSubmit}
-//                onCancel={() =>
-//                  navigate("/submodule")
-//                }
-//              />
-       
-//            </div>
-//         </>
+//   /* =========================================================
+//      SUB MODULE NOT FOUND
+//   ========================================================= */
+
+//   if (!submodule) {
+//     return (
+//       <div className="rounded-md border p-6 text-center">
+//         <p className="text-sm text-destructive">
+//           Sub Module not found.
+//         </p>
+
+//         <button
+//           type="button"
+//           className="mt-4 underline"
+//           onClick={() =>
+//             navigate(
+//               "/submodule",
+//             )
+//           }
+//         >
+//           Back to Sub Modules
+//         </button>
+//       </div>
 //     )
+//   }
+
+//   /* =========================================================
+//      ROLES ERROR
+//   ========================================================= */
+
+//   if (
+//     !rolesLoading &&
+//     rolesError
+//   ) {
+//     return (
+//       <div className="rounded-md border p-6 text-center">
+//         <p className="text-sm text-destructive">
+//           {rolesError}
+//         </p>
+
+//         <button
+//           type="button"
+//           className="mt-4 underline"
+//           onClick={() =>
+//             navigate(
+//               "/submodule",
+//             )
+//           }
+//         >
+//           Back to Sub Modules
+//         </button>
+//       </div>
+//     )
+//   }
+
+//   /* =========================================================
+//      NO ROLES
+//   ========================================================= */
+
+//   if (
+//     !rolesLoading &&
+//     roles.length === 0
+//   ) {
+//     return (
+//       <div className="rounded-md border p-6 text-center">
+//         <p className="text-sm text-destructive">
+//           No roles are available.
+//         </p>
+
+//         <button
+//           type="button"
+//           className="mt-4 underline"
+//           onClick={() =>
+//             navigate(
+//               "/submodule",
+//             )
+//           }
+//         >
+//           Back to Sub Modules
+//         </button>
+//       </div>
+//     )
+//   }
+
+//   /* =========================================================
+//      FORM
+//   ========================================================= */
+
+//   return (
+//     <div className="w-full">
+//       <SubmodulesForm
+//         initialData={{
+//           id:
+//             Number(
+//               submodule.id,
+//             ),
+
+//           module_id:
+//             Number(
+//               submodule.module_id,
+//             ),
+
+//           sub_module_code:
+//             submodule.sub_module_code ??
+//             "",
+
+//           sub_module_name:
+//             submodule.sub_module_name ??
+//             "",
+
+//           sub_module_status:
+//             submodule.sub_module_status ??
+//             "active",
+
+//           display_order:
+//             Number(
+//               submodule.display_order ??
+//                 1,
+//             ),
+
+//           note:
+//             submodule.note ??
+//             "",
+
+//           permissions:
+//             submodule.permissions ??
+//             [],
+//         }}
+//         loading={
+//           loading ||
+//           rolesLoading ||
+//           submitting
+//         }
+//         onSubmit={
+//           handleSubmit
+//         }
+//         onCancel={() =>
+//           navigate(
+//             "/submodule",
+//           )
+//         }
+//       />
+//     </div>
+//   )
 // }
 
 
@@ -188,14 +770,27 @@ import {
   selectRolesError,
 } from "../../roles/roleSelectors"
 
+
 export default function EditSubModule() {
+  /* =========================================================
+     PARAMS
+  ========================================================= */
+
   const {
     id,
   } = useParams<{
     id: string
   }>()
 
+  /* =========================================================
+     NAVIGATION
+  ========================================================= */
+
   const navigate = useNavigate()
+
+  /* =========================================================
+     REDUX
+  ========================================================= */
 
   const dispatch =
     useDispatch<AppDispatch>()
@@ -238,11 +833,20 @@ export default function EditSubModule() {
   ] =
     useState<SubModule | null>(null)
 
+  /*
+   * If ID does not exist, we don't need
+   * to show the loading screen.
+   *
+   * This avoids calling setState()
+   * synchronously inside useEffect().
+   */
   const [
     pageLoading,
     setPageLoading,
   ] =
-    useState(true)
+    useState(
+      Boolean(id),
+    )
 
   const [
     submitting,
@@ -255,8 +859,13 @@ export default function EditSubModule() {
   ========================================================= */
 
   useEffect(() => {
+    /*
+     * No ID means there is nothing to fetch.
+     *
+     * IMPORTANT:
+     * Do NOT call setPageLoading(false) here.
+     */
     if (!id) {
-      setPageLoading(false)
       return
     }
 
@@ -264,37 +873,77 @@ export default function EditSubModule() {
 
     const loadData = async () => {
       try {
-        setPageLoading(true)
-
         /*
-         * Load modules first.
+         * -----------------------------------------------------
+         * FETCH MODULES
+         * -----------------------------------------------------
          */
-        await dispatch(
-          fetchModulesList(),
-        )
+
+        const modulesResult =
+          await dispatch(
+            fetchModulesList(),
+          )
+
+        if (
+          !fetchModulesList.fulfilled.match(
+            modulesResult,
+          )
+        ) {
+          console.error(
+            "Failed to load modules:",
+            modulesResult,
+          )
+        }
 
         /*
-         * Load roles.
+         * -----------------------------------------------------
+         * FETCH ROLES
+         * -----------------------------------------------------
          *
-         * This is very important because
-         * permissions must use valid
-         * default_roles IDs.
+         * This is important because the permission
+         * role IDs must come from the roles API.
          */
-        await dispatch(
-          fetchRoles(),
-        )
+
+        const rolesResult =
+          await dispatch(
+            fetchRoles(),
+          )
+
+        if (
+          !fetchRoles.fulfilled.match(
+            rolesResult,
+          )
+        ) {
+          console.error(
+            "Failed to load roles:",
+            rolesResult,
+          )
+        }
 
         /*
-         * Load the existing sub module.
+         * -----------------------------------------------------
+         * FETCH SUB MODULE
+         * -----------------------------------------------------
          */
+
         const result =
           await dispatch(
             fetchSubModuleById(id),
           )
 
+        /*
+         * Component has been unmounted.
+         */
+
         if (!mounted) {
           return
         }
+
+        /*
+         * -----------------------------------------------------
+         * SUCCESS
+         * -----------------------------------------------------
+         */
 
         if (
           fetchSubModuleById.fulfilled.match(
@@ -309,7 +958,15 @@ export default function EditSubModule() {
           setSubModule(
             result.payload,
           )
-        } else {
+        }
+
+        /*
+         * -----------------------------------------------------
+         * FAILURE
+         * -----------------------------------------------------
+         */
+
+        else {
           console.error(
             "Failed to load sub module:",
             result,
@@ -327,6 +984,13 @@ export default function EditSubModule() {
           setSubModule(null)
         }
       } finally {
+        /*
+         * This setState is inside an async callback,
+         * after the external async operation completes.
+         *
+         * ESLint allows this pattern.
+         */
+
         if (mounted) {
           setPageLoading(false)
         }
@@ -377,6 +1041,10 @@ export default function EditSubModule() {
       "================================",
     )
 
+    /* -------------------------------------------------------
+       ID CHECK
+    ------------------------------------------------------- */
+
     if (!id) {
       console.error(
         "Sub module ID is missing.",
@@ -385,6 +1053,10 @@ export default function EditSubModule() {
       return
     }
 
+    /* -------------------------------------------------------
+       ROLE LOADING CHECK
+    ------------------------------------------------------- */
+
     if (rolesLoading) {
       console.error(
         "Roles are still loading.",
@@ -392,6 +1064,10 @@ export default function EditSubModule() {
 
       return
     }
+
+    /* -------------------------------------------------------
+       ROLE ERROR CHECK
+    ------------------------------------------------------- */
 
     if (rolesError) {
       console.error(
@@ -402,6 +1078,10 @@ export default function EditSubModule() {
       return
     }
 
+    /* -------------------------------------------------------
+       NO ROLES CHECK
+    ------------------------------------------------------- */
+
     if (roles.length === 0) {
       console.error(
         "No roles available.",
@@ -410,15 +1090,24 @@ export default function EditSubModule() {
       return
     }
 
+    /* =======================================================
+       BUILD PERMISSIONS
+    ======================================================= */
+
     /*
      * IMPORTANT:
      *
-     * Build permissions ONLY from roles
-     * returned by the roles API.
+     * Never hard-code:
      *
-     * Do NOT hard-code:
-     * role_id: 1, 2, 3, 4
+     * role_id: 1
+     * role_id: 2
+     * role_id: 3
+     * role_id: 4
+     *
+     * Instead use the roles returned from
+     * GET /api/v1/roles.
      */
+
     const permissions =
       roles.map(
         (role) => {
@@ -428,12 +1117,16 @@ export default function EditSubModule() {
                 Number(
                   permission.role_id,
                 ) ===
-                Number(role.id),
+                Number(
+                  role.id,
+                ),
             )
 
           return {
             role_id:
-              Number(role.id),
+              Number(
+                role.id,
+              ),
 
             permission:
               Number(
@@ -444,12 +1137,18 @@ export default function EditSubModule() {
         },
       )
 
+    /* =======================================================
+       FINAL PAYLOAD
+    ======================================================= */
+
     const payload = {
       id:
         Number(id),
 
       module_id:
-        Number(data.module_id),
+        Number(
+          data.module_id,
+        ),
 
       sub_module_code:
         data.sub_module_code.trim(),
@@ -466,10 +1165,15 @@ export default function EditSubModule() {
         ),
 
       note:
-        data.note?.trim() ?? "",
+        data.note?.trim() ??
+        "",
 
       permissions,
     }
+
+    /* =======================================================
+       DEBUG PAYLOAD
+    ======================================================= */
 
     console.log(
       "================================",
@@ -481,8 +1185,17 @@ export default function EditSubModule() {
     )
 
     console.log(
+      "PERMISSIONS:",
+      permissions,
+    )
+
+    console.log(
       "================================",
     )
+
+    /* =======================================================
+       UPDATE
+    ======================================================= */
 
     try {
       setSubmitting(true)
@@ -498,6 +1211,10 @@ export default function EditSubModule() {
         "UPDATE RESULT:",
         result,
       )
+
+      /* -----------------------------------------------------
+         SUCCESS
+      ----------------------------------------------------- */
 
       if (
         editSubModule.fulfilled.match(
@@ -515,6 +1232,10 @@ export default function EditSubModule() {
         return
       }
 
+      /* -----------------------------------------------------
+         FAILURE
+      ----------------------------------------------------- */
+
       console.error(
         "SUB MODULE UPDATE FAILED:",
         result,
@@ -530,26 +1251,13 @@ export default function EditSubModule() {
   }
 
   /* =========================================================
-     PAGE LOADING
-  ========================================================= */
-
-  if (pageLoading) {
-    return (
-      <div className="flex min-h-[300px] items-center justify-center">
-        <p className="text-sm text-muted-foreground">
-          Loading sub module...
-        </p>
-      </div>
-    )
-  }
-
-  /* =========================================================
      INVALID ID
   ========================================================= */
 
   if (!id) {
     return (
       <div className="rounded-md border p-6 text-center">
+
         <p className="text-sm text-destructive">
           Invalid sub module ID.
         </p>
@@ -565,32 +1273,23 @@ export default function EditSubModule() {
         >
           Back to Sub Modules
         </button>
+
       </div>
     )
   }
 
   /* =========================================================
-     SUB MODULE NOT FOUND
+     PAGE LOADING
   ========================================================= */
 
-  if (!submodule) {
+  if (pageLoading) {
     return (
-      <div className="rounded-md border p-6 text-center">
-        <p className="text-sm text-destructive">
-          Sub Module not found.
+      <div className="flex min-h-[300px] items-center justify-center">
+
+        <p className="text-sm text-muted-foreground">
+          Loading sub module...
         </p>
 
-        <button
-          type="button"
-          className="mt-4 underline"
-          onClick={() =>
-            navigate(
-              "/submodule",
-            )
-          }
-        >
-          Back to Sub Modules
-        </button>
       </div>
     )
   }
@@ -605,6 +1304,7 @@ export default function EditSubModule() {
   ) {
     return (
       <div className="rounded-md border p-6 text-center">
+
         <p className="text-sm text-destructive">
           {rolesError}
         </p>
@@ -620,6 +1320,7 @@ export default function EditSubModule() {
         >
           Back to Sub Modules
         </button>
+
       </div>
     )
   }
@@ -634,6 +1335,7 @@ export default function EditSubModule() {
   ) {
     return (
       <div className="rounded-md border p-6 text-center">
+
         <p className="text-sm text-destructive">
           No roles are available.
         </p>
@@ -649,6 +1351,35 @@ export default function EditSubModule() {
         >
           Back to Sub Modules
         </button>
+
+      </div>
+    )
+  }
+
+  /* =========================================================
+     SUB MODULE NOT FOUND
+  ========================================================= */
+
+  if (!submodule) {
+    return (
+      <div className="rounded-md border p-6 text-center">
+
+        <p className="text-sm text-destructive">
+          Sub Module not found.
+        </p>
+
+        <button
+          type="button"
+          className="mt-4 underline"
+          onClick={() =>
+            navigate(
+              "/submodule",
+            )
+          }
+        >
+          Back to Sub Modules
+        </button>
+
       </div>
     )
   }
@@ -659,6 +1390,7 @@ export default function EditSubModule() {
 
   return (
     <div className="w-full">
+
       <SubmodulesForm
         initialData={{
           id:
@@ -697,21 +1429,24 @@ export default function EditSubModule() {
             submodule.permissions ??
             [],
         }}
+
         loading={
           loading ||
           rolesLoading ||
           submitting
         }
+
         onSubmit={
           handleSubmit
         }
+
         onCancel={() =>
           navigate(
             "/submodule",
           )
         }
       />
+
     </div>
   )
 }
-
