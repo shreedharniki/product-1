@@ -92,59 +92,8 @@ export const organizationService = {
     }
   },
 
-  /* =======================================================
-     UPDATE ORGANIZATION
-  ======================================================= */
+ 
 
-  // updateOrganization: async (
-  //   id: number | string,
-  //   payload: UpdateOrganizationPayload,
-  // ): Promise<OrganizationResponse> => {
-  //   const response =
-  //     await api.put<OrganizationResponse>(
-  //       `${ORGANIZATION_API}/${id}`,
-  //       payload,
-  //     )
-
-  //   return response.data
-  // },
-
-    /* =======================================================
-     UPDATE ORGANIZATION
-  ======================================================= */
-
-  // updateOrganization: async (
-  //   id: number | string,
-  //   payload: UpdateOrganizationPayload,
-  // ): Promise<OrganizationResponse> => {
-
-  //   const response =
-  //     await api.put<OrganizationResponse>(
-  //       `${ORGANIZATION_API}/${id}`,
-  //       payload,
-  //     )
-
-  //   return response.data
-  // },
-
-
-  // /* =======================================================
-  //    UPDATE ORGANIZATION SUBSCRIPTION
-  // ======================================================= */
-
-  // updateOrganizationSubscription: async (
-  //   id: number | string,
-  //   payload: UpdateOrganizationSubscriptionPayload,
-  // ): Promise<OrganizationResponse> => {
-
-  //   const response =
-  //     await api.put<OrganizationResponse>(
-  //       `${ORGANIZATION_API}/subscriptions/${id}`,
-  //       payload,
-  //     )
-
-  //   return response.data
-  // },
 
 
   /* =======================================================

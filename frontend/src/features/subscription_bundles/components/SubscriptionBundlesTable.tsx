@@ -1,12 +1,4 @@
-// export default function SbscriptionBundlesTable(){
 
-//   return(
-//     <>
-// table
-
-//     </>
-//   )
-// }
 
 
 import { useEffect, useState } from "react"
