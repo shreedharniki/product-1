@@ -320,7 +320,7 @@ export async function softDeleteTemple(
   organizationId: number,
   id: number,
 ): Promise<boolean> {
-  const sql = 
+  const sql = ``
     UPDATE temples
     SET deleted_at = CURRENT_TIMESTAMP
     WHERE id = ?
