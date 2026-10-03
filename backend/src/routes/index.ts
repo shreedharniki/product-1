@@ -8,6 +8,7 @@ import subscriptionBundleRoutes from "../features/subscription_bundles/routes/su
 import organizationRoutes from "../features/organizations/routes/organizationRoutes"
 import systemDefaultsRoutes from "../features/settings/routes/systemDefaultsRoutes"
 import roleRoutes from "../features/role/routes/roleRoutes"
+import templeRoutes from "../features/temple/routes/templeRoutes"
 const router = Router()
 
 // router.use(organizationRoutes)
@@ -33,5 +34,9 @@ router.use(
 router.use(
   "/roles",
   roleRoutes,
+)
+router.use(
+  "/temples",
+  templeRoutes,
 )
 export default router

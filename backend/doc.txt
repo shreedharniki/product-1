@@ -115,3 +115,7 @@ Repository  → SQL/database
 Validation  → validate input
 Types       → TypeScript types
 Middleware  → auth/role/error handling
+
+
+gerate new dummy token for backend work   run the script
+npx tsx src/scripts/createDummyToken.ts
