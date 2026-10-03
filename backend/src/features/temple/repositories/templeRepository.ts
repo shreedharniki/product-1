@@ -482,7 +482,7 @@ export async function updateTemple(
   values.push(id)
   values.push(organizationId)
 
-  const sql = 
+  const sql = `
     UPDATE temples
     SET ${fields.join(", ")}
     WHERE id = ?
