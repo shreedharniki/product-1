@@ -40,7 +40,7 @@ export const createTempleSchema = z.object({
 
   temp_phone: z
     .string()
-    .max(20)
+    .max(10)
     .nullable()
     .optional(),
 
